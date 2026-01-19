@@ -1,0 +1,29 @@
+{
+  "name": "namazing",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/server",
+    "apps/web",
+    "packages/schemas",
+    "packages/tools",
+    "workers/orchestrator",
+    "workers/agents"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace apps/server\" \"npm run dev --workspace apps/web\"",
+    "build": "npm run build --workspace apps/server && npm run build --workspace apps/web",
+    "cli": "tsx run-pipeline.ts",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@esbuild/darwin-arm64": "^0.25.11",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "whatwg-url": "^15.1.0"
+  }
+}
