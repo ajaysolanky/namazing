@@ -24,6 +24,7 @@ import {
   roughIPA,
   scanNegAssociations,
   getPopularity,
+  searchWeb,
 } from "@namazing/tools";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -91,46 +92,170 @@ async function loadPromptSegments(slug: string): Promise<PromptSegments> {
   return segments;
 }
 
+interface ToolDefinition {
+  type: "function";
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+  };
+}
+
+interface ToolCall {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
+}
+
+type Message =
+  | { role: "system" | "user"; content: string }
+  | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
+  | { role: "tool"; tool_call_id: string; content: string };
+
 interface CallLLMArgs {
   model: string;
   system?: string;
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
   json?: boolean;
   temperature?: number;
+  tools?: ToolDefinition[];
+  toolExecutor?: (name: string, args: Record<string, unknown>) => Promise<string>;
+  maxToolRounds?: number;
 }
 
-async function callLLM({ model, system, messages, json = false, temperature = 0.2 }: CallLLMArgs): Promise<string> {
+const BROWSER_TOOL: ToolDefinition = {
+  type: "function",
+  function: {
+    name: "browser.run",
+    description: "Search the web for information. Use this to find name meanings, origins, popularity data, and cultural context.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "The search query",
+        },
+        topn: {
+          type: "number",
+          description: "Number of results to return (default 5)",
+        },
+      },
+      required: ["query"],
+    },
+  },
+};
+
+async function executeDefaultTool(name: string, args: Record<string, unknown>): Promise<string> {
+  if (name === "browser.run") {
+    const query = args.query as string;
+    const topn = (args.topn as number) ?? 5;
+    try {
+      const results = await searchWeb(query, { topK: topn });
+      return JSON.stringify(results, null, 2);
+    } catch (error) {
+      return JSON.stringify({ error: error instanceof Error ? error.message : "Search failed" });
+    }
+  }
+  return JSON.stringify({ error: `Unknown tool: ${name}` });
+}
+
+async function callLLM({
+  model,
+  system,
+  messages,
+  json = false,
+  temperature = 0.2,
+  tools,
+  toolExecutor = executeDefaultTool,
+  maxToolRounds = 5,
+}: CallLLMArgs): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY missing. Set it to enable live agent runs.");
   }
 
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        ...(system ? [{ role: "system", content: system }] : []),
-        ...messages,
-      ],
-      temperature,
-      response_format: json ? { type: "json_object" } : undefined,
-    }),
-  });
+  const conversationMessages: Message[] = [
+    ...(system ? [{ role: "system" as const, content: system }] : []),
+    ...messages,
+  ];
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`OpenRouter error: ${res.status} ${text}`);
+  for (let round = 0; round < maxToolRounds; round++) {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: conversationMessages,
+        temperature,
+        response_format: json ? { type: "json_object" } : undefined,
+        ...(tools && tools.length > 0 ? { tools } : {}),
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`OpenRouter error: ${res.status} ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      choices?: Array<{
+        message?: {
+          content?: string | null;
+          tool_calls?: ToolCall[];
+        };
+        finish_reason?: string;
+      }>;
+    };
+
+    const choice = data.choices?.[0];
+    const assistantMessage = choice?.message;
+
+    if (!assistantMessage) {
+      return "";
+    }
+
+    // If there are tool calls, execute them and continue
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      // Add assistant message with tool calls to conversation
+      conversationMessages.push({
+        role: "assistant",
+        content: assistantMessage.content ?? null,
+        tool_calls: assistantMessage.tool_calls,
+      });
+
+      // Execute each tool call and add results
+      for (const toolCall of assistantMessage.tool_calls) {
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(toolCall.function.arguments);
+        } catch {
+          args = {};
+        }
+
+        const result = await toolExecutor(toolCall.function.name, args);
+        conversationMessages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: result,
+        });
+      }
+
+      // Continue the loop to get the next response
+      continue;
+    }
+
+    // No tool calls, return the content
+    return assistantMessage.content ?? "";
   }
 
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  return data.choices?.[0]?.message?.content ?? "";
+  // Max rounds reached
+  throw new Error(`Max tool rounds (${maxToolRounds}) exceeded`);
 }
 
 function extractJson(text: string): unknown {
@@ -159,6 +284,7 @@ type JsonAgentOptions<T> = {
   schema: z.ZodTypeAny;
   jsonMode?: boolean;
   temperature?: number;
+  enableTools?: boolean;
 };
 
 async function runJsonAgent<T>({
@@ -168,6 +294,7 @@ async function runJsonAgent<T>({
   schema,
   jsonMode = true,
   temperature = 0.3,
+  enableTools = false,
 }: JsonAgentOptions<T>): Promise<T> {
   const { system, instruction } = await loadPromptSegments(promptSlug);
   const content = `${instruction}\n\n${userInput}`.trim();
@@ -177,6 +304,7 @@ async function runJsonAgent<T>({
     messages: [{ role: "user", content }],
     json: jsonMode,
     temperature,
+    tools: enableTools ? [BROWSER_TOOL] : undefined,
   });
   const parsed = extractJson(raw);
   return schema.parse(parsed) as T;
@@ -248,9 +376,28 @@ async function gatherResearchTools(name: string, region: string | undefined): Pr
 function stubProfile(brief: string): SessionProfile {
   const surnameMatch = brief.match(/surname\s*:?\s*([A-Za-z'-]+)/i);
   const siblingsMatch = brief.match(/siblings?\s*:?\s*([A-Za-z ,]+)/i);
-  const honorMatch = brief.match(/honou?r\s*names?\s*:?\s*([A-Za-z ,]+)/i);
+  
+  // Refined honor/middle detection
+  // 1. Explicit label "Honor names: ..."
+  const explicitHonor = brief.match(/honou?r\s*names?\s*:?\s*([A-Za-z ,]+)/i);
+  // 2. Sentence extraction "middle name would be Thomas"
+  const middleSentence = brief.match(/middle\s*names?\s*(?:would|should|could|is|to)\s*be\s*([A-Z][a-z]+)/);
+  
   const initialsMatch = brief.match(/initials?\s*:?\s*([A-Z ,]+)/i);
   
+  // Parse vetoes
+  const vetoMatch = brief.match(/vetoed.*?(?:include|are|:)\s*([A-Za-z ,]+)/i);
+  const myVetoMatch = brief.match(/I've\s*vetoed\s*([A-Za-z]+)/i);
+  
+  const vetoes: string[] = [];
+  if (vetoMatch) {
+    const raw = vetoMatch[1].replace(/\band\b/g, ",");
+    vetoes.push(...raw.split(/[,]+/).map(s => s.trim()).filter(Boolean));
+  }
+  if (myVetoMatch) {
+    vetoes.push(myVetoMatch[1]);
+  }
+
   // Simple heuristic for gender
   const isBoy = /\b(boy|son|brother|male)\b/i.test(brief);
   const isGirl = /\b(girl|daughter|sister|female)\b/i.test(brief) && !isBoy;
@@ -262,12 +409,13 @@ function stubProfile(brief: string): SessionProfile {
         .filter(Boolean)
     : undefined;
 
-  const honorNames = honorMatch
-    ? honorMatch[1]
-        .split(/[,]/)
-        .map((value) => value.trim())
-        .filter(Boolean)
-    : undefined;
+  const honorNames: string[] = [];
+  if (explicitHonor) {
+     honorNames.push(...explicitHonor[1].split(/[,]/).map(s => s.trim()).filter(Boolean));
+  }
+  if (middleSentence) {
+     honorNames.push(middleSentence[1]);
+  }
 
   const initials = initialsMatch
     ? initialsMatch[1]
@@ -281,7 +429,7 @@ function stubProfile(brief: string): SessionProfile {
     family: {
       surname: surnameMatch ? surnameMatch[1].trim() : undefined,
       siblings,
-      honor_names: honorNames,
+      honor_names: honorNames.length ? honorNames : undefined,
       special_initials_include: initials,
     },
     preferences: {
@@ -289,6 +437,7 @@ function stubProfile(brief: string): SessionProfile {
       length_pref: "short-to-medium",
       nickname_tolerance: "medium",
     },
+    vetoes: { hard: vetoes },
     region: [DEFAULT_REGION],
     comments: `Stubbed profile derived heuristically. Detected gender: ${isBoy ? "boy" : "girl"}.`,
   });
@@ -300,17 +449,47 @@ function stubCandidates(profile?: SessionProfile): Candidate[] {
   const isBoy = profile?.preferences?.style_lanes?.some(lane => Object.keys(SAMPLE_LANES_BOY).includes(lane)) ?? false;
   const source = isBoy ? SAMPLE_LANES_BOY : SAMPLE_LANES_GIRL;
 
-  Object.entries(source).forEach(([lane, names]) => {
-    names.forEach((name) => {
+  // Extract user favorites from brief
+  // Matches "So far we have A, B, C..."
+  const likedMatch = profile?.raw_brief.match(/(?:so\s*far\s*we\s*have)\s*:?\s*([A-Za-z ,]+)/i);
+  const likedNames = new Set<string>();
+  
+  if (likedMatch) {
+    const raw = likedMatch[1].replace(/\band\b/g, ",");
+    raw.split(/[,]+/).forEach(s => {
+      const clean = s.trim();
+      // Ensure it looks like a name (starts with Capital, at least 2 chars)
+      if (clean && /^[A-Z][a-z]+$/.test(clean)) {
+        likedNames.add(clean);
+      }
+    });
+  }
+
+  // Add favorites first
+  likedNames.forEach(name => {
       entries.push({
         name,
-        lane,
-        rationale: `${name} carries a ${lane} energy that suits the brief.`,
+        lane: "user-favorite",
+        rationale: "Explicitly mentioned as a contender in the brief.",
         theme_links: [],
       });
+  });
+
+  Object.entries(source).forEach(([lane, names]) => {
+    names.forEach((name) => {
+      if (!likedNames.has(name)) {
+        entries.push({
+          name,
+          lane,
+          rationale: `${name} carries a ${lane} energy that suits the brief.`,
+          theme_links: [],
+        });
+      }
     });
   });
-  return entries;
+  
+  const hardVetoes = profile?.vetoes?.hard ?? [];
+  return entries.filter(e => !hardVetoes.includes(e.name));
 }
 
 function stubCard(name: string, lane: string, profile: SessionProfile): NameCard {
@@ -692,7 +871,7 @@ export class OrchestratorService {
           candidate,
           tools,
           guidance: {
-            note: "You have access to OpenRouter model browsing. When you need fresh facts, search the web and cite sources conversationally.",
+            note: "You have access to the browser.run tool for web searches. Use it to find name meanings, origins, popularity, and cultural context. Cite sources conversationally.",
           },
         };
         const card = await runJsonAgent<NameCard>({
@@ -701,6 +880,7 @@ export class OrchestratorService {
           userInput: JSON.stringify(userPayload),
           schema: NameCardSchema,
           temperature: 0.4,
+          enableTools: true,
         });
 
         this.emit(record, {
