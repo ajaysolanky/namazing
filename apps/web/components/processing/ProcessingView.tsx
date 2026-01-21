@@ -1,0 +1,254 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { StageIndicator } from "./StageIndicator";
+import { LiveActivityFeed } from "./LiveActivityFeed";
+import { Container } from "@/components/layout/Container";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { subscribeToRun } from "@/lib/sse";
+import { fetchResult } from "@/lib/api";
+import type { ActivityEvent, NameCard } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+interface ProcessingViewProps {
+  runId: string;
+}
+
+export function ProcessingView({ runId }: ProcessingViewProps) {
+  const router = useRouter();
+  const [events, setEvents] = useState<ActivityEvent[]>([]);
+  const [discoveredNames, setDiscoveredNames] = useState<NameCard[]>([]);
+  const [isComplete, setIsComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [topNames, setTopNames] = useState<string[]>([]);
+
+  const handleEvent = useCallback((event: ActivityEvent) => {
+    setEvents((prev) => [...prev, event]);
+
+    // Handle result events
+    if (event.t === "result") {
+      if (event.agent === "researcher" && event.payload) {
+        const card = event.payload as NameCard;
+        setDiscoveredNames((prev) => {
+          const existing = prev.find((n) => n.name === card.name);
+          if (existing) {
+            return prev.map((n) => (n.name === card.name ? card : n));
+          }
+          return [...prev, card];
+        });
+      }
+
+      // Capture top names from expert selector
+      if (event.agent === "expert-selector" && event.payload) {
+        const selection = event.payload as { finalists?: { name: string }[] };
+        if (selection.finalists) {
+          setTopNames(selection.finalists.slice(0, 3).map((f) => f.name));
+        }
+      }
+    }
+
+    // Handle completion
+    if (event.t === "done" && event.agent === "report-composer") {
+      setIsComplete(true);
+    }
+
+    // Handle errors
+    if (event.t === "error") {
+      setError(event.msg);
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToRun(runId, handleEvent);
+    return () => unsubscribe();
+  }, [runId, handleEvent]);
+
+  const handleViewResults = async () => {
+    router.push(`/report/${runId}`);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Container size="lg" className="flex-1 py-8 sm:py-12">
+        <div className="space-y-8">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-3"
+          >
+            <AnimatePresence mode="wait">
+              {isComplete ? (
+                <motion.div
+                  key="complete"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="space-y-4"
+                >
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-studio-sage/30 rounded-full text-sm text-studio-ink/70">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Consultation complete
+                  </div>
+                  <h1 className="font-display text-3xl sm:text-4xl text-studio-ink">
+                    We found some beautiful names
+                  </h1>
+                  {topNames.length > 0 && (
+                    <p className="text-lg text-studio-ink/60">
+                      Including{" "}
+                      <span className="font-display text-studio-ink">
+                        {topNames.slice(0, 2).join(", ")}
+                        {topNames.length > 2 && `, and ${topNames[2]}`}
+                      </span>
+                    </p>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="processing"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-3"
+                >
+                  <h1 className="font-display text-3xl sm:text-4xl text-studio-ink">
+                    Finding your perfect names...
+                  </h1>
+                  <p className="text-studio-ink/60 max-w-lg mx-auto">
+                    Our naming experts are researching personalized recommendations for your family.
+                    This usually takes 2-3 minutes.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Stage indicator */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card variant="cream" padding="lg">
+              <StageIndicator events={events} />
+            </Card>
+          </motion.div>
+
+          {/* Main content grid */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Activity feed */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card variant="default" padding="md" className="h-full">
+                <h2 className="font-display text-xl text-studio-ink mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-studio-rose rounded-full animate-pulse" />
+                  Live updates
+                </h2>
+                <LiveActivityFeed events={events} />
+              </Card>
+            </motion.div>
+
+            {/* Discovered names */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card variant="default" padding="md" className="h-full">
+                <h2 className="font-display text-xl text-studio-ink mb-4">
+                  Names discovered
+                  {discoveredNames.length > 0 && (
+                    <span className="ml-2 text-sm font-body font-normal text-studio-ink/40">
+                      ({discoveredNames.length})
+                    </span>
+                  )}
+                </h2>
+
+                {discoveredNames.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-40 text-studio-ink/40">
+                    <p className="text-sm">Names will appear here as they're discovered...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin">
+                    <AnimatePresence>
+                      {discoveredNames.map((card, index) => (
+                        <motion.div
+                          key={card.name}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.03, duration: 0.2 }}
+                          className={cn(
+                            "p-3 rounded-xl border transition-all",
+                            topNames.includes(card.name)
+                              ? "bg-studio-sage/20 border-studio-sage/30"
+                              : "bg-studio-sand/30 border-transparent hover:bg-white hover:shadow-soft"
+                          )}
+                        >
+                          <div className="font-display text-lg text-studio-ink">
+                            {card.name}
+                          </div>
+                          {card.meaning && (
+                            <div className="text-xs text-studio-ink/50 mt-1 line-clamp-2">
+                              {card.meaning}
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card variant="outline" padding="md" className="border-red-200 bg-red-50">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-red-800">Something went wrong</p>
+                    <p className="text-sm text-red-600 mt-1">{error}</p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Completion actions */}
+          <AnimatePresence>
+            {isComplete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center gap-4"
+              >
+                <Button size="lg" onClick={handleViewResults}>
+                  View your personalized report
+                </Button>
+                <p className="text-sm text-studio-ink/40">
+                  Your curated shortlist with detailed insights awaits
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </Container>
+    </div>
+  );
+}

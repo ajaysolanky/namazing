@@ -25,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-studio-sand text-studio-ink">
+      <body className="min-h-screen bg-studio-sand text-studio-ink flex flex-col">
         {children}
       </body>
     </html>

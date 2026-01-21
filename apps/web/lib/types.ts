@@ -1,1 +1,8 @@
-export type { ActivityEvent, RunMode } from "@namazing/schemas";
+export type {
+  ActivityEvent,
+  RunMode,
+  NameCard,
+  RunResult,
+  ExpertSelection,
+  SessionProfile,
+} from "@namazing/schemas";
