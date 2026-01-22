@@ -28,21 +28,24 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
   const handleEvent = useCallback((event: ActivityEvent) => {
     setEvents((prev) => [...prev, event]);
 
-    // Handle result events
-    if (event.t === "result") {
-      if (event.agent === "researcher" && event.payload) {
-        const card = event.payload as NameCard;
-        setDiscoveredNames((prev) => {
-          const existing = prev.find((n) => n.name === card.name);
-          if (existing) {
-            return prev.map((n) => (n.name === card.name ? card : n));
-          }
-          return [...prev, card];
-        });
+    // Handle result and partial events
+    if (event.t === "result" || event.t === "partial") {
+      // Researcher emits "partial" events with name cards
+      if (event.agent === "researcher") {
+        const card = (event.t === "result" ? event.payload : event.value) as NameCard | undefined;
+        if (card && card.name) {
+          setDiscoveredNames((prev) => {
+            const existing = prev.find((n) => n.name === card.name);
+            if (existing) {
+              return prev.map((n) => (n.name === card.name ? card : n));
+            }
+            return [...prev, card];
+          });
+        }
       }
 
       // Capture top names from expert selector
-      if (event.agent === "expert-selector" && event.payload) {
+      if (event.t === "result" && event.agent === "expert-selector" && event.payload) {
         const selection = event.payload as { finalists?: { name: string }[] };
         if (selection.finalists) {
           setTopNames(selection.finalists.slice(0, 3).map((f) => f.name));

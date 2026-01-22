@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+// Helper to accept both array and object forms from LLM and normalize to array
+const flexibleStringArray = z.preprocess((val) => {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === "object") {
+    // Convert object values to array (handles {"key": "value"} or {"0": "item"})
+    return Object.values(val).filter((v) => typeof v === "string");
+  }
+  if (typeof val === "string") return [val];
+  return val;
+}, z.array(z.string()).optional());
+
 export const HonorNamesSchema = z.object({
   surname: z.string().optional(),
   siblings: z.array(z.string()).optional(),
@@ -26,9 +37,9 @@ export const SessionProfileSchema = z.object({
   raw_brief: z.string(),
   family: HonorNamesSchema.optional(),
   preferences: PreferencesSchema.optional(),
-  themes: z.array(z.string()).optional(),
+  themes: flexibleStringArray,
   vetoes: VetoSchema.optional(),
-  region: z.array(z.string()).optional(),
+  region: flexibleStringArray,
   target_popularity_band: z.string().nullable().optional(),
   comments: z.string().optional(),
 });

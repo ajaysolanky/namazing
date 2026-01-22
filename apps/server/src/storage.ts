@@ -15,7 +15,9 @@ async function ensureStorageDir() {
 export async function saveRun(run: RunRecord): Promise<void> {
   await ensureStorageDir();
   const filePath = path.join(STORAGE_DIR, `${run.id}.json`);
-  await fs.writeFile(filePath, JSON.stringify(run, null, 2));
+  // Exclude emitter from serialization - EventEmitter can't be JSON-serialized
+  const { emitter, ...serializable } = run;
+  await fs.writeFile(filePath, JSON.stringify(serializable, null, 2));
 }
 
 export async function getRun(runId: string): Promise<RunRecord | null> {

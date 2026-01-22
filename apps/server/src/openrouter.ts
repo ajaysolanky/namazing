@@ -20,6 +20,8 @@ export async function callLLM({
     throw new Error("OPENROUTER_API_KEY missing. Set it in your environment to enable LLM calls.");
   }
 
+  const provider = process.env.LLM_PROVIDER;
+
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -28,6 +30,7 @@ export async function callLLM({
     },
     body: JSON.stringify({
       model,
+      ...(provider ? { provider: { order: [provider], allow_fallbacks: false } } : {}),
       messages: [
         ...(system ? [{ role: "system", content: system }] : []),
         ...messages,
