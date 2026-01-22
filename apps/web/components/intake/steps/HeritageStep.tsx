@@ -83,7 +83,7 @@ export function HeritageStep({ formData, updateField }: HeritageStepProps) {
           Roots & traditions
         </h1>
         <p className="text-studio-ink/60 max-w-md mx-auto">
-          Names carry stories. Tell us about your heritage and anyone you'd like to honor.
+          Names carry stories. Tell us about your heritage and anyone you&apos;d like to honor.
         </p>
       </motion.div>
 
@@ -256,7 +256,7 @@ export function HeritageStep({ formData, updateField }: HeritageStepProps) {
           </div>
 
           <p className="text-center text-xs text-studio-ink/40">
-            We'll find names that honor them while still feeling fresh
+            We&apos;ll find names that honor them while still feeling fresh
           </p>
         </motion.div>
 

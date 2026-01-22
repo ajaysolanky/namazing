@@ -44,7 +44,7 @@ export function ReviewStep({ formData }: ReviewStepProps) {
         </div>
 
         <h1 className="font-display text-3xl sm:text-4xl text-studio-ink">
-          Here's what we learned
+          Here&apos;s what we learned
         </h1>
         <p className="text-studio-ink/60 max-w-md mx-auto">
           Review your preferences below, then let us work our magic.
@@ -171,7 +171,7 @@ export function ReviewStep({ formData }: ReviewStepProps) {
             <li className="flex items-start gap-3">
               <span className="w-6 h-6 rounded-full bg-studio-rose/30 flex items-center justify-center flex-shrink-0 text-xs font-medium text-studio-ink/60">1</span>
               <p className="text-sm text-studio-ink/70">
-                We'll explore <strong className="text-studio-ink">dozens of names</strong> that match your style and criteria
+                We&apos;ll explore <strong className="text-studio-ink">dozens of names</strong> that match your style and criteria
               </p>
             </li>
             <li className="flex items-start gap-3">

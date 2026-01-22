@@ -176,7 +176,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
 
                 {discoveredNames.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-40 text-studio-ink/40">
-                    <p className="text-sm">Names will appear here as they're discovered...</p>
+                    <p className="text-sm">Names will appear here as they&apos;re discovered...</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin">

@@ -96,7 +96,7 @@ export function StyleStep({ formData, updateField }: StyleStepProps) {
           What speaks to you?
         </h1>
         <p className="text-studio-ink/60 max-w-md mx-auto">
-          Select all the styles that resonate with your family. Don't overthink it —
+          Select all the styles that resonate with your family. Don&apos;t overthink it —
           go with your gut.
         </p>
       </motion.div>
@@ -150,7 +150,7 @@ export function StyleStep({ formData, updateField }: StyleStepProps) {
 
           {formData.stylePreferences.length === 0 && (
             <p className="text-center text-sm text-studio-ink/40">
-              Select at least one style you're drawn to
+              Select at least one style you&apos;re drawn to
             </p>
           )}
         </motion.div>

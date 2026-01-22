@@ -196,10 +196,10 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
                 Helpful Tips
               </div>
               <h2 className="font-display text-3xl sm:text-4xl text-studio-ink">
-                If You're Torn
+                If You&apos;re Torn
               </h2>
               <p className="text-studio-ink/60 max-w-lg mx-auto">
-                Loving multiple names is wonderful — here's how to decide.
+                Loving multiple names is wonderful — here&apos;s how to decide.
               </p>
             </div>
 

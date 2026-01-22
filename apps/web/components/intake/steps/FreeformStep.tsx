@@ -120,7 +120,7 @@ export function FreeformStep({ formData, updateField }: FreeformStepProps) {
                           onClick={() => addPromptToNotes(prompt)}
                           className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white border border-transparent hover:border-studio-ink/10 transition-all text-sm text-studio-ink/70 hover:text-studio-ink"
                         >
-                          "{prompt}"
+                          &quot;{prompt}&quot;
                         </button>
                       ))}
                     </div>
@@ -156,11 +156,11 @@ export function FreeformStep({ formData, updateField }: FreeformStepProps) {
             Example from another family
           </div>
           <p className="text-sm text-studio-ink/60 italic leading-relaxed">
-            "We want something that works in both English and Spanish since we're a bilingual family.
+            &quot;We want something that works in both English and Spanish since we&apos;re a bilingual family.
             My husband vetoed Felix because of a childhood bully. We love nature-inspired names but
             nothing too unusual — we want her to be taken seriously professionally someday. Also,
-            our daughter's middle name will be Rose after my grandmother, so we need a first name
-            that flows well with that."
+            our daughter&apos;s middle name will be Rose after my grandmother, so we need a first name
+            that flows well with that.&quot;
           </p>
         </div>
       </motion.div>

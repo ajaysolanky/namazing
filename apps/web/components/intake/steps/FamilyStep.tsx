@@ -40,8 +40,8 @@ export function FamilyStep({ formData, updateField }: FamilyStepProps) {
           Tell us about your family
         </h1>
         <p className="text-studio-ink/60 max-w-md mx-auto">
-          We'll use this to find names that sound beautiful with your surname
-          and complement your other children's names.
+          We&apos;ll use this to find names that sound beautiful with your surname
+          and complement your other children&apos;s names.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export function FamilyStep({ formData, updateField }: FamilyStepProps) {
             Siblings (if any)
           </label>
           <p className="text-sm text-studio-ink/50">
-            If you have other children, we'll make sure the names flow well together.
+            If you have other children, we&apos;ll make sure the names flow well together.
           </p>
 
           {/* Sibling list */}

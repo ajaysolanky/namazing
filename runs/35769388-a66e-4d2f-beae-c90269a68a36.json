@@ -1,0 +1,14 @@
+{
+  "id": "35769388-a66e-4d2f-beae-c90269a68a36",
+  "brief": "Looking for boy names. Family surname: Solanky. Siblings: Sainik (2). Style preferences: unique, traditional. Names being considered: Arjun (Strong religious connotations around duty, honor, and strength). Cultural considerations: Indian. Additional notes: Something that is grounded in Indian tradition but still Western accessible. Open to twists or variations that are not actually traditional names but have some relationship to the past. Pronouncability and lyricality are important.",
+  "mode": "parallel",
+  "status": "running",
+  "events": [
+    {
+      "t": "activity",
+      "runId": "35769388-a66e-4d2f-beae-c90269a68a36",
+      "agent": "brief-parser",
+      "msg": "parsing brief"
+    }
+  ]
+}

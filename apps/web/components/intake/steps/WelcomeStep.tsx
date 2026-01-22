@@ -38,7 +38,7 @@ const genderOptions = [
   },
   {
     value: "unknown",
-    label: "It's a surprise",
+    label: "It&apos;s a surprise",
     icon: (
       <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 17l-6.3 4 2.3-7-6-4.6h7.6L12 2z" />
@@ -68,12 +68,12 @@ export function WelcomeStep({ formData, updateField }: WelcomeStepProps) {
         <h1 className="font-display text-4xl sm:text-5xl text-studio-ink leading-tight">
           Choosing a name is one of the
           <br />
-          <span className="text-studio-ink/60">first gifts you'll give</span>
+          <span className="text-studio-ink/60">first gifts you&apos;ll give</span>
         </h1>
 
         <p className="text-lg text-studio-ink/60 max-w-lg mx-auto leading-relaxed">
-          We're honored to help you find it. In just a few minutes, tell us about
-          your family and preferences, and we'll do the research for you.
+          We&apos;re honored to help you find it. In just a few minutes, tell us about
+          your family and preferences, and we&apos;ll do the research for you.
         </p>
       </motion.div>
 
@@ -145,7 +145,7 @@ export function WelcomeStep({ formData, updateField }: WelcomeStepProps) {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="text-center text-sm text-studio-ink/40"
       >
-        Don't worry — you can explore names for any gender, and change this anytime.
+        Don&apos;t worry — you can explore names for any gender, and change this anytime.
       </motion.p>
     </div>
   );

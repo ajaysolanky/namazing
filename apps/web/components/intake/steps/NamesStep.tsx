@@ -55,7 +55,7 @@ export function NamesStep({ formData, updateField }: NamesStepProps) {
           Names on your mind
         </h1>
         <p className="text-studio-ink/60 max-w-md mx-auto">
-          Are there names you've been considering? Or ones that just don't feel right?
+          Are there names you&apos;ve been considering? Or ones that just don&apos;t feel right?
           This helps us understand your taste.
         </p>
       </div>
@@ -64,10 +64,10 @@ export function NamesStep({ formData, updateField }: NamesStepProps) {
         {/* Names considering */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-studio-ink">
-            Names you're considering
+            Names you&apos;re considering
           </label>
           <p className="text-sm text-studio-ink/50">
-            Add any names you've thought about, even if you're not sure about them.
+            Add any names you&apos;ve thought about, even if you&apos;re not sure about them.
           </p>
 
           {formData.namesConsidering.length > 0 && (
@@ -117,7 +117,7 @@ export function NamesStep({ formData, updateField }: NamesStepProps) {
             Names to avoid
           </label>
           <p className="text-sm text-studio-ink/50">
-            Every family has names that just don't feel right. What are yours?
+            Every family has names that just don&apos;t feel right. What are yours?
           </p>
 
           {formData.namesToAvoid.length > 0 && (

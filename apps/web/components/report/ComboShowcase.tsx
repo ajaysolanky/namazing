@@ -49,7 +49,7 @@ export function ComboShowcase({ combos }: ComboShowcaseProps) {
           >
             <div className="relative h-full bg-gradient-to-br from-studio-cream to-white rounded-2xl p-6 shadow-soft border border-studio-ink/5 transition-all duration-300 hover:shadow-card hover:-translate-y-1">
               {/* Decorative quote marks */}
-              <div className="absolute top-3 right-4 text-4xl text-studio-rose/20 font-serif leading-none">"</div>
+              <div className="absolute top-3 right-4 text-4xl text-studio-rose/20 font-serif leading-none">&quot;</div>
 
               {/* Names */}
               <div className="relative">
