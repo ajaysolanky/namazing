@@ -32,11 +32,26 @@ const __dirname = path.dirname(__filename);
 const PROMPTS_DIR = path.resolve(__dirname, "../../../packages/prompts");
 
 const DEFAULT_MODELS = {
-  briefParser: process.env.BRIEF_PARSER_MODEL ?? "z-ai/glm-4.5-air:free",
-  nameGenerator: process.env.NAME_GENERATOR_MODEL ?? "z-ai/glm-4.5-air:free",
-  nameResearcher: process.env.NAME_RESEARCHER_MODEL ?? "z-ai/glm-4.5-air:free",
-  expertSelector: process.env.EXPERT_SELECTOR_MODEL ?? "z-ai/glm-4.5-air:free",
-  reportComposer: process.env.REPORT_COMPOSER_MODEL ?? "z-ai/glm-4.5-air:free",
+  briefParser:
+    process.env.BRIEF_PARSER_MODEL ??
+    process.env.LLM_MODEL ??
+    "z-ai/glm-4.5-air:free",
+  nameGenerator:
+    process.env.NAME_GENERATOR_MODEL ??
+    process.env.LLM_MODEL ??
+    "z-ai/glm-4.5-air:free",
+  nameResearcher:
+    process.env.NAME_RESEARCHER_MODEL ??
+    process.env.LLM_MODEL ??
+    "z-ai/glm-4.5-air:free",
+  expertSelector:
+    process.env.EXPERT_SELECTOR_MODEL ??
+    process.env.LLM_MODEL ??
+    "z-ai/glm-4.5-air:free",
+  reportComposer:
+    process.env.REPORT_COMPOSER_MODEL ??
+    process.env.LLM_MODEL ??
+    "z-ai/glm-4.5-air:free",
 };
 
 const USE_STUBS = !process.env.OPENROUTER_API_KEY;
@@ -182,6 +197,11 @@ async function callLLM({
     ...messages,
   ];
 
+  const provider = process.env.LLM_PROVIDER;
+  const providerBody = provider
+    ? { provider: { order: [provider], allow_fallbacks: false } }
+    : {};
+
   for (let round = 0; round < maxToolRounds; round++) {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -195,6 +215,7 @@ async function callLLM({
         temperature,
         response_format: json ? { type: "json_object" } : undefined,
         ...(tools && tools.length > 0 ? { tools } : {}),
+        ...providerBody,
       }),
     });
 
@@ -222,15 +243,36 @@ async function callLLM({
 
     // If there are tool calls, execute them and continue
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      // Filter out malformed tool calls
+      const validToolCalls = assistantMessage.tool_calls.filter(
+        (tc) => tc.function && tc.function.name
+      );
+
+      if (assistantMessage.tool_calls.length !== validToolCalls.length) {
+        console.warn(
+          `[callLLM] Dropped ${
+            assistantMessage.tool_calls.length - validToolCalls.length
+          } invalid tool calls`
+        );
+      }
+
+      if (validToolCalls.length === 0) {
+        // If we have content, we can treat this as a final response instead of a tool call
+        if (assistantMessage.content) {
+          return assistantMessage.content;
+        }
+        throw new Error("Received tool_calls but all were invalid (missing function names)");
+      }
+
       // Add assistant message with tool calls to conversation
       conversationMessages.push({
         role: "assistant",
         content: assistantMessage.content ?? null,
-        tool_calls: assistantMessage.tool_calls,
+        tool_calls: validToolCalls,
       });
 
       // Execute each tool call and add results
-      for (const toolCall of assistantMessage.tool_calls) {
+      for (const toolCall of validToolCalls) {
         let args: Record<string, unknown> = {};
         try {
           args = JSON.parse(toolCall.function.arguments);

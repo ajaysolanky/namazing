@@ -1,8 +1,7 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
-import { orchestratorService } from "@namazing/orchestrator";
-import type { RunMode } from "@namazing/orchestrator";
-import { saveRun, getRun, deleteRun } from "./storage";
+import { pythonOrchestrator } from "./python-orchestrator.js";
+import { saveRun, getRun, deleteRun } from "./storage.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
@@ -21,10 +20,15 @@ app.post("/api/run", async (req: Request, res: Response) => {
   }
 
   try {
-    const runMode: RunMode = mode === "parallel" ? "parallel" : "serial";
+    const runMode = mode === "parallel" ? "parallel" : "serial";
     console.log(`[API] Starting new run (mode: ${runMode})`);
-    const run = orchestratorService.startRun(brief, runMode);
-    await saveRun(run);
+    const run = pythonOrchestrator.startRun(brief, runMode);
+    
+    // Save to disk (exclude process object)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { process: _proc, ...serializable } = run;
+    await saveRun(serializable as any);
+    
     console.log(`[API] Run created: ${run.id}`);
 
     res.json({ runId: run.id, mode: run.mode });
@@ -37,7 +41,7 @@ app.post("/api/run", async (req: Request, res: Response) => {
 app.get("/api/events/:runId", async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first (has live events), fall back to disk
-  const memoryRun = orchestratorService.getRun(runId);
+  const memoryRun = pythonOrchestrator.getRun(runId);
   const diskRun = await getRun(runId);
   const run = memoryRun || diskRun;
 
@@ -55,11 +59,12 @@ app.get("/api/events/:runId", async (req: Request, res: Response) => {
   };
 
   // Send all existing events from the in-memory run
+  // @ts-ignore
   run.events.forEach(sendEvent);
 
   // Subscribe to new events (only works for in-memory runs)
   if (memoryRun) {
-    const unsubscribe = orchestratorService.subscribe(runId, (event) => {
+    const unsubscribe = pythonOrchestrator.subscribe(runId, (event) => {
       sendEvent(event);
     });
 
@@ -78,7 +83,7 @@ app.get("/api/events/:runId", async (req: Request, res: Response) => {
 app.get("/api/result/:runId", async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first, fall back to disk
-  const memoryRun = orchestratorService.getRun(runId);
+  const memoryRun = pythonOrchestrator.getRun(runId);
   const diskRun = await getRun(runId);
   const run = memoryRun || diskRun;
 

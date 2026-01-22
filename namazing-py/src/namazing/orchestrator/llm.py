@@ -6,7 +6,7 @@ import os
 from typing import Any, TypeVar
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from namazing.orchestrator.prompts import load_prompt_segments
 
@@ -149,18 +149,39 @@ async def run_json_agent(
     schema: type[T],
     json_mode: bool = True,
     temperature: float = 0.3,
+    max_retries: int = 3,
 ) -> T:
     """Run an agent that returns JSON validated against a Pydantic schema."""
     segments = load_prompt_segments(prompt_slug)
     content = f"{segments.instruction}\n\n{user_input}".strip()
 
-    raw = await call_llm(
-        model=model,
-        system=segments.system,
-        messages=[{"role": "user", "content": content}],
-        json_mode=json_mode,
-        temperature=temperature,
-    )
+    last_error: Exception | None = None
 
-    parsed = extract_json(raw)
-    return schema.model_validate(parsed)
+    for attempt in range(max_retries):
+        try:
+            raw = await call_llm(
+                model=model,
+                system=segments.system,
+                messages=[{"role": "user", "content": content}],
+                json_mode=json_mode,
+                temperature=temperature,
+            )
+
+            parsed = extract_json(raw)
+            return schema.model_validate(parsed)
+        except (json.JSONDecodeError, ValidationError) as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                # Log to stderr to avoid cluttering stdout pipeline output
+                import sys
+                print(
+                    f"Warning: Validation/JSON error in {prompt_slug} (attempt {attempt+1}/{max_retries}): {e}",
+                    file=sys.stderr,
+                )
+                await asyncio.sleep(0.5)  # Brief pause
+                continue
+            raise e
+
+    if last_error:
+        raise last_error
+    raise Exception("Unknown error in run_json_agent")

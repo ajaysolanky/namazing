@@ -103,8 +103,14 @@ async def _gather_research_tools(name: str, region: str) -> dict[str, Any]:
 class OrchestratorService:
     """Service for managing pipeline runs."""
 
-    def __init__(self) -> None:
+    def __init__(self, allow_stubs: bool = True) -> None:
         self._runs: dict[str, RunRecord] = {}
+        self.allow_stubs = allow_stubs
+
+    def _check_stubs_allowed(self) -> None:
+        """Raise error if stubs are required but disabled."""
+        if not self.allow_stubs and use_stubs():
+            raise RuntimeError("Stubs disabled (--no-stubs) but OPENROUTER_API_KEY is missing.")
 
     def start_run(self, brief: str, mode: RunMode = "serial") -> RunRecord:
         """Start a new pipeline run.
@@ -206,8 +212,8 @@ class OrchestratorService:
             )
 
             record.result = result
-            record.status = "completed"
 
+            # Emit the final result event
             self._emit(
                 record,
                 ResultEvent(
@@ -216,6 +222,19 @@ class OrchestratorService:
                     payload=report.model_dump(),
                 ),
             )
+
+            # Emit done event for report-composer (frontend waits for this)
+            self._emit(
+                record,
+                DoneEvent(
+                    run_id=record.id,
+                    agent="report-composer",
+                ),
+            )
+
+            # Small yield to ensure events are fully processed before status change
+            await asyncio.sleep(0)
+            record.status = "completed"
 
         except Exception as e:
             record.status = "failed"
@@ -241,6 +260,8 @@ class OrchestratorService:
                 msg="parsing brief",
             ),
         )
+
+        self._check_stubs_allowed()
 
         if use_stubs():
             await asyncio.sleep(0.15)
@@ -287,6 +308,9 @@ class OrchestratorService:
             return profile
 
         except Exception as e:
+            if not self.allow_stubs:
+                raise e
+
             self._emit(
                 record,
                 LogEvent(
@@ -321,6 +345,8 @@ class OrchestratorService:
 
         limit = MAX_SERIAL_NAMES if record.mode == "serial" else 80
 
+        self._check_stubs_allowed()
+
         if use_stubs():
             await asyncio.sleep(0.15)
             candidates = stub_candidates(profile)[:limit]
@@ -341,6 +367,14 @@ class OrchestratorService:
                     ],
                 ),
             )
+            self._emit(
+                record,
+                ResultEvent(
+                    run_id=record.id,
+                    agent="generator",
+                    payload=candidates,
+                ),
+            )
             return candidates
 
         try:
@@ -358,6 +392,9 @@ class OrchestratorService:
             )
 
             parsed = extract_json(raw)
+            if isinstance(parsed, dict) and "candidates" in parsed:
+                parsed = parsed["candidates"]
+
             if not isinstance(parsed, list):
                 raise ValueError("Expected array of candidates")
 
@@ -390,9 +427,20 @@ class OrchestratorService:
                     ],
                 ),
             )
+            self._emit(
+                record,
+                ResultEvent(
+                    run_id=record.id,
+                    agent="generator",
+                    payload=candidates,
+                ),
+            )
             return candidates
 
         except Exception as e:
+            if not self.allow_stubs:
+                raise e
+
             self._emit(
                 record,
                 LogEvent(
@@ -419,6 +467,14 @@ class OrchestratorService:
                     ],
                 ),
             )
+            self._emit(
+                record,
+                ResultEvent(
+                    run_id=record.id,
+                    agent="generator",
+                    payload=candidates,
+                ),
+            )
             return candidates
 
     async def _run_research(
@@ -442,6 +498,8 @@ class OrchestratorService:
                     name=candidate.name,
                 ),
             )
+
+            self._check_stubs_allowed()
 
             if use_stubs():
                 await asyncio.sleep(0.12)
@@ -478,7 +536,7 @@ class OrchestratorService:
                     },
                     "tools": tools,
                     "guidance": {
-                        "note": "You have access to OpenRouter model browsing. When you need fresh facts, search the web and cite sources conversationally."
+                        "note": "Use the provided tool outputs (popularity, associations) and your own knowledge to fill the card. Do not attempt to use external tools."
                     },
                 }
 
@@ -511,6 +569,9 @@ class OrchestratorService:
                 return card
 
             except Exception as e:
+                if not self.allow_stubs:
+                    raise e
+
                 error_msg = f"{type(e).__name__}: {str(e)}"
                 self._emit(
                     record,
@@ -562,6 +623,8 @@ class OrchestratorService:
             ),
         )
 
+        self._check_stubs_allowed()
+
         if use_stubs():
             await asyncio.sleep(0.15)
             selection = stub_selection(cards)
@@ -609,6 +672,9 @@ class OrchestratorService:
             return selection
 
         except Exception as e:
+            if not self.allow_stubs:
+                raise e
+
             self._emit(
                 record,
                 LogEvent(
@@ -644,6 +710,8 @@ class OrchestratorService:
                 msg="writing consultation",
             ),
         )
+
+        self._check_stubs_allowed()
 
         if use_stubs():
             await asyncio.sleep(0.15)
@@ -689,6 +757,9 @@ class OrchestratorService:
             )
 
         except Exception as e:
+            if not self.allow_stubs:
+                raise e
+
             self._emit(
                 record,
                 LogEvent(

@@ -50,6 +50,7 @@ class DisplayState:
     mode: str
     stages: list[PipelineStage] = field(default_factory=list)
     researched_names: list[ResearchedName] = field(default_factory=list)
+    candidate_lanes: dict[str, str] = field(default_factory=dict)
     total_candidates: int = 0
     current_message: str = ""
 
@@ -217,15 +218,20 @@ class PipelineDisplay:
                 value = event.value
                 if isinstance(value, list):
                     self.state.total_candidates = len(value)
+                    # Store lanes
+                    for c in value:
+                        if isinstance(c, dict) and "name" in c and "lane" in c:
+                            self.state.candidate_lanes[c["name"]] = c["lane"]
 
             elif event.agent == "researcher" and event.field == "card":
                 value = event.value
                 if isinstance(value, dict):
+                    name = value.get("name", "")
                     # Find the lane for this name
-                    lane = "unknown"
+                    lane = self.state.candidate_lanes.get(name, "unknown")
                     self.state.researched_names.append(
                         ResearchedName(
-                            name=value.get("name", ""),
+                            name=name,
                             syllables=value.get("syllables", 0),
                             ipa=value.get("ipa", ""),
                             lane=lane,

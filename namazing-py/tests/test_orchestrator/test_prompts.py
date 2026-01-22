@@ -54,7 +54,7 @@ class TestLoadPromptSegments:
         """Test loading the report-composer prompt."""
         segments = load_prompt_segments("report-composer")
 
-        assert "consultations" in segments.system
+        assert "baby name consultant" in segments.system
         assert "markdown" in segments.instruction
 
     def test_caching(self):

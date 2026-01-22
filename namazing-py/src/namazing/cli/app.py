@@ -87,6 +87,21 @@ def run(
             help="Suppress progress output.",
         ),
     ] = False,
+    no_stubs: Annotated[
+        bool,
+        typer.Option(
+            "--no-stubs",
+            help="Disable fallback to stubs on error (fail noisily).",
+        ),
+    ] = False,
+    format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            "-f",
+            help="Output format: 'rich' (default) or 'json-stream'.",
+        ),
+    ] = "rich",
 ) -> None:
     """Run the naming pipeline with the given brief."""
     if mode not in ("serial", "parallel"):
@@ -95,9 +110,15 @@ def run(
         )
         raise typer.Exit(1)
 
+    if format not in ("rich", "json-stream"):
+        console.print(
+            f"[red]Error: Invalid format '{format}'. Use 'rich' or 'json-stream'.[/red]"
+        )
+        raise typer.Exit(1)
+
     run_mode: RunMode = "serial" if mode == "serial" else "parallel"
 
-    asyncio.run(_run_pipeline(brief, run_mode, output, quiet))
+    asyncio.run(_run_pipeline(brief, run_mode, output, quiet, no_stubs, format))
 
 
 async def _run_pipeline(
@@ -105,28 +126,38 @@ async def _run_pipeline(
     mode: RunMode,
     output: Path | None,
     quiet: bool,
+    no_stubs: bool,
+    format: str,
 ) -> None:
     """Run the pipeline asynchronously."""
-    service = OrchestratorService()
+    if format == "json-stream":
+        quiet = True
+
+    service = OrchestratorService(allow_stubs=not no_stubs)
     display = PipelineDisplay(brief, mode, quiet=quiet)
 
     # Event handler
     def handle_event(event: Event) -> None:
-        display.handle_event(event)
-        if quiet:
-            # Print minimal output in quiet mode
-            if event.t == "activity":
-                pass  # No output
-            elif event.t == "result" and event.agent == "report-composer":
-                pass  # Will print results at the end
-            elif event.t == "error":
-                console.print(f"[red]Error: {event.msg}[/red]")
+        if format == "json-stream":
+            print(event.model_dump_json())
+            sys.stdout.flush()
+        else:
+            display.handle_event(event)
+            if quiet:
+                # Print minimal output in quiet mode
+                if event.t == "activity":
+                    pass  # No output
+                elif event.t == "result" and event.agent == "report-composer":
+                    pass  # Will print results at the end
+                elif event.t == "error":
+                    console.print(f"[red]Error: {event.msg}[/red]")
 
     # Start the run
     record = service.start_run(brief, mode)
     service.subscribe(record.id, handle_event)
 
-    display.start()
+    if format == "rich":
+        display.start()
 
     try:
         # Poll for completion
@@ -140,12 +171,25 @@ async def _run_pipeline(
 
             await asyncio.sleep(0.1)
 
-        display.stop()
+        if format == "rich":
+            display.stop()
 
         # Handle results
         current = service.get_run(record.id)
         if current and current.status == "completed" and current.result:
-            if not quiet:
+            if format == "json-stream":
+                print(
+                    json.dumps(
+                        {
+                            "t": "run-complete",
+                            "runId": record.id,
+                            "result": current.result.model_dump(),
+                        }
+                    )
+                )
+                sys.stdout.flush()
+
+            if format == "rich" and not quiet:
                 print_results(
                     console,
                     current.result.selection,
@@ -156,15 +200,18 @@ async def _run_pipeline(
                 output.write_text(
                     json.dumps(current.result.model_dump(), indent=2)
                 )
-                console.print(f"\nResults written to: {output}")
+                if format == "rich":
+                    console.print(f"\nResults written to: {output}")
 
         elif current and current.status == "failed":
-            print_error(console, current.error or "Unknown error")
+            if format == "rich":
+                print_error(console, current.error or "Unknown error")
             raise typer.Exit(1)
 
     except KeyboardInterrupt:
-        display.stop()
-        console.print("\n[yellow]Pipeline interrupted.[/yellow]")
+        if format == "rich":
+            display.stop()
+            console.print("\n[yellow]Pipeline interrupted.[/yellow]")
         raise typer.Exit(130)
 
 

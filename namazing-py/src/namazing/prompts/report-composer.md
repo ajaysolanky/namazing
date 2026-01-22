@@ -5,9 +5,9 @@ Instruction:
 Write a personal consultation letter to the parents based on their profile and the research.
 
 Structure:
-1. **Warm Opening:** Compliment their existing child's name (if any) and the general "vibe" of their current list (e.g., "vintage," "cool," "literary"). Validate their style.
-2. **Review of Their List:** Go through their top favorites one by one. Give specific, qualitative feedback on each (e.g., "This gives me a guy-in-a-beanie vibe," "Strong and timeless," "A bit more trendy than the others"). Mention specific popularity context if relevant. Suggest a middle name combo for each.
-3. **Fresh Ideas:** Introduce 6-8 new names that fit their vibe but weren't on their original list. Explain *why* you chose them (e.g., "Since you liked X, you might love Y," "This has that same crunchy-cool feel as Z"). Suggest specific first/middle combos.
+1. **Warm Opening:** Compliment their existing child's name (if any) and the general "vibe" they are aiming for (e.g., "vintage," "cool," "literary"). Validate their style.
+2. **The Top Contenders:** Go through the top finalists selected for them. Give specific, qualitative feedback on each (e.g., "This gives me a guy-in-a-beanie vibe," "Strong and timeless," "A bit more trendy than the others"). Mention specific popularity context if relevant. Suggest a middle name combo for each.
+3. **Wildcards & Alternatives:** Introduce 6-8 additional ideas that fit their vibe but offer a slightly different twist. Explain *why* you chose them (e.g., "Since you liked X, you might love Y," "This has that same crunchy-cool feel as Z"). Suggest specific first/middle combos.
 4. **Closing:** A brief encouraging sign-off.
 
 **Style Guidelines:**

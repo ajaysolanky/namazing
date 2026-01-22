@@ -64,7 +64,11 @@ def stub_profile(brief: str) -> SessionProfile:
     is_boy = bool(re.search(r"\b(boy|son|brother|male)\b", brief, re.IGNORECASE))
     is_girl = bool(
         re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE)
-    ) and not is_boy
+    )
+
+    # Prefer girl if both are mentioned (e.g. "have a boy, expecting a girl")
+    if is_boy and is_girl:
+        is_boy = False
 
     siblings = None
     if siblings_match:
@@ -105,10 +109,21 @@ def stub_candidates(profile: SessionProfile | None = None) -> list[Candidate]:
     candidates: list[Candidate] = []
 
     # Determine which lane set to use
-    # Check for girl-specific lane "traditional feminine" vs boy-specific "classic masculine"
     is_girl = False
+    
+    # Try to determine from parsed preferences
     if profile and profile.preferences and profile.preferences.style_lanes:
         is_girl = "traditional feminine" in profile.preferences.style_lanes
+    # Fallback: check raw brief if preferences are missing
+    elif profile and profile.raw_brief:
+         # Simple heuristic for gender (reusing logic from stub_profile)
+        brief = profile.raw_brief
+        is_boy_term = bool(re.search(r"\b(boy|son|brother|male)\b", brief, re.IGNORECASE))
+        is_girl_term = bool(
+            re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE)
+        )
+        if is_girl_term and not (is_boy_term and not is_girl_term):
+             is_girl = True
 
     source = SAMPLE_LANES_GIRL if is_girl else SAMPLE_LANES_BOY
 
