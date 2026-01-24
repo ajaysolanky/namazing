@@ -55,14 +55,16 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   const shareToTwitter = () => {
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   };
 
   const shareToFacebook = () => {
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   };
 

@@ -48,11 +48,19 @@ export function StudioApp() {
       if (event.t === "result" && event.agent === "report-composer") {
         void fetchResult(runId)
           .then((payload) => {
-            setResult(payload as RunResult);
+            // Basic shape validation before casting
+            if (payload && typeof payload === 'object' && 'report' in payload && 'candidates' in payload) {
+              setResult(payload as RunResult);
+            } else {
+              console.error("Invalid result payload shape", payload);
+              setError("Received malformed result from server");
+            }
             setIsRunning(false);
           })
           .catch((err) => {
             console.error("Failed to fetch result", err);
+            setError("Failed to load results. Please try again.");
+            setIsRunning(false);
           });
       }
 

@@ -35,14 +35,16 @@ describe('FinalistCard', () => {
 
     it('should render origins when nameCard provided', () => {
       render(<FinalistCard name="Luna" why="Test" nameCard={mockNameCard} />)
-      expect(screen.getByText('Latin, Italian')).toBeInTheDocument()
+      // Origins are now shown as individual badges
+      expect(screen.getByText('Latin')).toBeInTheDocument()
+      expect(screen.getByText('Italian')).toBeInTheDocument()
     })
   })
 
   describe('Top Pick Badge', () => {
     it('should show top pick badge when index is 0', () => {
       render(<FinalistCard name="Luna" why="Test" index={0} />)
-      expect(screen.getByText('Our top pick')).toBeInTheDocument()
+      expect(screen.getByText('Our Top Pick')).toBeInTheDocument()
     })
 
     it('should not show top pick badge when index is not 0', () => {
@@ -53,7 +55,7 @@ describe('FinalistCard', () => {
     it('should use larger text for top pick', () => {
       const { container } = render(<FinalistCard name="Luna" why="Test" index={0} />)
       const nameHeading = container.querySelector('h3')
-      expect(nameHeading).toHaveClass('text-4xl')
+      expect(nameHeading).toHaveClass('text-5xl')
     })
   })
 
@@ -66,7 +68,7 @@ describe('FinalistCard', () => {
       }
       render(<FinalistCard name="Stella" why="Test" combo={combo} />)
 
-      expect(screen.getByText('Perfect pairing')).toBeInTheDocument()
+      expect(screen.getByText('Perfect Pairing')).toBeInTheDocument()
       expect(screen.getByText('Perfect flow')).toBeInTheDocument()
       // The combo section contains "first & middle" format
       expect(screen.getByText('&')).toBeInTheDocument()

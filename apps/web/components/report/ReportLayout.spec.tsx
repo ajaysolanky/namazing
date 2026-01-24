@@ -157,7 +157,7 @@ describe('ReportLayout', () => {
     it('should render section header', () => {
       render(<ReportLayout runId="test-123" result={mockResult} />)
 
-      expect(screen.getByText('Our Picks for Your Family')).toBeInTheDocument()
+      expect(screen.getByText('Names We Love for You')).toBeInTheDocument()
     })
 
     it('should render all finalists', () => {
@@ -236,7 +236,7 @@ describe('ReportLayout', () => {
     it('should render tie-break tips when they exist', () => {
       render(<ReportLayout runId="test-123" result={mockResult} />)
 
-      expect(screen.getByText("If You're Torn")).toBeInTheDocument()
+      expect(screen.getByText("If You're Torn Between Names")).toBeInTheDocument()
       expect(screen.getByText('Try calling out the name at the park')).toBeInTheDocument()
     })
 

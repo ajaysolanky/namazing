@@ -40,8 +40,8 @@ export function NameCard({ card }: NameCardProps) {
       </button>
       {open && card.research_log && (
         <ul className="mt-2 space-y-1 rounded-lg bg-studio-ink/5 p-3 text-xs text-studio-ink/70">
-          {card.research_log.map((entry, idx) => (
-            <li key={idx}>• {entry}</li>
+          {card.research_log.map((entry) => (
+            <li key={entry}>• {entry}</li>
           ))}
         </ul>
       )}

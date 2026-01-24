@@ -80,7 +80,8 @@ describe('ExportActions', () => {
 
       expect(mockOpen).toHaveBeenCalledWith(
         expect.stringContaining('twitter.com/intent/tweet'),
-        '_blank'
+        '_blank',
+        'noopener,noreferrer'
       )
     })
 
@@ -92,7 +93,8 @@ describe('ExportActions', () => {
 
       expect(mockOpen).toHaveBeenCalledWith(
         expect.stringContaining('facebook.com/sharer'),
-        '_blank'
+        '_blank',
+        'noopener,noreferrer'
       )
     })
 

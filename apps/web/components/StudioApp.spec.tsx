@@ -115,7 +115,8 @@ describe('StudioApp', () => {
         finalists: [],
         tradeoffs: [],
         tie_break_tips: []
-      }
+      },
+      candidates: []
     }
     vi.mocked(api.fetchResult).mockResolvedValue(mockResult as any)
 

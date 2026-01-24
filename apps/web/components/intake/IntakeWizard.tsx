@@ -75,8 +75,11 @@ export function IntakeWizard() {
     try {
       const profile = transformToSessionProfile(formData);
       const { runId } = await startRun(profile.raw_brief, "parallel");
-      resetForm();
+      // Navigate first, then reset form in the background
+      // This prevents the form from flashing back to step 0
       router.push(`/processing/${runId}`);
+      // Reset form after a delay to ensure navigation has started
+      setTimeout(() => resetForm(), 500);
     } catch (err) {
       console.error("Failed to start run:", err);
       setError("Something went wrong. Please try again.");
@@ -107,6 +110,34 @@ export function IntakeWizard() {
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
   const canProceed = validateStep(currentStep);
+
+  // Show full-screen transition when submitting
+  if (isSubmitting) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-6"
+        >
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-studio-sage/30 border-t-studio-sage rounded-full animate-spin mx-auto" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-studio-rose to-studio-sage rounded-full animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-display text-2xl text-studio-ink">
+              Starting your consultation
+            </h2>
+            <p className="text-studio-ink/60">
+              We&apos;re assembling your expert naming team...
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col">

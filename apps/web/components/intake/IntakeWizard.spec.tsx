@@ -237,7 +237,8 @@ describe('IntakeWizard', () => {
       fireEvent.click(screen.getByText('Start consultation'))
 
       await waitFor(() => {
-        expect(screen.getByText('Starting...')).toBeInTheDocument()
+        // Now shows a full-screen loading state
+        expect(screen.getByText('Starting your consultation')).toBeInTheDocument()
       })
     })
   })

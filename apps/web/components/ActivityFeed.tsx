@@ -12,7 +12,11 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
     return events
       .filter((event) => event.t === "activity" || event.t === "start" || event.t === "done")
       .map((event, index) => {
-        const key = `${event.t}-${event.agent}-${index}`;
+        // Use a combination of event properties and index to create a stable key
+        // Include msg content hash for activity events to ensure uniqueness
+        const msgHash = event.t === "activity" ? `-${event.msg.slice(0, 20).replace(/\s/g, '')}` : '';
+        const nameHash = ('name' in event && event.name) ? `-${event.name}` : '';
+        const key = `${event.t}-${event.agent}${nameHash}${msgHash}-${index}`;
         let label = "";
         if (event.t === "activity") {
           label = `${event.agent}: ${event.msg}`;
