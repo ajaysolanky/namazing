@@ -11,6 +11,7 @@ import { NameDetailModal } from "./NameDetailModal";
 import { ComboShowcase } from "./ComboShowcase";
 import { NearMissesAccordion } from "./NearMissesAccordion";
 import { ExportActions } from "./ExportActions";
+import { MarkdownContent } from "./MarkdownContent";
 
 interface ReportLayoutProps {
   runId: string;
@@ -185,6 +186,54 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
         </motion.section>
 
         <SectionDivider variant="celebration" />
+
+        {/* Full consultation - markdown content */}
+        {result.report.markdown && (
+          <>
+            <motion.section
+              variants={sectionVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="text-center mb-12 space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm text-studio-ink/60 shadow-soft"
+                >
+                  <svg className="w-4 h-4 text-studio-sage" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Your Complete Report
+                </motion.div>
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="font-display text-3xl sm:text-4xl text-studio-ink"
+                >
+                  The Full Story
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  className="text-studio-ink/60 max-w-lg mx-auto"
+                >
+                  A comprehensive look at your naming journey and our recommendations.
+                </motion.p>
+              </div>
+
+              <MarkdownContent content={result.report.markdown} className="max-w-4xl mx-auto" />
+            </motion.section>
+            <SectionDivider />
+          </>
+        )}
 
         {/* Combos section */}
         {allCombos.length > 0 && (

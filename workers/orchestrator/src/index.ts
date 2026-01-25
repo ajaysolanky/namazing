@@ -1117,15 +1117,20 @@ export class OrchestratorService {
         temperature: 0.4,
       });
 
+      // Extract first meaningful line as summary (skip markdown headers)
+      const lines = markdown.trim().split("\n").filter(Boolean);
+      const summaryLine = lines.find(line => !line.startsWith("#") && line.trim().length > 10) || lines[0] || "";
+
       const report = {
-        summary: markdown.trim().split("\n")[0] ?? markdown.trim(),
+        summary: summaryLine.replace(/^\*+|\*+$/g, "").trim(),
+        markdown: markdown.trim(),
         loved_names: [],
         finalists: selection.finalists,
         combos: selection.finalists
           .map((f) => f.combo)
           .filter((combo): combo is NonNullable<typeof combo> => Boolean(combo)),
-        tradeoffs: ["Review the generated markdown report for full detail."],
-        tie_break_tips: ["Read the closing section of the markdown report for action items."],
+        tradeoffs: [],
+        tie_break_tips: [],
       } satisfies RunResult["report"];
 
       return report;

@@ -119,6 +119,7 @@ export const RunResultSchema = z.object({
   selection: ExpertSelectionSchema,
   report: z.object({
     summary: z.string(),
+    markdown: z.string().optional(),
     loved_names: z.array(z.string()).optional(),
     finalists: z.array(
       z.object({

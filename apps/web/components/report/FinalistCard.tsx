@@ -140,7 +140,7 @@ export function FinalistCard({
             {/* Meaning preview - gives immediate context */}
             {meaningPreview && (
               <motion.p
-                className="text-sm text-studio-sage font-medium mb-3 flex items-center gap-2"
+                className="text-sm text-studio-ink/60 font-medium mb-3 flex items-center gap-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.2 + 0.4 }}
