@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import { Container } from "@/components/layout/Container";
 
 interface ReportHeroProps {
@@ -38,11 +39,6 @@ export function ReportHero({ surname, summary }: ReportHeroProps) {
     const timer = setTimeout(() => setShowContent(true), 300);
     return () => clearTimeout(timer);
   }, []);
-
-  // Parse summary into opening line and details
-  const summaryParts = summary.split(/(?<=\.)\s+/).filter(Boolean);
-  const openingLine = summaryParts[0] || summary;
-  const detailLines = summaryParts.slice(1);
 
   return (
     <div className="relative overflow-hidden min-h-[70vh] flex items-center">
@@ -155,27 +151,30 @@ export function ReportHero({ surname, summary }: ReportHeroProps) {
               transition={{ delay: 0.8, duration: 0.6 }}
               className="max-w-2xl mx-auto space-y-4"
             >
-              {/* Opening line - emphasized */}
-              <p className="text-xl sm:text-2xl text-studio-ink/80 font-light leading-relaxed italic">
-                &ldquo;{openingLine}&rdquo;
-              </p>
-
-              {/* Detail lines - if any */}
-              {detailLines.length > 0 && (
-                <div className="space-y-3 pt-4">
-                  {detailLines.map((line, i) => (
-                    <motion.p
-                      key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1 + i * 0.2 }}
-                      className="text-base sm:text-lg text-studio-ink/60 leading-relaxed"
-                    >
-                      {line}
-                    </motion.p>
-                  ))}
-                </div>
-              )}
+              <div className="text-xl sm:text-2xl text-studio-ink/80 font-light leading-relaxed italic prose prose-studio">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="text-xl sm:text-2xl text-studio-ink/80 font-light leading-relaxed mb-4">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold text-studio-ink">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    h1: ({ children }) => <h1 className="font-display text-3xl text-studio-ink mb-4">{children}</h1>,
+                    h2: ({ children }) => <h2 className="font-display text-2xl text-studio-ink mb-3">{children}</h2>,
+                    h3: ({ children }) => <h3 className="font-display text-xl text-studio-ink mb-2">{children}</h3>,
+                    ul: ({ children }) => <ul className="space-y-2 my-4 ml-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="space-y-2 my-4 ml-4 list-decimal">{children}</ol>,
+                    li: ({ children }) => <li className="text-lg text-studio-ink/70">{children}</li>,
+                    hr: () => <hr className="my-6 border-studio-ink/10" />,
+                    table: ({ children }) => <table className="w-full my-6 text-base border-collapse">{children}</table>,
+                    thead: ({ children }) => <thead className="bg-studio-sand/50">{children}</thead>,
+                    tbody: ({ children }) => <tbody>{children}</tbody>,
+                    tr: ({ children }) => <tr className="border-b border-studio-ink/10">{children}</tr>,
+                    th: ({ children }) => <th className="px-3 py-2 text-left font-semibold text-studio-ink/80 text-sm">{children}</th>,
+                    td: ({ children }) => <td className="px-3 py-2 text-studio-ink/70 text-sm">{children}</td>,
+                  }}
+                >
+                  {summary}
+                </ReactMarkdown>
+              </div>
             </motion.div>
 
             {/* Scroll indicator */}
