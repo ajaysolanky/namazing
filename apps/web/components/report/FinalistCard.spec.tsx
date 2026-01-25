@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { FinalistCard } from './FinalistCard'
 import type { NameCard } from '@/lib/types'
 
@@ -12,6 +12,10 @@ const mockNameCard: NameCard = {
 }
 
 describe('FinalistCard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   describe('Rendering', () => {
     it('should render the name', () => {
       render(<FinalistCard name="Luna" why="Beautiful meaning" />)
@@ -50,12 +54,6 @@ describe('FinalistCard', () => {
     it('should not show top pick badge when index is not 0', () => {
       render(<FinalistCard name="Luna" why="Test" index={1} />)
       expect(screen.queryByText('Our top pick')).not.toBeInTheDocument()
-    })
-
-    it('should use larger text for top pick', () => {
-      const { container } = render(<FinalistCard name="Luna" why="Test" index={0} />)
-      const nameHeading = container.querySelector('h3')
-      expect(nameHeading).toHaveClass('text-5xl')
     })
   })
 

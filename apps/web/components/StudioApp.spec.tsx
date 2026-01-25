@@ -26,7 +26,7 @@ describe('StudioApp', () => {
     vi.mocked(sse.subscribeToRun).mockReturnValue(() => {}) // unsubscribe fn
   })
 
-  it('renders initial state correctly', () => {
+  it('should render initial state correctly', () => {
     render(<StudioApp />)
     
     expect(screen.getByRole('heading', { name: 'Namazing' })).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('StudioApp', () => {
     expect(screen.queryByText('Download JSON')).not.toBeInTheDocument()
   })
 
-  it('shows error if brief is empty when starting', async () => {
+  it('should show error when starting with empty brief', async () => {
     render(<StudioApp />)
     
     const startBtn = screen.getByRole('button', { name: 'Start' })
@@ -46,7 +46,7 @@ describe('StudioApp', () => {
     expect(api.startRun).not.toHaveBeenCalled()
   })
 
-  it('starts run when brief is provided', async () => {
+  it('should start run when brief is provided', async () => {
     render(<StudioApp />)
     
     const briefInput = screen.getByPlaceholderText(/Paste your client’s brief/i)
@@ -63,9 +63,9 @@ describe('StudioApp', () => {
     expect(sse.subscribeToRun).toHaveBeenCalledWith('test-run-id', expect.any(Function))
   })
 
-  it('updates state based on SSE events', async () => {
+  it('should update state based on SSE events', async () => {
     // We need to capture the callback passed to subscribeToRun
-    let capturedCallback: (event: any) => void = () => {}
+    let capturedCallback: (event: Record<string, unknown>) => void = () => {}
     vi.mocked(sse.subscribeToRun).mockImplementation((runId, cb) => {
       capturedCallback = cb
       return () => {}
@@ -101,8 +101,8 @@ describe('StudioApp', () => {
     expect(screen.getByText('luna')).toBeInTheDocument()
   })
 
-  it('handles run completion and result fetching', async () => {
-    let capturedCallback: (event: any) => void = () => {}
+  it('should handle run completion and result fetching', async () => {
+    let capturedCallback: (event: Record<string, unknown>) => void = () => {}
     vi.mocked(sse.subscribeToRun).mockImplementation((runId, cb) => {
       capturedCallback = cb
       return () => {}
@@ -118,7 +118,7 @@ describe('StudioApp', () => {
       },
       candidates: []
     }
-    vi.mocked(api.fetchResult).mockResolvedValue(mockResult as any)
+    vi.mocked(api.fetchResult).mockResolvedValue(mockResult)
 
     render(<StudioApp />)
     

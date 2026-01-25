@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ShortlistPanel } from './ShortlistPanel'
+import type { ExpertSelection } from '../lib/types'
 
-const mockSelection = {
+const mockSelection: ExpertSelection = {
   finalists: [
     {
       name: 'Luna',
@@ -20,33 +21,66 @@ const mockSelection = {
 }
 
 describe('ShortlistPanel', () => {
-  it('renders empty state when no selection provided', () => {
-    render(<ShortlistPanel />)
-    expect(screen.getByText(/Finalists will appear once/i)).toBeInTheDocument()
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
-  it('renders finalists correctly', () => {
-    render(<ShortlistPanel selection={mockSelection} />)
-    
-    expect(screen.getByText('Shortlist')).toBeInTheDocument()
-    expect(screen.getByText('Luna')).toBeInTheDocument()
-    expect(screen.getByText('Fits the celestial theme perfect.')).toBeInTheDocument()
-    
-    expect(screen.getByText('Nova')).toBeInTheDocument()
-    expect(screen.getByText('Modern and energetic.')).toBeInTheDocument()
+  describe('Empty State', () => {
+    it('should render empty state when no selection provided', () => {
+      render(<ShortlistPanel />)
+
+      expect(screen.getByText(/Finalists will appear once/i)).toBeInTheDocument()
+    })
   })
 
-  it('renders combo details for finalists', () => {
-    render(<ShortlistPanel selection={mockSelection} />)
-    expect(screen.getByText('Luna Belle')).toBeInTheDocument()
-    expect(screen.getByText(/Beautiful moon/)).toBeInTheDocument()
+  describe('Finalists', () => {
+    it('should render the shortlist heading', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Shortlist')).toBeInTheDocument()
+    })
+
+    it('should render finalist names', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Luna')).toBeInTheDocument()
+      expect(screen.getByText('Nova')).toBeInTheDocument()
+    })
+
+    it('should render finalist explanations', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Fits the celestial theme perfect.')).toBeInTheDocument()
+      expect(screen.getByText('Modern and energetic.')).toBeInTheDocument()
+    })
   })
 
-  it('renders near misses', () => {
-    render(<ShortlistPanel selection={mockSelection} />)
-    
-    expect(screen.getByText('Near Misses')).toBeInTheDocument()
-    expect(screen.getByText('Stella')).toBeInTheDocument()
-    expect(screen.getByText(/Too popular/)).toBeInTheDocument()
+  describe('Combo Suggestions', () => {
+    it('should render combo name when provided', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Luna Belle')).toBeInTheDocument()
+    })
+
+    it('should render combo explanation when provided', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText(/Beautiful moon/)).toBeInTheDocument()
+    })
+  })
+
+  describe('Near Misses', () => {
+    it('should render near misses section', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Near Misses')).toBeInTheDocument()
+    })
+
+    it('should render near miss names and reasons', () => {
+      render(<ShortlistPanel selection={mockSelection} />)
+
+      expect(screen.getByText('Stella')).toBeInTheDocument()
+      expect(screen.getByText(/Too popular/)).toBeInTheDocument()
+    })
   })
 })

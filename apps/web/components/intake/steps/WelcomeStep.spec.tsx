@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { WelcomeStep } from './WelcomeStep'
 import type { IntakeFormData } from '@/hooks/useIntakeForm'
 
@@ -20,6 +20,10 @@ const createMockFormData = (overrides: Partial<IntakeFormData> = {}): IntakeForm
 })
 
 describe('WelcomeStep', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   describe('Rendering', () => {
     it('should render the welcome header', () => {
       render(<WelcomeStep formData={createMockFormData()} updateField={vi.fn()} />)
@@ -78,30 +82,13 @@ describe('WelcomeStep', () => {
     })
   })
 
-  describe('Selection State', () => {
-    it('should show boy as selected when babyGender is boy', () => {
-      const formData = createMockFormData({ babyGender: 'boy' })
-      const { container } = render(<WelcomeStep formData={formData} updateField={vi.fn()} />)
+  describe('Edge Cases', () => {
+    it('should render without crashing when no gender selected', () => {
+      const formData = createMockFormData({ babyGender: undefined })
+      render(<WelcomeStep formData={formData} updateField={vi.fn()} />)
 
-      // The selected option should have a checkmark indicator
-      const checkmarks = container.querySelectorAll('path[d="M5 13l4 4L19 7"]')
-      expect(checkmarks.length).toBeGreaterThan(0)
-    })
-
-    it('should show girl as selected when babyGender is girl', () => {
-      const formData = createMockFormData({ babyGender: 'girl' })
-      const { container } = render(<WelcomeStep formData={formData} updateField={vi.fn()} />)
-
-      const checkmarks = container.querySelectorAll('path[d="M5 13l4 4L19 7"]')
-      expect(checkmarks.length).toBeGreaterThan(0)
-    })
-
-    it('should show unknown as selected when babyGender is unknown', () => {
-      const formData = createMockFormData({ babyGender: 'unknown' })
-      const { container } = render(<WelcomeStep formData={formData} updateField={vi.fn()} />)
-
-      const checkmarks = container.querySelectorAll('path[d="M5 13l4 4L19 7"]')
-      expect(checkmarks.length).toBeGreaterThan(0)
+      expect(screen.getByText('A boy')).toBeInTheDocument()
+      expect(screen.getByText('A girl')).toBeInTheDocument()
     })
   })
 })

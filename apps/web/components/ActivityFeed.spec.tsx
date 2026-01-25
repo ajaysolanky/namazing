@@ -1,45 +1,64 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ActivityFeed } from './ActivityFeed'
 import type { ActivityEvent } from '../lib/types'
 
 describe('ActivityFeed', () => {
-  it('renders empty state message when no relevant events', () => {
-    render(<ActivityFeed events={[]} />)
-    expect(screen.getByText(/Activity timeline will appear/i)).toBeInTheDocument()
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
-  it('renders activity events correctly', () => {
-    const events: ActivityEvent[] = [
-      { t: 'activity', agent: 'Researcher', msg: 'Searching database' } as any
-    ]
-    render(<ActivityFeed events={events} />)
-    expect(screen.getByText('Researcher: Searching database')).toBeInTheDocument()
+  describe('Empty State', () => {
+    it('should render empty state message when no events provided', () => {
+      render(<ActivityFeed events={[]} />)
+
+      expect(screen.getByText(/Activity timeline will appear/i)).toBeInTheDocument()
+    })
   })
 
-  it('renders start events correctly', () => {
-    const events: ActivityEvent[] = [
-      { t: 'start', agent: 'Orchestrator', name: 'Analysis' } as any
-    ]
-    render(<ActivityFeed events={events} />)
-    expect(screen.getByText('Orchestrator starting Analysis')).toBeInTheDocument()
+  describe('Activity Events', () => {
+    it('should render activity event with agent and message', () => {
+      const events: ActivityEvent[] = [
+        { t: 'activity', runId: 'test-run', agent: 'Researcher', msg: 'Searching database' }
+      ]
+      render(<ActivityFeed events={events} />)
+
+      expect(screen.getByText('Researcher: Searching database')).toBeInTheDocument()
+    })
   })
 
-  it('renders done events correctly', () => {
-    const events: ActivityEvent[] = [
-      { t: 'done', agent: 'Orchestrator', name: 'Analysis' } as any
-    ]
-    render(<ActivityFeed events={events} />)
-    expect(screen.getByText('Orchestrator finished Analysis')).toBeInTheDocument()
+  describe('Start Events', () => {
+    it('should render start event with agent and name', () => {
+      const events: ActivityEvent[] = [
+        { t: 'start', runId: 'test-run', agent: 'Orchestrator', name: 'Analysis' }
+      ]
+      render(<ActivityFeed events={events} />)
+
+      expect(screen.getByText('Orchestrator starting Analysis')).toBeInTheDocument()
+    })
   })
 
-  it('filters out ignored event types', () => {
-    const events: ActivityEvent[] = [
-      { t: 'activity', agent: 'Visible', msg: 'Hello' } as any,
-      { t: 'other_type', agent: 'Hidden' } as any 
-    ]
-    render(<ActivityFeed events={events} />)
-    expect(screen.getByText('Visible: Hello')).toBeInTheDocument()
-    expect(screen.queryByText(/Hidden/)).not.toBeInTheDocument()
+  describe('Done Events', () => {
+    it('should render done event with agent and name', () => {
+      const events: ActivityEvent[] = [
+        { t: 'done', runId: 'test-run', agent: 'Orchestrator', name: 'Analysis' }
+      ]
+      render(<ActivityFeed events={events} />)
+
+      expect(screen.getByText('Orchestrator finished Analysis')).toBeInTheDocument()
+    })
+  })
+
+  describe('Event Filtering', () => {
+    it('should only render supported event types', () => {
+      const events: ActivityEvent[] = [
+        { t: 'activity', runId: 'test-run', agent: 'Visible', msg: 'Hello' },
+        { t: 'log', runId: 'test-run', agent: 'Hidden', msg: 'Log message' }
+      ]
+      render(<ActivityFeed events={events} />)
+
+      expect(screen.getByText('Visible: Hello')).toBeInTheDocument()
+      expect(screen.queryByText(/Hidden/)).not.toBeInTheDocument()
+    })
   })
 })
