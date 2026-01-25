@@ -724,6 +724,11 @@ export class OrchestratorService {
         agent: "report-composer",
         payload: report,
       });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "report-composer",
+      });
     } catch (error) {
       record.status = "failed";
       const msg = error instanceof Error ? error.message : String(error);
@@ -753,6 +758,11 @@ export class OrchestratorService {
         runId: record.id,
         agent: "brief-parser",
         payload: profile,
+      });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "brief-parser",
       });
       return profile;
     }
@@ -784,6 +794,11 @@ export class OrchestratorService {
         agent: "brief-parser",
         payload: profile,
       });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "brief-parser",
+      });
       return profile;
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -799,6 +814,11 @@ export class OrchestratorService {
         runId: record.id,
         agent: "brief-parser",
         payload: profile,
+      });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "brief-parser",
       });
       return profile;
     }
@@ -821,6 +841,11 @@ export class OrchestratorService {
         agent: "generator",
         field: "candidates",
         value: candidates,
+      });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "generator",
       });
       return shouldLimitCandidates(record.mode) ? candidates.slice(0, MAX_SERIAL_NAMES) : candidates;
     }
@@ -846,6 +871,11 @@ export class OrchestratorService {
         field: "candidates",
         value: limited,
       });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "generator",
+      });
       return limited;
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -865,6 +895,11 @@ export class OrchestratorService {
         agent: "generator",
         field: "candidates",
         value: limited,
+      });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "generator",
       });
       return limited;
     }
@@ -990,6 +1025,11 @@ export class OrchestratorService {
         agent: "expert-selector",
         payload: selection,
       });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "expert-selector",
+      });
       return selection;
     }
 
@@ -1011,6 +1051,11 @@ export class OrchestratorService {
         agent: "expert-selector",
         payload: selection,
       });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "expert-selector",
+      });
       return selection;
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -1026,6 +1071,11 @@ export class OrchestratorService {
         runId: record.id,
         agent: "expert-selector",
         payload: selection,
+      });
+      this.emit(record, {
+        t: "done",
+        runId: record.id,
+        agent: "expert-selector",
       });
       return selection;
     }
