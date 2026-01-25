@@ -263,8 +263,30 @@ def stub_report(profile: SessionProfile, selection: ExpertSelection) -> Report:
         f.combo for f in selection.finalists if f.combo is not None
     ]
 
+    stub_markdown = """# Your Personalized Name Consultation
+
+## Summary
+
+This is a stub report summarising the AI studio run. The full Report Composer agent output will appear once the live run completes.
+
+## Your Finalists
+
+Based on your preferences, we've selected names that balance tradition with modern appeal.
+
+## Things to Consider
+
+- Nicknames are inferred; validate with the family for preference.
+- Popularity trends are qualitative placeholders until SSA integration lands.
+
+## Tie-Break Tips
+
+- Say each finalist aloud with the sibling set and surname.
+- Consider monogram balance with honour initials.
+"""
+
     return Report(
-        summary="Stub report summarising the AI studio run. Swap in Report Composer agent output once live.",
+        summary=stub_markdown,
+        markdown=stub_markdown,
         loved_names=[],
         finalists=selection.finalists,
         combos=combos,

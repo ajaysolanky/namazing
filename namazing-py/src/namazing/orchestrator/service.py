@@ -740,13 +740,24 @@ class OrchestratorService:
                 temperature=0.4,
             )
 
-            # Use more of the markdown for the summary instead of just the first line
+            # Clean up the markdown output
             summary = markdown.strip()
+
+            # Some models wrap their output in quotes - strip them if present
+            if summary.startswith('"') and summary.endswith('"'):
+                summary = summary[1:-1]
+            elif summary.startswith("'") and summary.endswith("'"):
+                summary = summary[1:-1]
+
+            # Handle escaped newlines (literal \n instead of actual newlines)
+            if '\\n' in summary and '\n' not in summary:
+                summary = summary.replace('\\n', '\n')
 
             combos = [f.combo for f in selection.finalists if f.combo is not None]
 
             return Report(
                 summary=summary,
+                markdown=summary,
                 loved_names=[],
                 finalists=selection.finalists,
                 combos=combos,

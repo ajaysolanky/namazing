@@ -11,6 +11,7 @@ class Report(BaseModel):
     """Final consultation report."""
 
     summary: str
+    markdown: str | None = None
     loved_names: list[str] | None = None
     finalists: list[Finalist]
     combos: list[Combo] | None = None
