@@ -35,3 +35,4 @@ coverage/
 pipeline-results.json
 apps/server/runs/
 runs/
+__pycache__/
