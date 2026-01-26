@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/Card";
 import { ReportHero } from "./ReportHero";
 import { FinalistCard } from "./FinalistCard";
 import { NameDetailModal } from "./NameDetailModal";
-import { ComboShowcase } from "./ComboShowcase";
 import { NearMissesAccordion } from "./NearMissesAccordion";
 import { ExportActions } from "./ExportActions";
 import { MarkdownContent } from "./MarkdownContent";
@@ -65,6 +64,21 @@ function SectionDivider({ variant = "default" }: { variant?: "default" | "celebr
   );
 }
 
+// Placeholder texts to filter out
+const PLACEHOLDER_TEXTS = [
+  "Review the report for tradeoffs.",
+  "Read the report for tie-break tips.",
+];
+
+function isPlaceholder(text: string): boolean {
+  return PLACEHOLDER_TEXTS.some(p => text.toLowerCase().includes(p.toLowerCase()));
+}
+
+function filterPlaceholders(items: string[] | undefined): string[] {
+  if (!items) return [];
+  return items.filter(item => !isPlaceholder(item));
+}
+
 export function ReportLayout({ runId, result }: ReportLayoutProps) {
   const [selectedName, setSelectedName] = useState<NameCard | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -80,35 +94,10 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
     return map;
   }, [result.candidates]);
 
-  // Get all unique combos
-  const allCombos = useMemo(() => {
-    const combos: { first: string; middle: string; why: string }[] = [];
-    const seen = new Set<string>();
+  // Filter out placeholder content
+  const tradeoffs = filterPlaceholders(result.report.tradeoffs);
+  const tieBreakTips = filterPlaceholders(result.report.tie_break_tips);
 
-    // From report combos
-    if (result.report.combos) {
-      result.report.combos.forEach((combo) => {
-        const key = `${combo.first}-${combo.middle}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          combos.push(combo);
-        }
-      });
-    }
-
-    // From finalist combos
-    result.report.finalists.forEach((finalist) => {
-      if (finalist.combo) {
-        const key = `${finalist.combo.first}-${finalist.combo.middle}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          combos.push(finalist.combo);
-        }
-      }
-    });
-
-    return combos;
-  }, [result]);
 
   const handleViewDetails = (name: string) => {
     const card = nameCardMap.get(name.toLowerCase());
@@ -235,24 +224,9 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
           </>
         )}
 
-        {/* Combos section */}
-        {allCombos.length > 0 && (
-          <>
-            <motion.section
-              variants={sectionVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <ComboShowcase combos={allCombos} />
-            </motion.section>
-            <SectionDivider />
-          </>
-        )}
 
         {/* Considerations section */}
-        {result.report.tradeoffs && result.report.tradeoffs.length > 0 && (
+        {tradeoffs.length > 0 && (
           <>
             <motion.section
               variants={sectionVariants}
@@ -278,7 +252,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
 
               <Card variant="glass" padding="lg" className="max-w-3xl mx-auto">
                 <ul className="space-y-5">
-                  {result.report.tradeoffs.map((tradeoff, index) => (
+                  {tradeoffs.map((tradeoff, index) => (
                     <motion.li
                       key={tradeoff}
                       initial={{ opacity: 0, x: -10 }}
@@ -301,7 +275,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
         )}
 
         {/* Tie-break tips */}
-        {result.report.tie_break_tips && result.report.tie_break_tips.length > 0 && (
+        {tieBreakTips.length > 0 && (
           <>
             <motion.section
               variants={sectionVariants}
@@ -326,7 +300,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
-                {result.report.tie_break_tips.map((tip, index) => (
+                {tieBreakTips.map((tip, index) => (
                   <motion.div
                     key={tip}
                     initial={{ opacity: 0, y: 10 }}

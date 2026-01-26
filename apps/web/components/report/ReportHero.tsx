@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Container } from "@/components/layout/Container";
 
 interface ReportHeroProps {
@@ -153,6 +154,7 @@ export function ReportHero({ surname, summary }: ReportHeroProps) {
             >
               <div className="text-xl sm:text-2xl text-studio-ink/80 font-light leading-relaxed italic prose prose-studio">
                 <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => <p className="text-xl sm:text-2xl text-studio-ink/80 font-light leading-relaxed mb-4">{children}</p>,
                     strong: ({ children }) => <strong className="font-semibold text-studio-ink">{children}</strong>,

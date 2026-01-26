@@ -30,10 +30,10 @@ export function ComboShowcase({ combos }: ComboShowcaseProps) {
           First + Middle
         </div>
         <h2 className="font-display text-3xl sm:text-4xl text-studio-ink">
-          Perfect Pairings
+          First & Middle Name Pairings
         </h2>
         <p className="text-studio-ink/60 max-w-lg mx-auto">
-          Combinations that flow beautifully together, considering rhythm, meaning, and sound.
+          Our favorite first and middle name combinations for your little one, chosen for rhythm, meaning, and flow.
         </p>
       </motion.div>
 

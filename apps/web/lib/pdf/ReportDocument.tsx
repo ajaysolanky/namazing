@@ -8,25 +8,11 @@ import {
 } from "@react-pdf/renderer";
 import type { RunResult } from "@/lib/types";
 
-// Register fonts
-Font.register({
-  family: "Inter",
-  fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2",
-      fontWeight: 600,
-    },
-  ],
-});
+// Use Hyphenation callback to disable it (can cause issues)
+Font.registerHyphenationCallback((word) => [word]);
 
-Font.register({
-  family: "DM Serif Display",
-  src: "https://fonts.gstatic.com/s/dmserifDisplay/v15/-nFnOHM81r4j6k0gjAW3mujVU2B2K_d709jy92k.woff2",
-});
+// Note: Using built-in Helvetica font family for compatibility
+// Custom fonts can be added later with proper TTF files
 
 // Design tokens
 const colors = {
@@ -43,7 +29,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: colors.sand,
     padding: 48,
-    fontFamily: "Inter",
+    fontFamily: "Helvetica",
     fontSize: 11,
     color: colors.ink,
   },
@@ -52,13 +38,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   logo: {
-    fontFamily: "DM Serif Display",
+    fontFamily: "Times-Roman",
     fontSize: 24,
     color: colors.inkLight,
     marginBottom: 8,
   },
   title: {
-    fontFamily: "DM Serif Display",
+    fontFamily: "Times-Roman",
     fontSize: 32,
     color: colors.ink,
     marginBottom: 8,
@@ -78,7 +64,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   sectionTitle: {
-    fontFamily: "DM Serif Display",
+    fontFamily: "Times-Roman",
     fontSize: 20,
     color: colors.ink,
     marginBottom: 16,
@@ -91,7 +77,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardName: {
-    fontFamily: "DM Serif Display",
+    fontFamily: "Times-Roman",
     fontSize: 18,
     color: colors.ink,
     marginBottom: 4,
@@ -113,7 +99,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   comboName: {
-    fontFamily: "DM Serif Display",
+    fontFamily: "Times-Roman",
     fontSize: 14,
     color: colors.ink,
     marginBottom: 4,
@@ -197,6 +183,37 @@ interface ReportDocumentProps {
   result: RunResult;
 }
 
+// Placeholder texts to filter out
+const PLACEHOLDER_TEXTS = [
+  "Review the report for tradeoffs.",
+  "Read the report for tie-break tips.",
+];
+
+function isPlaceholder(text: string): boolean {
+  return PLACEHOLDER_TEXTS.some(p => text.toLowerCase().includes(p.toLowerCase()));
+}
+
+function filterPlaceholders(items: string[] | undefined): string[] {
+  if (!items) return [];
+  return items.filter(item => !isPlaceholder(item));
+}
+
+// Strip markdown formatting for plain text display
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold** -> bold
+    .replace(/\*([^*]+)\*/g, '$1')       // *italic* -> italic
+    .replace(/__([^_]+)__/g, '$1')       // __bold__ -> bold
+    .replace(/_([^_]+)_/g, '$1')         // _italic_ -> italic
+    .replace(/~~([^~]+)~~/g, '$1')       // ~~strike~~ -> strike
+    .replace(/`([^`]+)`/g, '$1')         // `code` -> code
+    .replace(/^#+\s*/gm, '')             // # headers -> text
+    .replace(/^\s*[-*+]\s+/gm, '• ')     // - list -> bullet
+    .replace(/^\s*\d+\.\s+/gm, '')       // numbered list -> text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [link](url) -> link
+    .trim();
+}
+
 export function ReportDocument({ result }: ReportDocumentProps) {
   const surname = result.profile.family?.surname || "Family";
 
@@ -229,9 +246,16 @@ export function ReportDocument({ result }: ReportDocumentProps) {
     }
   });
 
+  // Filter out placeholder content
+  const tradeoffs = filterPlaceholders(result.report.tradeoffs);
+  const tieBreakTips = filterPlaceholders(result.report.tie_break_tips);
+
+  // Clean the summary
+  const cleanSummary = stripMarkdown(result.report.summary || "");
+
   return (
     <Document>
-      {/* Page 1: Cover and Finalists */}
+      {/* Single flowing page - react-pdf will create page breaks automatically */}
       <Page size="LETTER" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
@@ -241,14 +265,14 @@ export function ReportDocument({ result }: ReportDocumentProps) {
         </View>
 
         {/* Summary */}
-        <Text style={styles.summary}>{result.report.summary}</Text>
+        <Text style={styles.summary}>{cleanSummary}</Text>
 
         {/* Finalists */}
         <Text style={styles.sectionTitle}>Our Top Picks</Text>
         {result.report.finalists.map((finalist) => {
           const nameCard = nameCardMap.get(finalist.name.toLowerCase());
           return (
-            <View key={finalist.name} style={styles.card}>
+            <View key={finalist.name} style={styles.card} wrap={false}>
               <Text style={styles.cardName}>{finalist.name}</Text>
               {nameCard?.ipa && (
                 <Text style={styles.cardIpa}>{nameCard.ipa}</Text>
@@ -271,25 +295,14 @@ export function ReportDocument({ result }: ReportDocumentProps) {
           );
         })}
 
-        <Text
-          style={styles.pageNumber}
-          render={({ pageNumber, totalPages }) =>
-            `${pageNumber} of ${totalPages}`
-          }
-          fixed
-        />
-      </Page>
-
-      {/* Page 2: Combos and Considerations */}
-      <Page size="LETTER" style={styles.page}>
-        {/* Perfect Pairings */}
+        {/* Perfect Pairings - force page break before this section */}
         {allCombos.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>Perfect Pairings</Text>
+          <View break>
+            <Text style={styles.sectionTitle}>First & Middle Name Pairings</Text>
             <View style={styles.grid}>
               {allCombos.slice(0, 6).map((combo) => (
                 <View key={`${combo.first}-${combo.middle}`} style={styles.gridItem}>
-                  <View style={[styles.card, { backgroundColor: colors.cream }]}>
+                  <View style={[styles.card, { backgroundColor: colors.cream }]} wrap={false}>
                     <Text style={styles.comboName}>
                       {combo.first} {combo.middle}
                     </Text>
@@ -298,14 +311,14 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                 </View>
               ))}
             </View>
-          </>
+          </View>
         )}
 
         {/* Considerations */}
-        {result.report.tradeoffs && result.report.tradeoffs.length > 0 && (
-          <>
+        {tradeoffs.length > 0 && (
+          <View wrap={false}>
             <Text style={styles.sectionTitle}>Things to Consider</Text>
-            {result.report.tradeoffs.map((tradeoff, index) => (
+            {tradeoffs.map((tradeoff, index) => (
               <View key={index} style={styles.tradeoffCard}>
                 <View style={styles.tradeoffNumber}>
                   <Text style={styles.tradeoffNumberText}>{index + 1}</Text>
@@ -313,15 +326,15 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                 <Text style={styles.tradeoffText}>{tradeoff}</Text>
               </View>
             ))}
-          </>
+          </View>
         )}
 
         {/* Tie-break tips */}
-        {result.report.tie_break_tips && result.report.tie_break_tips.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>If You&apos;re Stuck</Text>
+        {tieBreakTips.length > 0 && (
+          <View wrap={false}>
+            <Text style={styles.sectionTitle}>If You{"'"}re Stuck</Text>
             <View style={styles.grid}>
-              {result.report.tie_break_tips.map((tip, index) => (
+              {tieBreakTips.map((tip, index) => (
                 <View key={index} style={styles.gridItem}>
                   <View style={[styles.card, { backgroundColor: colors.cream }]}>
                     <Text style={styles.cardText}>{tip}</Text>
@@ -329,12 +342,12 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                 </View>
               ))}
             </View>
-          </>
+          </View>
         )}
 
         {/* Near Misses */}
         {result.selection.near_misses && result.selection.near_misses.length > 0 && (
-          <>
+          <View wrap={false}>
             <Text style={styles.sectionTitle}>Honorable Mentions</Text>
             <View style={styles.grid}>
               {result.selection.near_misses.map((miss) => (
@@ -346,11 +359,11 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                 </View>
               ))}
             </View>
-          </>
+          </View>
         )}
 
         {/* Footer */}
-        <View style={styles.footer}>
+        <View style={styles.footer} fixed>
           <Text style={styles.footerText}>
             Generated by namazing - Finding the perfect name for your little one
           </Text>

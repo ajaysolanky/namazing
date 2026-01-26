@@ -1,6 +1,7 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
 
         {/* Markdown content with beautiful typography */}
         <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
           components={{
             h1: ({ children }) => (
               <h1 className="font-display text-4xl sm:text-5xl text-studio-ink mb-8 text-center">
@@ -119,6 +121,36 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
               <code className="px-2 py-0.5 bg-studio-sand/50 rounded text-sm font-mono text-studio-ink/80">
                 {children}
               </code>
+            ),
+            table: ({ children }) => (
+              <div className="overflow-x-auto my-6">
+                <table className="w-full border-collapse text-sm">
+                  {children}
+                </table>
+              </div>
+            ),
+            thead: ({ children }) => (
+              <thead className="bg-studio-sand/50 border-b border-studio-ink/10">
+                {children}
+              </thead>
+            ),
+            tbody: ({ children }) => (
+              <tbody>{children}</tbody>
+            ),
+            tr: ({ children }) => (
+              <tr className="border-b border-studio-ink/5 last:border-0">
+                {children}
+              </tr>
+            ),
+            th: ({ children }) => (
+              <th className="px-4 py-3 text-left font-semibold text-studio-ink/80 text-sm">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="px-4 py-3 text-studio-ink/70">
+                {children}
+              </td>
             ),
           }}
         >

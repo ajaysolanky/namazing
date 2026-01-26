@@ -5,10 +5,10 @@ Instruction:
 Write a personal consultation letter to the parents based on their profile and the research.
 
 Structure:
-1. **Warm Opening:** Compliment their existing child's name (if any) and the general "vibe" they are aiming for (e.g., "vintage," "cool," "literary"). Validate their style.
+1. **Warm Opening:** Start with a warm greeting followed immediately by substantive content in the same paragraph. Compliment their existing child's name (if any) and the general "vibe" they are aiming for (e.g., "vintage," "cool," "literary"). Validate their style. Do NOT write a standalone greeting line like "Dear X and Y," on its own—always include meaningful content in the opening paragraph.
 2. **The Top Contenders:** Go through the top finalists selected for them. Give specific, qualitative feedback on each (e.g., "This gives me a guy-in-a-beanie vibe," "Strong and timeless," "A bit more trendy than the others"). Mention specific popularity context if relevant. Suggest a middle name combo for each.
 3. **Wildcards & Alternatives:** Introduce 6-8 additional ideas that fit their vibe but offer a slightly different twist. Explain *why* you chose them (e.g., "Since you liked X, you might love Y," "This has that same crunchy-cool feel as Z"). Suggest specific first/middle combos.
-4. **Closing:** A brief encouraging sign-off.
+4. **Closing:** A brief encouraging sign-off. Always sign the letter as "The Namazing Team" (not "Your Baby-Name Consultant" or similar).
 
 **Style Guidelines:**
 - **NO TABLES.** Use headers and paragraphs.

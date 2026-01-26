@@ -13,15 +13,22 @@ interface ExportActionsProps {
 
 export function ExportActions({ runId, surname }: ExportActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
   const handleDownloadPDF = async () => {
     setIsDownloading(true);
+    setDownloadError(null);
     try {
       const response = await fetch(`/api/pdf/${runId}`);
       if (!response.ok) {
-        throw new Error("Failed to generate PDF");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to generate PDF (${response.status})`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/pdf")) {
+        throw new Error("Invalid response from PDF endpoint");
       }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -34,6 +41,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Failed to download PDF:", error);
+      setDownloadError(error instanceof Error ? error.message : "Failed to download PDF");
     } finally {
       setIsDownloading(false);
     }
@@ -167,26 +175,31 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
           </div>
 
           {/* Download PDF */}
-          <Button onClick={handleDownloadPDF} disabled={isDownloading}>
-            {isDownloading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                Download PDF
-              </>
+          <div className="flex flex-col items-end gap-1">
+            <Button onClick={handleDownloadPDF} disabled={isDownloading}>
+              {isDownloading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Download PDF
+                </>
+              )}
+            </Button>
+            {downloadError && (
+              <p className="text-xs text-red-500">{downloadError}</p>
             )}
-          </Button>
+          </div>
         </div>
       </div>
     </Card>

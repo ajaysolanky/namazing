@@ -753,18 +753,24 @@ class OrchestratorService:
             if '\\n' in full_markdown and '\n' not in full_markdown:
                 full_markdown = full_markdown.replace('\\n', '\n')
 
-            # Extract first paragraph as the hero summary
+            # Extract opening paragraphs as the hero summary
             # Split on double newlines to find paragraph breaks
             paragraphs = [p.strip() for p in full_markdown.split('\n\n') if p.strip()]
-            # Skip any leading headers (lines starting with #) to get the first real paragraph
-            summary_paragraph = ""
+            # Collect opening paragraphs that aren't headers, up to ~500 chars
+            summary_parts = []
+            summary_len = 0
             for p in paragraphs:
-                if not p.startswith('#'):
-                    summary_paragraph = p
+                if p.startswith('#'):
+                    # Stop at first header after collecting some content
+                    if summary_parts:
+                        break
+                    continue
+                summary_parts.append(p)
+                summary_len += len(p)
+                # Stop if we have enough content (at least 2 paragraphs or 400+ chars)
+                if len(summary_parts) >= 2 or summary_len > 400:
                     break
-            # Fallback to first paragraph if all are headers
-            if not summary_paragraph and paragraphs:
-                summary_paragraph = paragraphs[0]
+            summary_paragraph = '\n\n'.join(summary_parts) if summary_parts else (paragraphs[0] if paragraphs else "")
 
             combos = [f.combo for f in selection.finalists if f.combo is not None]
 
