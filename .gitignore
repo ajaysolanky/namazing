@@ -33,4 +33,5 @@ coverage/
 
 # Project Specific
 pipeline-results.json
-apps/server/runs/*.json
+apps/server/runs/
+runs/
