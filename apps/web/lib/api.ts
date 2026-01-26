@@ -1,8 +1,18 @@
 import type { RunMode } from "./types";
-import { API_BASE_URL } from "./config";
+
+// Determine base URL at runtime
+function getApiBaseUrl() {
+  // Server-side: go directly to backend
+  if (typeof window === "undefined") {
+    return process.env.BACKEND_URL || "http://localhost:4000";
+  }
+  // Client-side: use same-origin proxy
+  return process.env.NEXT_PUBLIC_API_BASE_URL || "";
+}
 
 export async function startRun(brief: string, mode: RunMode) {
-  const res = await fetch(`${API_BASE_URL}/api/run`, {
+  const baseUrl = getApiBaseUrl();
+  const res = await fetch(`${baseUrl}/api/run`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +26,8 @@ export async function startRun(brief: string, mode: RunMode) {
 }
 
 export async function fetchResult(runId: string) {
-  const res = await fetch(`${API_BASE_URL}/api/result/${runId}`);
+  const baseUrl = getApiBaseUrl();
+  const res = await fetch(`${baseUrl}/api/result/${runId}`, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`Failed to fetch result: ${res.status}`);
   }

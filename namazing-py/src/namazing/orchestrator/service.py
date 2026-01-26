@@ -741,23 +741,36 @@ class OrchestratorService:
             )
 
             # Clean up the markdown output
-            summary = markdown.strip()
+            full_markdown = markdown.strip()
 
             # Some models wrap their output in quotes - strip them if present
-            if summary.startswith('"') and summary.endswith('"'):
-                summary = summary[1:-1]
-            elif summary.startswith("'") and summary.endswith("'"):
-                summary = summary[1:-1]
+            if full_markdown.startswith('"') and full_markdown.endswith('"'):
+                full_markdown = full_markdown[1:-1]
+            elif full_markdown.startswith("'") and full_markdown.endswith("'"):
+                full_markdown = full_markdown[1:-1]
 
             # Handle escaped newlines (literal \n instead of actual newlines)
-            if '\\n' in summary and '\n' not in summary:
-                summary = summary.replace('\\n', '\n')
+            if '\\n' in full_markdown and '\n' not in full_markdown:
+                full_markdown = full_markdown.replace('\\n', '\n')
+
+            # Extract first paragraph as the hero summary
+            # Split on double newlines to find paragraph breaks
+            paragraphs = [p.strip() for p in full_markdown.split('\n\n') if p.strip()]
+            # Skip any leading headers (lines starting with #) to get the first real paragraph
+            summary_paragraph = ""
+            for p in paragraphs:
+                if not p.startswith('#'):
+                    summary_paragraph = p
+                    break
+            # Fallback to first paragraph if all are headers
+            if not summary_paragraph and paragraphs:
+                summary_paragraph = paragraphs[0]
 
             combos = [f.combo for f in selection.finalists if f.combo is not None]
 
             return Report(
-                summary=summary,
-                markdown=summary,
+                summary=summary_paragraph,
+                markdown=full_markdown,
                 loved_names=[],
                 finalists=selection.finalists,
                 combos=combos,

@@ -3,6 +3,7 @@ import path from "path";
 import { EventEmitter } from "eventemitter3";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
+import { saveRun } from "./storage.js";
 
 // Helper for ESM __dirname equivalent if needed, but process.cwd() is safer for mono-repo execution
 const __filename = fileURLToPath(import.meta.url);
@@ -89,10 +90,11 @@ export class PythonOrchestrator {
           if (event.t === "run-complete") {
              run.result = event.result;
              run.status = "completed";
-             // Don't emit this wrapper event to client, client expects standard events?
-             // Actually client doesn't listen for run-complete, it listens for 'result' from report-composer
-             // But we should probably keep it internal or let it pass?
-             // Let's NOT emit it to client to avoid confusing the frontend which expects specific schema.
+             // Save completed run to disk
+             const { process: _proc, emitter: _em, ...serializable } = run;
+             saveRun(serializable as any).catch((err) => {
+               console.error("[PythonOrchestrator] Failed to save run:", err);
+             });
              continue;
           }
 
@@ -111,10 +113,34 @@ export class PythonOrchestrator {
 
     child.on("close", (code) => {
       console.log(`[PythonOrchestrator] Process exited with code ${code}`);
+
+      // Process any remaining buffered data
+      if (buffer.trim()) {
+        try {
+          const event = JSON.parse(buffer);
+          if (event.t === "run-complete") {
+            run.result = event.result;
+            run.status = "completed";
+            console.log(`[PythonOrchestrator] Captured run-complete from buffer`);
+          } else {
+            run.events.push(event);
+            run.emitter.emit("event", event);
+          }
+        } catch (e) {
+          console.error("[PythonOrchestrator] Failed to parse buffered JSON:", buffer);
+        }
+      }
+
       if (code !== 0 && run.status !== "completed") {
         run.status = "failed";
         run.emitter.emit("event", { t: "error", msg: `Process exited with code ${code}` });
       }
+
+      // Save final state to disk
+      const { process: _proc, emitter: _em, ...serializable } = run;
+      saveRun(serializable as any).catch((err) => {
+        console.error("[PythonOrchestrator] Failed to save run:", err);
+      });
     });
 
     return run;

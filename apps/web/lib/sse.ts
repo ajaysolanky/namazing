@@ -1,13 +1,13 @@
 'use client';
 
 import type { ActivityEvent } from "./types";
-import { API_BASE_URL } from "./config";
+import { SSE_BASE_URL } from "./config";
 
 export function subscribeToRun(
   runId: string,
   onEvent: (event: ActivityEvent) => void
 ) {
-  const source = new EventSource(`${API_BASE_URL}/api/events/${runId}`);
+  const source = new EventSource(`${SSE_BASE_URL}/api/events/${runId}`);
   source.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data) as ActivityEvent;

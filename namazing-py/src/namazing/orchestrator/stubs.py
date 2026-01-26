@@ -263,29 +263,34 @@ def stub_report(profile: SessionProfile, selection: ExpertSelection) -> Report:
         f.combo for f in selection.finalists if f.combo is not None
     ]
 
-    stub_markdown = """# Your Personalized Name Consultation
+    surname = profile.family.surname if profile.family and profile.family.surname else "your family"
 
-## Summary
+    # Brief, warm summary for the hero section
+    stub_summary = f"We loved diving into your naming journey. Based on your style preferences and family traditions, we've curated a collection of names that feel both timeless and distinctly *you*. Each name has been carefully considered for how it sounds with {surname}, and we think you'll find some real gems here."
 
-This is a stub report summarising the AI studio run. The full Report Composer agent output will appear once the live run completes.
+    stub_markdown = f"""# Your Personalized Name Consultation
+
+We loved diving into your naming journey. Based on your style preferences and family traditions, we've curated a collection of names that feel both timeless and distinctly *you*. Each name has been carefully considered for how it sounds with {surname}, and we think you'll find some real gems here.
 
 ## Your Finalists
 
-Based on your preferences, we've selected names that balance tradition with modern appeal.
+Based on your preferences, we've selected names that balance tradition with modern appeal. Each finalist has been evaluated for meaning, sound, and compatibility with your family's existing names.
 
 ## Things to Consider
 
 - Nicknames are inferred; validate with the family for preference.
 - Popularity trends are qualitative placeholders until SSA integration lands.
+- Consider how each name flows with your chosen middle name combinations.
 
 ## Tie-Break Tips
 
 - Say each finalist aloud with the sibling set and surname.
 - Consider monogram balance with honour initials.
+- Sleep on it—the right name often reveals itself over time.
 """
 
     return Report(
-        summary=stub_markdown,
+        summary=stub_summary,
         markdown=stub_markdown,
         loved_names=[],
         finalists=selection.finalists,

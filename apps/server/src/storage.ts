@@ -1,8 +1,18 @@
-import { RunRecord } from "@namazing/orchestrator";
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const STORAGE_DIR = path.resolve(process.env.GEMINI_TMPDIR || "", "runs");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Store runs in apps/server/runs directory
+const STORAGE_DIR = path.resolve(__dirname, "..", "runs");
+
+// Using a simple type instead of importing to avoid circular deps
+interface RunRecord {
+  id: string;
+  [key: string]: unknown;
+}
 
 async function ensureStorageDir() {
   try {

@@ -72,16 +72,9 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
                 {children}
               </ol>
             ),
-            li: ({ children, ordered }) => (
+            li: ({ children }) => (
               <li className="flex items-start gap-3 text-studio-ink/75">
-                <span className={cn(
-                  "flex-shrink-0 mt-1.5",
-                  ordered
-                    ? "w-6 h-6 rounded-full bg-studio-sage/20 flex items-center justify-center text-xs font-medium text-studio-ink/60"
-                    : "w-2 h-2 rounded-full bg-gradient-to-br from-studio-rose to-studio-sage"
-                )}>
-                  {ordered ? null : null}
-                </span>
+                <span className="flex-shrink-0 mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br from-studio-rose to-studio-sage" />
                 <span className="leading-relaxed">{children}</span>
               </li>
             ),
