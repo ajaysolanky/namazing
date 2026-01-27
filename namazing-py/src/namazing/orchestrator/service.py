@@ -13,6 +13,7 @@ from namazing.schemas.profile import SessionProfile
 from namazing.schemas.name_card import NameCard
 from namazing.schemas.selection import ExpertSelection
 from namazing.schemas.result import Report, RunResult
+from namazing.schemas.sanity_check import SanityCheckResult
 from namazing.schemas.events import (
     Event,
     ActivityEvent,
@@ -25,7 +26,8 @@ from namazing.schemas.events import (
 )
 from namazing.tools.phonetics import rough_ipa, count_syllables
 from namazing.tools.popularity import get_popularity
-from namazing.tools.associations import scan_neg_associations
+from namazing.tools.associations import scan_neg_associations, scan_celebrity_associations
+from namazing.tools.validators import filter_candidates
 from namazing.orchestrator.llm import run_json_agent, call_llm, extract_json
 from namazing.orchestrator.prompts import load_prompt_segments
 from namazing.orchestrator.stubs import (
@@ -73,12 +75,28 @@ class RunRecord:
     _pending_task: Any = None  # Coroutine when no event loop available
 
 
-async def _gather_research_tools(name: str, region: str) -> dict[str, Any]:
-    """Gather research tool outputs for a name."""
+async def _gather_research_tools(
+    name: str, region: str, surname: str | None = None
+) -> dict[str, Any]:
+    """Gather research tool outputs for a name.
+
+    Args:
+        name: The first name to research.
+        region: Region code for popularity data.
+        surname: Optional surname for celebrity name collision check.
+
+    Returns:
+        Dictionary of research tool outputs.
+    """
     popularity = get_popularity(name, region)
     associations = await scan_neg_associations(name)
 
-    return {
+    # Check for celebrity name collisions if surname provided
+    celebrity_associations = None
+    if surname:
+        celebrity_associations = await scan_celebrity_associations(name, surname)
+
+    result: dict[str, Any] = {
         "heuristics": {
             "ipaSeed": rough_ipa(name),
             "syllables": count_syllables(name),
@@ -98,6 +116,17 @@ async def _gather_research_tools(name: str, region: str) -> dict[str, Any]:
             "notes": associations.notes,
         },
     }
+
+    if celebrity_associations:
+        result["celebrity_associations"] = {
+            "items": [
+                {"label": item.label, "url": item.url}
+                for item in celebrity_associations.items
+            ],
+            "notes": celebrity_associations.notes,
+        }
+
+    return result
 
 
 class OrchestratorService:
@@ -197,6 +226,9 @@ class OrchestratorService:
 
             # Stage 4: Select finalists
             selection = await self._run_expert_selector(record, profile, cards)
+
+            # Stage 4.5: Sanity check - holistic validation against original brief
+            selection = await self._run_sanity_checker(record, record.brief, selection)
 
             # Stage 5: Compose report
             report = await self._run_report_composer(
@@ -410,6 +442,30 @@ class OrchestratorService:
                 for item in parsed[:limit]
             ]
 
+            # Code-enforced filtering (don't trust LLM to respect vetoes/siblings)
+            original_count = len(candidates)
+            candidates = filter_candidates(
+                candidates,
+                profile,
+                log_callback=lambda msg: self._emit(
+                    record,
+                    LogEvent(
+                        run_id=record.id,
+                        agent="generator",
+                        msg=msg,
+                    ),
+                ),
+            )
+            if len(candidates) < original_count:
+                self._emit(
+                    record,
+                    LogEvent(
+                        run_id=record.id,
+                        agent="generator",
+                        msg=f"Filtered {original_count - len(candidates)} candidates due to veto/sibling constraints",
+                    ),
+                )
+
             self._emit(
                 record,
                 PartialEvent(
@@ -485,6 +541,7 @@ class OrchestratorService:
     ) -> list[NameCard]:
         """Stage 3: Research each candidate name."""
         region = (profile.region[0] if profile.region else DEFAULT_REGION)
+        surname = profile.family.surname if profile.family else None
         concurrency = CONCURRENCY if record.mode == "parallel" else 1
 
         async def research_candidate(
@@ -525,7 +582,7 @@ class OrchestratorService:
                 return card
 
             try:
-                tools = await _gather_research_tools(candidate.name, region)
+                tools = await _gather_research_tools(candidate.name, region, surname)
                 user_payload = {
                     "sessionProfile": profile.model_dump(),
                     "candidate": {
@@ -661,6 +718,36 @@ class OrchestratorService:
                     unique_misses.append(miss)
             selection.near_misses = unique_misses
 
+            # Code-enforced filtering: remove vetoed names from selection
+            from namazing.tools.validators import create_veto_filter, create_sibling_filter, create_prefix_filter, create_deity_filter
+            veto_filter = create_veto_filter(profile)
+            sibling_filter = create_sibling_filter(profile)
+            prefix_filter = create_prefix_filter(profile)
+            deity_filter = create_deity_filter(profile)
+
+            original_finalist_count = len(selection.finalists)
+            selection.finalists = [
+                f for f in selection.finalists
+                if veto_filter(f.name) and sibling_filter(f.name) and prefix_filter(f.name) and deity_filter(f.name)
+            ]
+            original_miss_count = len(selection.near_misses)
+            selection.near_misses = [
+                nm for nm in selection.near_misses
+                if veto_filter(nm.name) and sibling_filter(nm.name) and prefix_filter(nm.name) and deity_filter(nm.name)
+            ]
+
+            filtered_finalists = original_finalist_count - len(selection.finalists)
+            filtered_misses = original_miss_count - len(selection.near_misses)
+            if filtered_finalists > 0 or filtered_misses > 0:
+                self._emit(
+                    record,
+                    LogEvent(
+                        run_id=record.id,
+                        agent="expert-selector",
+                        msg=f"Filtered {filtered_finalists} finalists and {filtered_misses} near-misses due to veto/sibling/prefix/deity constraints",
+                    ),
+                )
+
             self._emit(
                 record,
                 ResultEvent(
@@ -690,6 +777,135 @@ class OrchestratorService:
                     run_id=record.id,
                     agent="expert-selector",
                     payload=selection.model_dump(),
+                ),
+            )
+            return selection
+
+    async def _run_sanity_checker(
+        self,
+        record: RunRecord,
+        brief: str,
+        selection: ExpertSelection,
+    ) -> ExpertSelection:
+        """Stage 4.5: Holistic sanity check of finalists against original brief.
+
+        This is a bird's eye view validation that catches obvious constraint
+        violations the LLM may have missed during generation/selection.
+        """
+        self._emit(
+            record,
+            ActivityEvent(
+                run_id=record.id,
+                agent="sanity-checker",
+                msg="validating finalists against brief",
+            ),
+        )
+
+        self._check_stubs_allowed()
+
+        if use_stubs():
+            # In stub mode, skip sanity check
+            await asyncio.sleep(0.05)
+            return selection
+
+        try:
+            # Prepare the validation request
+            finalist_names = [f.name for f in selection.finalists]
+
+            user_input = f"""<original-brief>
+{brief}
+</original-brief>
+
+<finalist-names>
+{json.dumps(finalist_names, indent=2)}
+</finalist-names>
+
+Perform a holistic sanity check. Flag any names that obviously violate the client's stated requirements."""
+
+            result = await run_json_agent(
+                prompt_slug="sanity-checker",
+                model=None,
+                user_input=user_input,
+                schema=SanityCheckResult,
+                temperature=0.2,
+            )
+
+            # Log the sanity check results
+            if result.flagged_names:
+                for flagged in result.flagged_names:
+                    self._emit(
+                        record,
+                        LogEvent(
+                            run_id=record.id,
+                            agent="sanity-checker",
+                            msg=f"Flagged '{flagged.name}' ({flagged.severity}): {flagged.violation}",
+                        ),
+                    )
+
+            # Filter out names that should be removed (high severity + remove recommendation)
+            names_to_remove = {
+                f.name.lower()
+                for f in result.flagged_names
+                if f.severity == "high" and f.recommendation == "remove"
+            }
+
+            if names_to_remove:
+                original_count = len(selection.finalists)
+                selection.finalists = [
+                    f for f in selection.finalists
+                    if f.name.lower() not in names_to_remove
+                ]
+                removed_count = original_count - len(selection.finalists)
+
+                if removed_count > 0:
+                    self._emit(
+                        record,
+                        LogEvent(
+                            run_id=record.id,
+                            agent="sanity-checker",
+                            msg=f"Removed {removed_count} finalists due to constraint violations",
+                        ),
+                    )
+
+            # Also filter near_misses
+            selection.near_misses = [
+                nm for nm in selection.near_misses
+                if nm.name.lower() not in names_to_remove
+            ]
+
+            if result.notes:
+                self._emit(
+                    record,
+                    LogEvent(
+                        run_id=record.id,
+                        agent="sanity-checker",
+                        msg=f"Validation notes: {result.notes}",
+                    ),
+                )
+
+            self._emit(
+                record,
+                ResultEvent(
+                    run_id=record.id,
+                    agent="sanity-checker",
+                    payload={
+                        "overall_pass": result.overall_pass,
+                        "flagged_count": len(result.flagged_names),
+                        "approved_count": len(result.approved_names),
+                    },
+                ),
+            )
+
+            return selection
+
+        except Exception as e:
+            # On error, log but don't fail - just return original selection
+            self._emit(
+                record,
+                LogEvent(
+                    run_id=record.id,
+                    agent="sanity-checker",
+                    msg=f"Sanity check skipped due to error: {e}",
                 ),
             )
             return selection

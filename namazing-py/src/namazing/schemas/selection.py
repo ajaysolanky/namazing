@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from namazing.schemas.name_card import Combo
 
@@ -48,3 +48,16 @@ class ExpertSelection(BaseModel):
 
     finalists: list[Finalist]
     near_misses: list[NearMiss]
+
+    @model_validator(mode="after")
+    def ensure_mutual_exclusivity(self) -> "ExpertSelection":
+        """Ensure finalists and near_misses are disjoint sets.
+
+        A name cannot appear in both finalists AND near_misses.
+        If LLM outputs a name in both, keep it as finalist and remove from near_misses.
+        """
+        finalist_names = {f.name.lower() for f in self.finalists}
+        self.near_misses = [
+            nm for nm in self.near_misses if nm.name.lower() not in finalist_names
+        ]
+        return self

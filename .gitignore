@@ -36,3 +36,13 @@ pipeline-results.json
 apps/server/runs/
 runs/
 __pycache__/
+*.pyc
+
+# Generated outputs
+council-outputs/
+*.pdf
+report-*.png
+
+# Test/temp files
+kimi-k2-*.json
+namazing-py/MODEL_CONFIGURATION.md

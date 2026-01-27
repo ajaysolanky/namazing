@@ -56,6 +56,7 @@ class NameCard(BaseModel):
     ipa: str
     syllables: int
     meaning: str | None = None
+    meaning_verified: bool = False  # True if meaning verified from cultural dictionary
     origins: list[str] | None = None
     variants: list[str] | None = None
     nicknames: Nickname | None = None

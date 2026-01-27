@@ -1,6 +1,7 @@
 """Pydantic schemas for namazing."""
 
 from namazing.schemas.profile import (
+    MiddleNames,
     HonorNames,
     Preferences,
     Veto,
@@ -24,6 +25,10 @@ from namazing.schemas.result import (
     Report,
     RunResult,
 )
+from namazing.schemas.sanity_check import (
+    FlaggedName,
+    SanityCheckResult,
+)
 from namazing.schemas.events import (
     ActivityEvent,
     StartEvent,
@@ -37,6 +42,7 @@ from namazing.schemas.events import (
 
 __all__ = [
     # Profile
+    "MiddleNames",
     "HonorNames",
     "Preferences",
     "Veto",
@@ -56,6 +62,9 @@ __all__ = [
     # Result
     "Report",
     "RunResult",
+    # Sanity Check
+    "FlaggedName",
+    "SanityCheckResult",
     # Events
     "ActivityEvent",
     "StartEvent",
