@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center rounded-full font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-studio-ink/20 focus:ring-offset-2 focus:ring-offset-studio-sand disabled:opacity-50 disabled:pointer-events-none overflow-hidden",
+  "relative inline-flex items-center justify-center rounded-full font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-studio-terracotta/30 focus:ring-offset-2 focus:ring-offset-studio-sand disabled:opacity-50 disabled:pointer-events-none overflow-hidden",
   {
     variants: {
       variant: {
@@ -19,12 +19,14 @@ const buttonVariants = cva(
           "bg-gradient-to-r from-studio-rose to-studio-rose/90 text-studio-ink hover:from-studio-rose/90 hover:to-studio-rose/80 shadow-soft active:scale-[0.98] hover:-translate-y-0.5",
         premium:
           "bg-gradient-to-r from-studio-ink via-studio-ink/95 to-studio-ink text-white shadow-card hover:shadow-elevated active:scale-[0.98] hover:-translate-y-0.5",
+        terracotta:
+          "bg-gradient-to-r from-studio-terracotta to-studio-terracotta-light text-white shadow-glow-terracotta hover:shadow-elevated active:scale-[0.98] hover:-translate-y-1 hover:from-studio-terracotta-light hover:to-studio-terracotta",
       },
       size: {
-        sm: "h-9 px-4 text-sm",
-        md: "h-11 px-6 text-base",
-        lg: "h-14 px-8 text-lg font-semibold",
-        xl: "h-16 px-10 text-lg font-semibold tracking-wide",
+        sm: "h-9 px-5 text-sm",
+        md: "h-12 px-7 text-base",
+        lg: "h-14 px-9 text-lg font-semibold",
+        xl: "h-16 px-12 text-lg font-semibold tracking-wide",
         icon: "h-10 w-10",
       },
     },

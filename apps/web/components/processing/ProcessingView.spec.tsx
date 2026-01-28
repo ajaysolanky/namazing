@@ -147,7 +147,9 @@ describe('ProcessingView', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Consultation complete')).toBeInTheDocument()
-        expect(screen.getByText('We found some beautiful names')).toBeInTheDocument()
+        // The text is split: "We found some " and "beautiful names" as gradient text
+        expect(screen.getByText(/We found some/)).toBeInTheDocument()
+        expect(screen.getByText(/beautiful names/)).toBeInTheDocument()
       })
     })
 
@@ -194,7 +196,9 @@ describe('ProcessingView', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getByText(/Luna, Aria/)).toBeInTheDocument()
+        // Top names now shown as separate badges
+        expect(screen.getByText('Luna')).toBeInTheDocument()
+        expect(screen.getByText('Aria')).toBeInTheDocument()
       })
     })
   })

@@ -14,7 +14,8 @@ describe('ProgressIndicator', () => {
 
     it('should render step counter on mobile', () => {
       render(<ProgressIndicator currentStep={2} />)
-      expect(screen.getByText('3 of 7')).toBeInTheDocument()
+      // Mobile shows "Step 3 of 7"
+      expect(screen.getByText(/Step 3 of 7/)).toBeInTheDocument()
     })
 
     it('should render all step labels on desktop', () => {
@@ -89,8 +90,8 @@ describe('ProgressIndicator', () => {
   describe('Progress Bar', () => {
     it('should render mobile progress bar', () => {
       const { container } = render(<ProgressIndicator currentStep={3} />)
-      // Mobile progress uses a gradient bar
-      const progressBar = container.querySelector('.bg-gradient-to-r')
+      // Mobile progress uses a flow-bar class or rounded-full for the container
+      const progressBar = container.querySelector('.rounded-full')
       expect(progressBar).toBeInTheDocument()
     })
   })

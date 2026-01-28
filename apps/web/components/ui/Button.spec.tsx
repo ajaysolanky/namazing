@@ -17,7 +17,7 @@ describe('Button', () => {
       render(<Button>Default</Button>)
       const button = screen.getByRole('button')
       expect(button).toHaveClass('bg-studio-ink')
-      expect(button).toHaveClass('h-11')
+      expect(button).toHaveClass('h-12')
     })
   })
 
@@ -51,22 +51,22 @@ describe('Button', () => {
   describe('Sizes', () => {
     it('should render sm size', () => {
       render(<Button size="sm">Small</Button>)
-      expect(screen.getByRole('button')).toHaveClass('h-9', 'px-4')
+      expect(screen.getByRole('button')).toHaveClass('h-9', 'px-5')
     })
 
     it('should render md size', () => {
       render(<Button size="md">Medium</Button>)
-      expect(screen.getByRole('button')).toHaveClass('h-11', 'px-6')
+      expect(screen.getByRole('button')).toHaveClass('h-12', 'px-7')
     })
 
     it('should render lg size', () => {
       render(<Button size="lg">Large</Button>)
-      expect(screen.getByRole('button')).toHaveClass('h-14', 'px-8')
+      expect(screen.getByRole('button')).toHaveClass('h-14', 'px-9')
     })
 
     it('should render xl size', () => {
       render(<Button size="xl">Extra Large</Button>)
-      expect(screen.getByRole('button')).toHaveClass('h-16', 'px-10')
+      expect(screen.getByRole('button')).toHaveClass('h-16', 'px-12')
     })
 
     it('should render icon size', () => {

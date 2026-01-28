@@ -10,12 +10,19 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: "bg-white shadow-soft",
-        elevated: "bg-white shadow-card hover:shadow-elevated",
+        elevated: "bg-white shadow-card hover:shadow-elevated hover:-translate-y-1",
         cream: "bg-studio-cream shadow-soft",
         outline: "bg-white border border-studio-ink/10",
         glass: "bg-white/70 backdrop-blur-lg border border-white/20 shadow-soft",
-        premium: "bg-white shadow-card hover:shadow-elevated border border-studio-ink/5",
+        premium: "bg-white shadow-card hover:shadow-elevated hover:-translate-y-1 border border-studio-ink/5",
         gradient: "bg-gradient-to-br from-white to-studio-cream shadow-soft border border-white/50",
+        celebration: "bg-white shadow-celebration border border-studio-rose/20",
+        "cultural-chinese": "bg-white shadow-soft cultural-chinese",
+        "cultural-irish": "bg-white shadow-soft cultural-irish",
+        "cultural-hebrew": "bg-white shadow-soft cultural-hebrew",
+        "cultural-arabic": "bg-white shadow-soft cultural-arabic",
+        "cultural-japanese": "bg-white shadow-soft cultural-japanese",
+        "cultural-indian": "bg-white shadow-soft cultural-indian",
       },
       padding: {
         none: "",

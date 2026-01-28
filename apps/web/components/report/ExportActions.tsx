@@ -83,13 +83,22 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   };
 
   return (
-    <Card variant="default" padding="lg">
+    <Card variant="gradient" padding="lg" className="bg-gradient-to-br from-white via-studio-cream/50 to-studio-rose/10 border border-studio-ink/5">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-1">
-          <h3 className="font-display text-xl text-studio-ink">Save & share your results</h3>
-          <p className="text-sm text-studio-ink/60">
-            Download a beautiful PDF to share with your partner, or share online.
-          </p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-studio-terracotta to-studio-gold flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-display text-xl text-studio-ink">Save & share your results</h3>
+              <p className="text-sm text-studio-ink/60">
+                Download a beautiful PDF to share with your partner, or share online.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -176,15 +185,15 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
 
           {/* Download PDF */}
           <div className="flex flex-col items-end gap-1">
-            <Button onClick={handleDownloadPDF} disabled={isDownloading}>
+            <Button variant="terracotta" size="lg" onClick={handleDownloadPDF} disabled={isDownloading}>
               {isDownloading ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  Generating...
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Generating PDF...
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

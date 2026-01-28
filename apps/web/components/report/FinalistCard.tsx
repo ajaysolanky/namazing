@@ -18,6 +18,40 @@ interface FinalistCardProps {
   index?: number;
 }
 
+// Cultural accent colors and styles based on origin
+function getCulturalStyle(origins: string[] | null | undefined) {
+  if (!origins || origins.length === 0) return null;
+
+  const origin = origins[0].toLowerCase();
+
+  // Chinese/East Asian
+  if (origin.includes("chinese") || origin.includes("mandarin") || origin.includes("cantonese")) {
+    return { accentColor: "#dc2626", borderClass: "cultural-chinese", label: "Chinese" };
+  }
+  // Irish/Celtic
+  if (origin.includes("irish") || origin.includes("celtic") || origin.includes("gaelic")) {
+    return { accentColor: "#16a34a", borderClass: "cultural-irish", label: "Irish" };
+  }
+  // Hebrew/Jewish
+  if (origin.includes("hebrew") || origin.includes("jewish")) {
+    return { accentColor: "#2563eb", borderClass: "cultural-hebrew", label: "Hebrew" };
+  }
+  // Arabic
+  if (origin.includes("arabic") || origin.includes("muslim")) {
+    return { accentColor: "#d97706", borderClass: "cultural-arabic", label: "Arabic" };
+  }
+  // Japanese
+  if (origin.includes("japanese")) {
+    return { accentColor: "#e11d48", borderClass: "cultural-japanese", label: "Japanese" };
+  }
+  // Indian/Sanskrit
+  if (origin.includes("indian") || origin.includes("sanskrit") || origin.includes("hindi")) {
+    return { accentColor: "#ea580c", borderClass: "cultural-indian", label: "Indian" };
+  }
+
+  return null;
+}
+
 export function FinalistCard({
   name,
   why,
@@ -27,6 +61,9 @@ export function FinalistCard({
   index = 0,
 }: FinalistCardProps) {
   const isTopPick = index === 0;
+  const isTopThree = index < 3;
+
+  const culturalStyle = getCulturalStyle(nameCard?.origins);
 
   // Get a meaningful descriptor for the name
   const getMeaningPreview = () => {
@@ -39,93 +76,262 @@ export function FinalistCard({
 
   const meaningPreview = getMeaningPreview();
 
+  // Top pick gets special hero treatment
+  if (isTopPick) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 50, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="col-span-full"
+      >
+        <div className="relative rounded-[2rem] overflow-hidden">
+          {/* Animated gradient background */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-studio-rose/30 via-studio-cream to-studio-sage/30"
+            animate={{
+              background: [
+                "linear-gradient(135deg, rgba(248,212,216,0.3), rgba(250,248,245,1), rgba(215,227,212,0.3))",
+                "linear-gradient(135deg, rgba(215,227,212,0.3), rgba(250,248,245,1), rgba(248,212,216,0.3))",
+                "linear-gradient(135deg, rgba(248,212,216,0.3), rgba(250,248,245,1), rgba(215,227,212,0.3))",
+              ],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Decorative sparkles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-studio-gold/60 rounded-full"
+                style={{
+                  left: `${20 + i * 15}%`,
+                  top: `${20 + (i % 3) * 25}%`,
+                }}
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  delay: i * 0.4,
+                  repeat: Infinity,
+                  repeatDelay: 2,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className={cn(
+            "relative p-10 sm:p-14 lg:p-16",
+            culturalStyle?.borderClass
+          )}>
+            {/* Top pick badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex justify-center mb-8"
+            >
+              <span className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-studio-terracotta to-studio-gold text-white rounded-full text-sm font-semibold shadow-glow-terracotta">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                Our Top Recommendation
+              </span>
+            </motion.div>
+
+            {/* Name - dramatic reveal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-center mb-8"
+            >
+              <h2 className="font-display text-7xl sm:text-8xl lg:text-9xl text-studio-ink leading-none mb-4">
+                {name}
+              </h2>
+              {nameCard?.ipa && (
+                <p className="text-lg text-studio-ink/40 font-light tracking-wide">
+                  {nameCard.ipa}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Meaning and origin badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-wrap justify-center gap-3 mb-10"
+            >
+              {meaningPreview && (
+                <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-studio-ink/70 shadow-soft">
+                  {meaningPreview}
+                </span>
+              )}
+              {nameCard?.syllables && (
+                <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-studio-ink/70 shadow-soft">
+                  {nameCard.syllables} syllable{nameCard.syllables !== 1 ? "s" : ""}
+                </span>
+              )}
+              {nameCard?.origins?.slice(0, 2).map((origin) => (
+                <span
+                  key={origin}
+                  className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-studio-ink/70 shadow-soft"
+                  style={culturalStyle ? { borderLeft: `3px solid ${culturalStyle.accentColor}` } : undefined}
+                >
+                  {origin}
+                </span>
+              ))}
+            </motion.div>
+
+            {/* Why this name */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="text-xl text-studio-ink/80 text-center max-w-2xl mx-auto leading-relaxed mb-10"
+            >
+              {why}
+            </motion.p>
+
+            {/* Middle name pairing - prominent section */}
+            {combo && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="max-w-lg mx-auto mb-10"
+              >
+                <div className="p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-soft border border-studio-ink/5">
+                  <div className="flex items-center gap-2 text-xs text-studio-ink/50 uppercase tracking-wider mb-3">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    Suggested Complete Name
+                  </div>
+                  <div className="font-display text-3xl text-studio-ink mb-2 flex items-center justify-center gap-4">
+                    <span>{combo.first}</span>
+                    <span className="text-studio-ink/20 text-2xl font-light">+</span>
+                    <span className="text-studio-terracotta">{combo.middle}</span>
+                  </div>
+                  <p className="text-studio-ink/60 text-center">{combo.why}</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* View details button */}
+            {onViewDetails && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-center"
+              >
+                <Button variant="primary" size="lg" onClick={onViewDetails}>
+                  Explore full details
+                  <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Button>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Regular cards for positions 2+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
-        delay: index * 0.2,
+        delay: index * 0.15,
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1]
+        ease: [0.22, 1, 0.36, 1],
       }}
       className="h-full"
     >
       <div
         className={cn(
           "relative h-full rounded-3xl transition-all duration-500 group",
-          isTopPick
+          isTopThree
             ? "hover:scale-[1.02] hover:shadow-2xl"
             : "hover:shadow-xl hover:-translate-y-1"
         )}
       >
-        {/* Gradient border for top pick */}
-        {isTopPick && (
+        {/* Gradient border for positions 2-3 */}
+        {isTopThree && !isTopPick && (
           <>
             <motion.div
-              className="absolute -inset-[3px] rounded-3xl bg-gradient-to-br from-studio-rose via-studio-sage to-studio-rose opacity-70 blur-sm"
+              className="absolute -inset-[2px] rounded-3xl bg-gradient-to-br from-studio-rose via-studio-sage to-studio-rose opacity-50 blur-sm"
               animate={{
-                background: [
-                  "linear-gradient(135deg, #e8c4c4, #c4d4c4, #e8c4c4)",
-                  "linear-gradient(135deg, #c4d4c4, #e8c4c4, #c4d4c4)",
-                  "linear-gradient(135deg, #e8c4c4, #c4d4c4, #e8c4c4)",
-                ]
+                opacity: [0.4, 0.6, 0.4],
               }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             />
-            <div className="absolute -inset-[2px] rounded-3xl bg-gradient-to-br from-studio-rose via-studio-sage to-studio-rose opacity-60" />
+            <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-studio-rose via-studio-sage to-studio-rose opacity-40" />
           </>
         )}
 
         <div
           className={cn(
             "relative h-full flex flex-col bg-white rounded-3xl overflow-hidden",
-            isTopPick ? "shadow-glow" : "shadow-card"
+            isTopThree ? "shadow-glow" : "shadow-card",
+            culturalStyle?.borderClass
           )}
         >
           {/* Top accent bar */}
-          <div className={cn(
-            "h-1.5 w-full",
-            isTopPick
-              ? "bg-gradient-to-r from-studio-rose via-studio-sage to-studio-rose"
-              : "bg-gradient-to-r from-studio-sand via-studio-sage/30 to-studio-sand"
-          )} />
+          <div
+            className={cn(
+              "h-1.5 w-full",
+              isTopThree
+                ? "bg-gradient-to-r from-studio-rose via-studio-sage to-studio-rose"
+                : "bg-gradient-to-r from-studio-sand via-studio-sage/30 to-studio-sand"
+            )}
+            style={culturalStyle ? { background: `linear-gradient(90deg, ${culturalStyle.accentColor}40, ${culturalStyle.accentColor}20)` } : undefined}
+          />
 
           <div className="p-6 sm:p-8 flex flex-col flex-1">
-            {/* Top pick badge */}
-            {isTopPick && (
-              <motion.div
-                className="mb-4"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2 + 0.3 }}
+            {/* Rank badge */}
+            <div className="flex items-center justify-between mb-4">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium",
+                  isTopThree
+                    ? "bg-gradient-to-r from-studio-rose/30 to-studio-sage/30 text-studio-ink"
+                    : "bg-studio-sand/50 text-studio-ink/50"
+                )}
               >
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-studio-rose/20 to-studio-sage/20 rounded-full text-xs font-medium text-studio-ink">
-                  <svg className="w-4 h-4 text-studio-rose" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  Our Top Pick
+                #{index + 1}
+                {isTopThree && !isTopPick && (
+                  <>
+                    <svg className="w-3.5 h-3.5 text-studio-rose" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </>
+                )}
+              </span>
+              {culturalStyle && (
+                <span
+                  className="text-xs px-2 py-1 rounded-full"
+                  style={{ backgroundColor: `${culturalStyle.accentColor}15`, color: culturalStyle.accentColor }}
+                >
+                  {culturalStyle.label}
                 </span>
-              </motion.div>
-            )}
+              )}
+            </div>
 
-            {/* Rank number for non-top picks */}
-            {!isTopPick && (
-              <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-studio-sand/50 flex items-center justify-center">
-                <span className="text-sm font-medium text-studio-ink/40">#{index + 1}</span>
-              </div>
-            )}
-
-            {/* Name - the star of the show */}
-            <motion.div
-              className="mb-4"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.2 + 0.2, duration: 0.5 }}
-            >
+            {/* Name */}
+            <motion.div className="mb-4">
               <h3
                 className={cn(
                   "font-display text-studio-ink leading-none",
-                  isTopPick ? "text-5xl sm:text-6xl" : "text-4xl sm:text-5xl"
+                  isTopThree ? "text-5xl sm:text-6xl" : "text-4xl sm:text-5xl"
                 )}
               >
                 {name}
@@ -137,66 +343,53 @@ export function FinalistCard({
               )}
             </motion.div>
 
-            {/* Meaning preview - gives immediate context */}
+            {/* Meaning preview */}
             {meaningPreview && (
-              <motion.p
-                className="text-sm text-studio-ink/60 font-medium mb-3 flex items-center gap-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.2 + 0.4 }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-studio-sage" />
+              <p className="text-sm text-studio-ink/60 font-medium mb-3 flex items-center gap-2">
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: culturalStyle?.accentColor || "#d7e3d4" }}
+                />
                 {meaningPreview}
-              </motion.p>
+              </p>
             )}
 
-            {/* Why this name - the personalized reason */}
-            <motion.div
-              className="flex-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: index * 0.2 + 0.5 }}
-            >
-              <p className="text-studio-ink/70 leading-relaxed text-[15px]">
-                {why}
-              </p>
-            </motion.div>
+            {/* Why this name */}
+            <div className="flex-1">
+              <p className="text-studio-ink/70 leading-relaxed text-[15px]">{why}</p>
+            </div>
 
             {/* Quick stats */}
             {nameCard && (nameCard.syllables || (nameCard.origins && nameCard.origins.length > 0)) && (
-              <motion.div
-                className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-studio-ink/5"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.2 + 0.6 }}
-              >
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-studio-ink/5">
                 {nameCard.syllables && (
                   <span className="px-2.5 py-1 bg-studio-sand/50 rounded-full text-xs text-studio-ink/60">
-                    {nameCard.syllables} syllable{nameCard.syllables !== 1 ? 's' : ''}
+                    {nameCard.syllables} syllable{nameCard.syllables !== 1 ? "s" : ""}
                   </span>
                 )}
-                {nameCard.origins && nameCard.origins.slice(0, 2).map((origin) => (
-                  <span
-                    key={origin}
-                    className="px-2.5 py-1 bg-studio-sage/10 rounded-full text-xs text-studio-ink/60"
-                  >
-                    {origin}
-                  </span>
-                ))}
-              </motion.div>
+                {nameCard.origins &&
+                  nameCard.origins.slice(0, 2).map((origin) => (
+                    <span
+                      key={origin}
+                      className="px-2.5 py-1 bg-studio-sage/10 rounded-full text-xs text-studio-ink/60"
+                    >
+                      {origin}
+                    </span>
+                  ))}
+              </div>
             )}
 
-            {/* Suggested combo - if available */}
+            {/* Middle name combo */}
             {combo && (
-              <motion.div
-                className="mt-5 p-4 bg-gradient-to-br from-studio-sage/15 to-studio-rose/10 rounded-2xl border border-studio-sage/20"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 + 0.7 }}
-              >
+              <div className="mt-5 p-4 bg-gradient-to-br from-studio-sage/15 to-studio-rose/10 rounded-2xl border border-studio-sage/20">
                 <p className="text-xs text-studio-ink/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
                   </svg>
                   Suggested Middle Name
                 </p>
@@ -204,28 +397,22 @@ export function FinalistCard({
                   {combo.first} <span className="text-studio-ink/30 font-light">&</span> {combo.middle}
                 </p>
                 <p className="text-sm text-studio-ink/60 mt-1.5 leading-relaxed">{combo.why}</p>
-              </motion.div>
+              </div>
             )}
 
             {/* View details button */}
             {onViewDetails && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.2 + 0.8 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onViewDetails}
-                  className="mt-5 w-full group/btn"
+              <Button variant="ghost" size="sm" onClick={onViewDetails} className="mt-5 w-full group/btn">
+                <span>View full details</span>
+                <svg
+                  className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <span>View full details</span>
-                  <svg className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Button>
-              </motion.div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
             )}
           </div>
         </div>

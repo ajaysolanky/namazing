@@ -33,10 +33,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={id}
           className={cn(
             "w-full bg-white border rounded-xl px-4 transition-all duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-studio-ink/10 focus:border-studio-ink/30",
+            "focus:outline-none focus:ring-2 focus:ring-studio-terracotta/20 focus:border-studio-terracotta/40 focus:shadow-soft",
             label ? "pt-6 pb-2" : "py-3",
             error
-              ? "border-red-400 focus:ring-red-200"
+              ? "border-red-400 bg-red-50/30 focus:ring-red-200"
               : "border-studio-ink/10",
             className
           )}
@@ -90,10 +90,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={id}
           className={cn(
             "w-full bg-white border rounded-xl px-4 transition-all duration-200 resize-none",
-            "focus:outline-none focus:ring-2 focus:ring-studio-ink/10 focus:border-studio-ink/30",
+            "focus:outline-none focus:ring-2 focus:ring-studio-terracotta/20 focus:border-studio-terracotta/40 focus:shadow-soft",
             label ? "pt-6 pb-3" : "py-3",
             error
-              ? "border-red-400 focus:ring-red-200"
+              ? "border-red-400 bg-red-50/30 focus:ring-red-200"
               : "border-studio-ink/10",
             className
           )}

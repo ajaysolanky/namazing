@@ -48,12 +48,12 @@ describe('FinalistCard', () => {
   describe('Top Pick Badge', () => {
     it('should show top pick badge when index is 0', () => {
       render(<FinalistCard name="Luna" why="Test" index={0} />)
-      expect(screen.getByText('Our Top Pick')).toBeInTheDocument()
+      expect(screen.getByText('Our Top Recommendation')).toBeInTheDocument()
     })
 
     it('should not show top pick badge when index is not 0', () => {
       render(<FinalistCard name="Luna" why="Test" index={1} />)
-      expect(screen.queryByText('Our top pick')).not.toBeInTheDocument()
+      expect(screen.queryByText('Our Top Recommendation')).not.toBeInTheDocument()
     })
   })
 
@@ -64,7 +64,8 @@ describe('FinalistCard', () => {
         middle: 'Rose',
         why: 'Perfect flow',
       }
-      render(<FinalistCard name="Stella" why="Test" combo={combo} />)
+      // Use index > 0 to not trigger top pick layout
+      render(<FinalistCard name="Stella" why="Test" combo={combo} index={1} />)
 
       expect(screen.getByText('Suggested Middle Name')).toBeInTheDocument()
       expect(screen.getByText('Perfect flow')).toBeInTheDocument()
@@ -80,18 +81,19 @@ describe('FinalistCard', () => {
 
   describe('View Details Button', () => {
     it('should render view details button when onViewDetails provided', () => {
-      render(<FinalistCard name="Luna" why="Test" onViewDetails={() => {}} />)
+      // Use index > 0 to get non-top-pick layout which has "View full details"
+      render(<FinalistCard name="Luna" why="Test" onViewDetails={() => {}} index={1} />)
       expect(screen.getByRole('button', { name: /view full details/i })).toBeInTheDocument()
     })
 
     it('should not render button when onViewDetails not provided', () => {
-      render(<FinalistCard name="Luna" why="Test" />)
+      render(<FinalistCard name="Luna" why="Test" index={1} />)
       expect(screen.queryByRole('button', { name: /view full details/i })).not.toBeInTheDocument()
     })
 
     it('should call onViewDetails when button clicked', () => {
       const handleViewDetails = vi.fn()
-      render(<FinalistCard name="Luna" why="Test" onViewDetails={handleViewDetails} />)
+      render(<FinalistCard name="Luna" why="Test" onViewDetails={handleViewDetails} index={1} />)
 
       fireEvent.click(screen.getByRole('button', { name: /view full details/i }))
 

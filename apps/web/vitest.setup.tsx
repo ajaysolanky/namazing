@@ -59,6 +59,9 @@ vi.mock('framer-motion', () => {
       svg: ({ children, ...props }: { children?: React.ReactNode } & Record<string, unknown>) => (
         <svg {...filterMotionProps(props)}>{children}</svg>
       ),
+      path: ({ ...props }: Record<string, unknown>) => (
+        <path {...filterMotionProps(props)} />
+      ),
       ul: ({ children, ...props }: { children?: React.ReactNode } & Record<string, unknown>) => (
         <ul {...filterMotionProps(props)}>{children}</ul>
       ),

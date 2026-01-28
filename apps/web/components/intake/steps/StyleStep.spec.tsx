@@ -108,7 +108,8 @@ describe('StyleStep', () => {
       render(<StyleStep formData={formData} updateField={vi.fn()} />)
 
       const balancedButton = screen.getByText('Balanced').closest('button')
-      expect(balancedButton).toHaveClass('bg-studio-ink')
+      // Selected state has bg-studio-ink styling
+      expect(balancedButton).toHaveClass('bg-studio-ink', 'text-white')
     })
   })
 
@@ -127,7 +128,8 @@ describe('StyleStep', () => {
       render(<StyleStep formData={formData} updateField={vi.fn()} />)
 
       const nicknamesWelcome = screen.getByText('Nicknames welcome').closest('button')
-      expect(nicknamesWelcome).toHaveClass('border-studio-ink')
+      // Selected state has gradient and ring styling
+      expect(nicknamesWelcome).toHaveClass('ring-2', 'ring-studio-ink/20')
     })
   })
 })

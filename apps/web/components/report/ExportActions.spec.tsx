@@ -126,7 +126,7 @@ describe('ExportActions', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /download pdf/i }))
 
-      expect(screen.getByText('Generating...')).toBeInTheDocument()
+      expect(screen.getByText('Generating PDF...')).toBeInTheDocument()
     })
 
     it('should download PDF with correct filename', async () => {

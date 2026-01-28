@@ -53,8 +53,8 @@ describe('StageIndicator', () => {
       ]
       const { container } = render(<StageIndicator events={events} />)
 
-      // Active stages have rose background
-      const activeStage = container.querySelector('.bg-studio-rose\\/20')
+      // Active stages have terracotta ring
+      const activeStage = container.querySelector('.ring-studio-terracotta\\/30')
       expect(activeStage).toBeInTheDocument()
     })
 
@@ -64,8 +64,8 @@ describe('StageIndicator', () => {
       ]
       const { container } = render(<StageIndicator events={events} />)
 
-      // Done stages have sage background
-      const doneStage = container.querySelector('.bg-studio-sage\\/20')
+      // Done stages have sage gradient background
+      const doneStage = container.querySelector('.from-studio-sage\\/30')
       expect(doneStage).toBeInTheDocument()
     })
 
@@ -112,12 +112,12 @@ describe('StageIndicator', () => {
       ]
       const { container } = render(<StageIndicator events={events} />)
 
-      // Should have done stages (sage)
-      const doneStages = container.querySelectorAll('.bg-studio-sage\\/20')
+      // Should have done stages (sage gradient)
+      const doneStages = container.querySelectorAll('.from-studio-sage\\/30')
       expect(doneStages.length).toBe(2)
 
-      // Should have active stage (rose)
-      const activeStages = container.querySelectorAll('.bg-studio-rose\\/20')
+      // Should have active stage (terracotta ring)
+      const activeStages = container.querySelectorAll('.ring-studio-terracotta\\/30')
       expect(activeStages.length).toBe(1)
     })
   })

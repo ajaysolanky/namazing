@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { DM_Serif_Display, Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import { Agentation } from "agentation";
 
-const display = DM_Serif_Display({
+const display = Fraunces({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700"],
   variable: "--font-display",
+  display: "swap",
 });
 const body = Inter({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600"],
   variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {

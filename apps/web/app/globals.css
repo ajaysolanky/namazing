@@ -7,8 +7,12 @@
   --studio-sand: #f5efe6;
   --studio-ink: #1f2933;
   --studio-rose: #f8d4d8;
+  --studio-rose-deep: #e8a5ad;
   --studio-sage: #d7e3d4;
   --studio-cream: #faf8f5;
+  --studio-terracotta: #c4704b;
+  --studio-terracotta-light: #d4896a;
+  --studio-gold: #d4a574;
 }
 
 body {
@@ -27,7 +31,7 @@ body {
 
 /* Focus styles */
 *:focus-visible {
-  @apply outline-none ring-2 ring-studio-rose ring-offset-2 ring-offset-studio-sand;
+  @apply outline-none ring-2 ring-studio-terracotta/50 ring-offset-2 ring-offset-studio-sand;
 }
 
 /* Smooth transitions for interactive elements */
@@ -254,5 +258,152 @@ a:not([class]) {
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+  }
+
+  /* Terracotta gradient border */
+  .gradient-border-terracotta {
+    position: relative;
+    background: white;
+  }
+
+  .gradient-border-terracotta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--studio-terracotta), var(--studio-gold));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Celebration card with animated border */
+  .celebration-card {
+    position: relative;
+    background: white;
+    overflow: hidden;
+  }
+
+  .celebration-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--studio-rose), var(--studio-sage), var(--studio-terracotta), var(--studio-rose));
+    background-size: 300% 100%;
+    animation: gradient-shift 4s ease infinite;
+    z-index: -1;
+  }
+
+  /* Cultural card variants */
+  .cultural-chinese {
+    border-left: 3px solid #dc2626;
+  }
+
+  .cultural-irish {
+    border-left: 3px solid #16a34a;
+  }
+
+  .cultural-hebrew {
+    border-left: 3px solid #2563eb;
+  }
+
+  .cultural-arabic {
+    border-left: 3px solid #d97706;
+  }
+
+  .cultural-japanese {
+    border-left: 3px solid #e11d48;
+  }
+
+  .cultural-indian {
+    border-left: 3px solid #ea580c;
+  }
+
+  /* Staggered text reveal animation */
+  .text-reveal-stagger > * {
+    opacity: 0;
+    animation: text-reveal 0.6s ease-out forwards;
+  }
+
+  .text-reveal-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .text-reveal-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+  .text-reveal-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+  .text-reveal-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+  .text-reveal-stagger > *:nth-child(5) { animation-delay: 0.5s; }
+
+  @keyframes text-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Flowing progress bar */
+  .progress-flow-bar {
+    background: linear-gradient(
+      90deg,
+      var(--studio-sage),
+      var(--studio-rose),
+      var(--studio-terracotta),
+      var(--studio-rose),
+      var(--studio-sage)
+    );
+    background-size: 200% 100%;
+    animation: progress-flow 3s linear infinite;
+  }
+
+  @keyframes progress-flow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Sparkle effect for celebrations */
+  .sparkle-container {
+    position: relative;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, var(--studio-gold) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+
+  /* Premium hover lift with glow */
+  .hover-lift-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-lift-glow:hover {
+    @apply -translate-y-2 shadow-celebration;
+  }
+
+  /* Organic blob shapes */
+  .blob-organic {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: blob-organic-morph 15s ease-in-out infinite;
+  }
+
+  @keyframes blob-organic-morph {
+    0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+    25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+    50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+    75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+  }
+
+  /* Terracotta text gradient */
+  .text-gradient-terracotta {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--studio-terracotta), var(--studio-gold));
   }
 }

@@ -89,25 +89,77 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
                   key="complete"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="space-y-4"
+                  className="space-y-6 relative"
                 >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-studio-sage/30 rounded-full text-sm text-studio-ink/70">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {/* Celebration particles */}
+                  <div className="absolute inset-0 pointer-events-none overflow-visible">
+                    {[...Array(12)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-3 h-3 rounded-full"
+                        style={{
+                          left: `${50 + (Math.random() - 0.5) * 60}%`,
+                          top: "50%",
+                          background: i % 3 === 0 ? "#f8d4d8" : i % 3 === 1 ? "#d7e3d4" : "#c4704b",
+                        }}
+                        initial={{ y: 0, scale: 0, opacity: 1 }}
+                        animate={{
+                          y: [0, -100 - Math.random() * 100],
+                          x: [(Math.random() - 0.5) * 200],
+                          scale: [0, 1, 0.5],
+                          opacity: [0, 1, 0],
+                          rotate: [0, 360],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          delay: i * 0.05,
+                          ease: "easeOut",
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-studio-sage/40 to-studio-rose/40 rounded-full text-sm text-studio-ink/80 shadow-soft"
+                  >
+                    <svg className="w-5 h-5 text-studio-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Consultation complete
-                  </div>
-                  <h1 className="font-display text-3xl sm:text-4xl text-studio-ink">
-                    We found some beautiful names
-                  </h1>
+                  </motion.div>
+
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="font-display text-4xl sm:text-5xl text-studio-ink"
+                  >
+                    We found some{" "}
+                    <span className="text-gradient-terracotta">beautiful names</span>
+                  </motion.h1>
+
                   {topNames.length > 0 && (
-                    <p className="text-lg text-studio-ink/60">
-                      Including{" "}
-                      <span className="font-display text-studio-ink">
-                        {topNames.slice(0, 2).join(", ")}
-                        {topNames.length > 2 && `, and ${topNames[2]}`}
-                      </span>
-                    </p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="flex flex-wrap justify-center gap-3"
+                    >
+                      {topNames.slice(0, 3).map((name, i) => (
+                        <motion.span
+                          key={name}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.6 + i * 0.1 }}
+                          className="px-5 py-2 bg-white rounded-full shadow-soft font-display text-xl text-studio-ink"
+                        >
+                          {name}
+                        </motion.span>
+                      ))}
+                    </motion.div>
                   )}
                 </motion.div>
               ) : (
