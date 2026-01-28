@@ -1,12 +1,19 @@
 """Tests for the CLI."""
 
+import re
+
 from typer.testing import CliRunner
 
 from namazing.cli.app import app
 from namazing import __version__
 
 
-runner = CliRunner(color=False)
+runner = CliRunner()
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 class TestCLI:
@@ -37,11 +44,12 @@ class TestCLI:
     def test_run_help(self):
         """Test run command help."""
         result = runner.invoke(app, ["run", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "--mode" in result.stdout
-        assert "--output" in result.stdout
-        assert "--quiet" in result.stdout
+        assert "--mode" in output
+        assert "--output" in output
+        assert "--quiet" in output
 
     def test_run_invalid_mode(self):
         """Test run with invalid mode."""
