@@ -998,7 +998,7 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
             # Split on double newlines to find paragraph breaks
             paragraphs = [p.strip() for p in full_markdown.split("\n\n") if p.strip()]
             # Collect opening paragraphs that aren't headers, up to ~500 chars
-            summary_parts = []
+            summary_parts: list[str] = []
             summary_len = 0
             for p in paragraphs:
                 if p.startswith("#"):
