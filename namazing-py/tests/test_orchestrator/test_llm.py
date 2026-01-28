@@ -33,9 +33,9 @@ class TestExtractJson:
 
     def test_json_in_code_block(self):
         """Test extracting JSON from markdown code block."""
-        text = '''```json
+        text = """```json
 {"name": "Emma", "ipa": "/EM-a/"}
-```'''
+```"""
         result = extract_json(text)
 
         assert result["name"] == "Emma"
@@ -69,7 +69,7 @@ class TestExtractJson:
 
     def test_invalid_json_raises_error(self):
         """Test that invalid JSON raises error."""
-        text = 'This is not JSON at all'
+        text = "This is not JSON at all"
 
         with pytest.raises(json.JSONDecodeError):
             extract_json(text)

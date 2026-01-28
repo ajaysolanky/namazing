@@ -62,9 +62,7 @@ def stub_profile(brief: str) -> SessionProfile:
 
     # Simple heuristic for gender
     is_boy = bool(re.search(r"\b(boy|son|brother|male)\b", brief, re.IGNORECASE))
-    is_girl = bool(
-        re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE)
-    )
+    is_girl = bool(re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE))
 
     # Prefer girl if both are mentioned (e.g. "have a boy, expecting a girl")
     if is_boy and is_girl:
@@ -82,9 +80,7 @@ def stub_profile(brief: str) -> SessionProfile:
     if initials_match:
         initials = [i.strip() for i in re.split(r"[,\s]+", initials_match.group(1)) if i.strip()]
 
-    style_lanes = (
-        list(SAMPLE_LANES_BOY.keys()) if is_boy else list(SAMPLE_LANES_GIRL.keys())
-    )
+    style_lanes = list(SAMPLE_LANES_BOY.keys()) if is_boy else list(SAMPLE_LANES_GIRL.keys())
 
     return SessionProfile(
         raw_brief=brief,
@@ -110,20 +106,18 @@ def stub_candidates(profile: SessionProfile | None = None) -> list[Candidate]:
 
     # Determine which lane set to use
     is_girl = False
-    
+
     # Try to determine from parsed preferences
     if profile and profile.preferences and profile.preferences.style_lanes:
         is_girl = "traditional feminine" in profile.preferences.style_lanes
     # Fallback: check raw brief if preferences are missing
     elif profile and profile.raw_brief:
-         # Simple heuristic for gender (reusing logic from stub_profile)
+        # Simple heuristic for gender (reusing logic from stub_profile)
         brief = profile.raw_brief
         is_boy_term = bool(re.search(r"\b(boy|son|brother|male)\b", brief, re.IGNORECASE))
-        is_girl_term = bool(
-            re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE)
-        )
+        is_girl_term = bool(re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE))
         if is_girl_term and not (is_boy_term and not is_girl_term):
-             is_girl = True
+            is_girl = True
 
     source = SAMPLE_LANES_GIRL if is_girl else SAMPLE_LANES_BOY
 
@@ -176,9 +170,7 @@ def stub_card(name: str, lane: str, profile: SessionProfile) -> NameCard:
     )
     combo_suggestions = _honour_combos(name, honor_names)
 
-    surname = (
-        profile.family.surname if profile.family else None
-    ) or "family surname"
+    surname = (profile.family.surname if profile.family else None) or "family surname"
     siblings = profile.family.siblings if profile.family else None
 
     sibset_notes = (
@@ -259,9 +251,7 @@ def stub_selection(cards: list[NameCard]) -> ExpertSelection:
 
 def stub_report(profile: SessionProfile, selection: ExpertSelection) -> Report:
     """Generate a stubbed report from profile and selection."""
-    combos = [
-        f.combo for f in selection.finalists if f.combo is not None
-    ]
+    combos = [f.combo for f in selection.finalists if f.combo is not None]
 
     surname = profile.family.surname if profile.family and profile.family.surname else "your family"
 

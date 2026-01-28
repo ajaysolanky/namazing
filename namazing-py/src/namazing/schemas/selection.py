@@ -57,7 +57,5 @@ class ExpertSelection(BaseModel):
         If LLM outputs a name in both, keep it as finalist and remove from near_misses.
         """
         finalist_names = {f.name.lower() for f in self.finalists}
-        self.near_misses = [
-            nm for nm in self.near_misses if nm.name.lower() not in finalist_names
-        ]
+        self.near_misses = [nm for nm in self.near_misses if nm.name.lower() not in finalist_names]
         return self

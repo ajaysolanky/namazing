@@ -126,9 +126,7 @@ class TestNameCard:
                 notes="Complements well",
             ),
             honor_mapping=["Margaret -> Eleanor"],
-            combo_suggestions=[
-                Combo(first="Eleanor", middle="Rose", why="Classic pairing")
-            ],
+            combo_suggestions=[Combo(first="Eleanor", middle="Rose", why="Classic pairing")],
         )
 
         assert card.name == "Eleanor"

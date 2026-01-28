@@ -1,6 +1,5 @@
 """Tests for validators module."""
 
-
 from namazing.schemas.profile import SessionProfile, Veto, HonorNames
 from namazing.tools.validators import (
     normalize_name,
@@ -99,30 +98,21 @@ class TestCreateVetoFilter:
     """Tests for create_veto_filter function."""
 
     def test_blocks_vetoed_name(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=["Clara", "Nora"])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=["Clara", "Nora"]))
         filter_fn = create_veto_filter(profile)
 
         assert filter_fn("Clara") is False
         assert filter_fn("Nora") is False
 
     def test_allows_non_vetoed_name(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=["Clara", "Nora"])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=["Clara", "Nora"]))
         filter_fn = create_veto_filter(profile)
 
         assert filter_fn("Emma") is True
         assert filter_fn("Oliver") is True
 
     def test_case_insensitive(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=["clara"])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=["clara"]))
         filter_fn = create_veto_filter(profile)
 
         assert filter_fn("CLARA") is False
@@ -136,10 +126,7 @@ class TestCreateVetoFilter:
         assert filter_fn("Any name") is True
 
     def test_empty_vetoes(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=[])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=[]))
         filter_fn = create_veto_filter(profile)
 
         assert filter_fn("Any name") is True
@@ -149,35 +136,26 @@ class TestCreateSiblingFilter:
     """Tests for create_sibling_filter function."""
 
     def test_rejects_similar_to_sibling(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            family=HonorNames(siblings=["Oliver"])
-        )
+        profile = SessionProfile(raw_brief="test", family=HonorNames(siblings=["Oliver"]))
         filter_fn = create_sibling_filter(profile)
 
         # Olive is too similar to Oliver (contained)
         assert filter_fn("Olive") is False
 
     def test_allows_distinct_name(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            family=HonorNames(siblings=["Oliver"])
-        )
+        profile = SessionProfile(raw_brief="test", family=HonorNames(siblings=["Oliver"]))
         filter_fn = create_sibling_filter(profile)
 
         assert filter_fn("Charlotte") is True
         assert filter_fn("Emma") is True
 
     def test_multiple_siblings(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            family=HonorNames(siblings=["Oliver", "Emma"])
-        )
+        profile = SessionProfile(raw_brief="test", family=HonorNames(siblings=["Oliver", "Emma"]))
         filter_fn = create_sibling_filter(profile)
 
         # Similar to either sibling should be rejected
         assert filter_fn("Olive") is False  # similar to Oliver
-        assert filter_fn("Ella") is False   # similar to Emma
+        assert filter_fn("Ella") is False  # similar to Emma
         assert filter_fn("Charlotte") is True
 
     def test_no_siblings(self):
@@ -191,10 +169,7 @@ class TestFilterCandidates:
     """Tests for filter_candidates function."""
 
     def test_filters_vetoed_names(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=["Clara"])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=["Clara"]))
         candidates = [
             MockCandidate("Emma"),
             MockCandidate("Clara"),
@@ -209,10 +184,7 @@ class TestFilterCandidates:
         assert "Oliver" in names
 
     def test_filters_similar_to_siblings(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            family=HonorNames(siblings=["Oliver"])
-        )
+        profile = SessionProfile(raw_brief="test", family=HonorNames(siblings=["Oliver"]))
         candidates = [
             MockCandidate("Emma"),
             MockCandidate("Olive"),
@@ -227,10 +199,7 @@ class TestFilterCandidates:
         assert "Charlotte" in names
 
     def test_logs_filtered_names(self):
-        profile = SessionProfile(
-            raw_brief="test",
-            vetoes=Veto(hard=["Clara"])
-        )
+        profile = SessionProfile(raw_brief="test", vetoes=Veto(hard=["Clara"]))
         candidates = [MockCandidate("Clara")]
         logs = []
 

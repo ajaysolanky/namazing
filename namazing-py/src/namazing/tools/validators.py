@@ -127,12 +127,13 @@ def create_prefix_filter(profile: SessionProfile) -> Callable[[str], bool]:
     # Also check raw brief for common patterns
     if profile.raw_brief:
         import re
+
         brief_lower = profile.raw_brief.lower()
         # Match "avoid [prefix]-", "no [prefix]-", "starting with [prefix]"
         patterns = [
             r'avoid\s+["\']?(\w+)-',
             r'avoid.*starting\s+with\s+["\']?(\w+)',
-            r'no\s+(\w+)-\s*names',
+            r"no\s+(\w+)-\s*names",
             r'anything\s+starting\s+with\s+["\']?(\w+)',
         ]
         for pattern in patterns:
@@ -149,9 +150,7 @@ def create_prefix_filter(profile: SessionProfile) -> Callable[[str], bool]:
     return is_allowed
 
 
-def create_sibling_filter(
-    profile: SessionProfile, threshold: int = 2
-) -> Callable[[str], bool]:
+def create_sibling_filter(profile: SessionProfile, threshold: int = 2) -> Callable[[str], bool]:
     """Create a filter function that rejects names too similar to siblings.
 
     Args:
@@ -179,17 +178,51 @@ def create_sibling_filter(
 # Common deity/religious names that should be filtered when religious names are vetoed
 DEITY_NAMES = {
     # Hindu
-    "krishna", "lakshmi", "shiva", "sivan", "vishnu", "brahma", "ganesh", "ganesha",
-    "durga", "kali", "saraswati", "parvati", "hanuman", "rama", "radha",
+    "krishna",
+    "lakshmi",
+    "shiva",
+    "sivan",
+    "vishnu",
+    "brahma",
+    "ganesh",
+    "ganesha",
+    "durga",
+    "kali",
+    "saraswati",
+    "parvati",
+    "hanuman",
+    "rama",
+    "radha",
     # Christian
-    "jesus", "christ", "mary", "madonna",
+    "jesus",
+    "christ",
+    "mary",
+    "madonna",
     # Greek
-    "zeus", "athena", "apollo", "artemis", "aphrodite", "hera", "poseidon",
-    "hades", "hermes", "ares", "dionysus", "demeter", "persephone",
+    "zeus",
+    "athena",
+    "apollo",
+    "artemis",
+    "aphrodite",
+    "hera",
+    "poseidon",
+    "hades",
+    "hermes",
+    "ares",
+    "dionysus",
+    "demeter",
+    "persephone",
     # Norse
-    "odin", "thor", "freya", "loki", "frigg",
+    "odin",
+    "thor",
+    "freya",
+    "loki",
+    "frigg",
     # Other
-    "isis", "osiris", "ra", "anubis",
+    "isis",
+    "osiris",
+    "ra",
+    "anubis",
 }
 
 
@@ -217,10 +250,19 @@ def create_deity_filter(profile: SessionProfile) -> Callable[[str], bool]:
 
     if profile.raw_brief:
         brief_lower = profile.raw_brief.lower()
-        if any(phrase in brief_lower for phrase in [
-            "avoid religious", "no religious", "avoid deity", "no deity",
-            "avoid god", "no god names", "not religious", "avoid strong religious"
-        ]):
+        if any(
+            phrase in brief_lower
+            for phrase in [
+                "avoid religious",
+                "no religious",
+                "avoid deity",
+                "no deity",
+                "avoid god",
+                "no god names",
+                "not religious",
+                "avoid strong religious",
+            ]
+        ):
             avoid_religious = True
 
     def is_allowed(name: str) -> bool:

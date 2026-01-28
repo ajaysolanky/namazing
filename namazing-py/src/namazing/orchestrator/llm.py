@@ -58,7 +58,7 @@ async def call_llm(
     }
     if provider:
         payload["provider"] = {"order": [provider], "allow_fallbacks": False}
-        
+
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
@@ -74,19 +74,19 @@ async def call_llm(
                     json=payload,
                     timeout=60.0,
                 )
-                
+
                 if response.status_code == 429:
                     if attempt < max_retries - 1:
                         wait = (attempt + 1) * 2
                         await asyncio.sleep(wait)
                         continue
-                
+
                 response.raise_for_status()
                 data = response.json()
-                
+
                 # Log raw interaction if DEBUG_LLM is set
                 if os.environ.get("DEBUG_LLM"):
-                     with open("llm_debug.log", "a") as f:
+                    with open("llm_debug.log", "a") as f:
                         f.write(f"\n--- REQUEST ({model}) ---\n")
                         f.write(json.dumps(payload, indent=2))
                         f.write("\n--- RESPONSE ---\n")
@@ -174,8 +174,9 @@ async def run_json_agent(
             if attempt < max_retries - 1:
                 # Log to stderr to avoid cluttering stdout pipeline output
                 import sys
+
                 print(
-                    f"Warning: Validation/JSON error in {prompt_slug} (attempt {attempt+1}/{max_retries}): {e}",
+                    f"Warning: Validation/JSON error in {prompt_slug} (attempt {attempt + 1}/{max_retries}): {e}",
                     file=sys.stderr,
                 )
                 await asyncio.sleep(0.5)  # Brief pause

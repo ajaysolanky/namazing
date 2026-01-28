@@ -37,9 +37,7 @@ class TestOrchestratorService:
 
         assert retrieved is record
 
-    def test_get_run_returns_none_for_unknown(
-        self, service: OrchestratorService
-    ):
+    def test_get_run_returns_none_for_unknown(self, service: OrchestratorService):
         """Test that get_run returns None for unknown ID."""
         result = service.get_run("nonexistent-id")
         assert result is None
@@ -59,9 +57,7 @@ class TestOrchestratorService:
 
         assert len(events) > 0
 
-    def test_subscribe_raises_for_unknown_run(
-        self, service: OrchestratorService
-    ):
+    def test_subscribe_raises_for_unknown_run(self, service: OrchestratorService):
         """Test that subscribe raises for unknown run ID."""
         with pytest.raises(ValueError):
             service.subscribe("nonexistent-id", lambda e: None)
@@ -98,9 +94,7 @@ class TestOrchestratorPipeline:
         """Create a fresh service instance."""
         return OrchestratorService()
 
-    async def test_full_pipeline_with_stubs(
-        self, service: OrchestratorService, sample_brief: str
-    ):
+    async def test_full_pipeline_with_stubs(self, service: OrchestratorService, sample_brief: str):
         """Test running the full pipeline with stubs."""
         assert use_stubs(), "Test requires stub mode"
 
@@ -128,9 +122,7 @@ class TestOrchestratorPipeline:
         assert len(result.selection.finalists) > 0
         assert result.report.summary is not None
 
-    async def test_pipeline_events_sequence(
-        self, service: OrchestratorService
-    ):
+    async def test_pipeline_events_sequence(self, service: OrchestratorService):
         """Test that pipeline emits events in expected sequence."""
         events: list[Event] = []
         record = service.start_run("Brief for a girl", "serial")
@@ -150,9 +142,7 @@ class TestOrchestratorPipeline:
         assert "expert-selector" in agents_seen
         assert "report-composer" in agents_seen
 
-    async def test_serial_mode_limits_candidates(
-        self, service: OrchestratorService
-    ):
+    async def test_serial_mode_limits_candidates(self, service: OrchestratorService):
         """Test that serial mode limits candidate count."""
         record = service.start_run("Brief for testing", "serial")
 
@@ -170,9 +160,7 @@ class TestOrchestratorPipeline:
         # Serial mode should have at most 24 candidates
         assert len(current.result.candidates) <= 24
 
-    async def test_result_contains_finalists(
-        self, service: OrchestratorService
-    ):
+    async def test_result_contains_finalists(self, service: OrchestratorService):
         """Test that result contains proper finalists."""
         record = service.start_run("Looking for a girl name", "serial")
 

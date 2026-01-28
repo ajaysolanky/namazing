@@ -46,6 +46,7 @@ RunStatus = Literal["pending", "running", "completed", "failed"]
 
 # Model is configured via LLM_MODEL env var, defaults handled in llm.py
 
+
 def use_stubs() -> bool:
     """Check if we should use stubs (no API key available)."""
     return not os.environ.get("OPENROUTER_API_KEY")
@@ -113,10 +114,7 @@ async def _gather_research_tools(
             "notes": popularity.notes,
         },
         "associations": {
-            "items": [
-                {"label": item.label, "url": item.url}
-                for item in associations.items
-            ],
+            "items": [{"label": item.label, "url": item.url} for item in associations.items],
             "notes": associations.notes,
         },
     }
@@ -124,8 +122,7 @@ async def _gather_research_tools(
     if celebrity_associations:
         result["celebrity_associations"] = {
             "items": [
-                {"label": item.label, "url": item.url}
-                for item in celebrity_associations.items
+                {"label": item.label, "url": item.url} for item in celebrity_associations.items
             ],
             "notes": celebrity_associations.notes,
         }
@@ -178,9 +175,7 @@ class OrchestratorService:
         """Get a run record by ID."""
         return self._runs.get(run_id)
 
-    def subscribe(
-        self, run_id: str, listener: Callable[[Event], None]
-    ) -> Callable[[], None]:
+    def subscribe(self, run_id: str, listener: Callable[[Event], None]) -> Callable[[], None]:
         """Subscribe to events from a run.
 
         Args:
@@ -264,9 +259,7 @@ class OrchestratorService:
             selection = await self._run_sanity_checker(record, record.brief, selection)
 
             # Stage 5: Compose report
-            report = await self._run_report_composer(
-                record, profile, cards, selection
-            )
+            report = await self._run_report_composer(record, profile, cards, selection)
 
             # Assemble final result
             result = RunResult(
@@ -313,9 +306,7 @@ class OrchestratorService:
                 ),
             )
 
-    async def _run_brief_parser(
-        self, record: RunRecord, brief: str
-    ) -> SessionProfile:
+    async def _run_brief_parser(self, record: RunRecord, brief: str) -> SessionProfile:
         """Stage 1: Parse the client brief into a SessionProfile."""
         self._emit(
             record,
@@ -342,7 +333,9 @@ class OrchestratorService:
             return profile
 
         try:
-            user_input = f"Client Brief:\n{brief}\n\nRespond with JSON following SessionProfile schema."
+            user_input = (
+                f"Client Brief:\n{brief}\n\nRespond with JSON following SessionProfile schema."
+            )
 
             # Use a partial parse, then add raw_brief back
             segments = load_prompt_segments("brief-parser")
@@ -573,13 +566,11 @@ class OrchestratorService:
         candidates: list[Candidate],
     ) -> list[NameCard]:
         """Stage 3: Research each candidate name."""
-        region = (profile.region[0] if profile.region else DEFAULT_REGION)
+        region = profile.region[0] if profile.region else DEFAULT_REGION
         surname = profile.family.surname if profile.family else None
         concurrency = CONCURRENCY if record.mode == "parallel" else 1
 
-        async def research_candidate(
-            candidate: Candidate, index: int
-        ) -> NameCard:
+        async def research_candidate(candidate: Candidate, index: int) -> NameCard:
             self._emit(
                 record,
                 StartEvent(
@@ -693,9 +684,7 @@ class OrchestratorService:
                 )
                 return card
 
-        return await map_with_concurrency(
-            candidates, concurrency, research_candidate
-        )
+        return await map_with_concurrency(candidates, concurrency, research_candidate)
 
     async def _run_expert_selector(
         self,
@@ -890,8 +879,7 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
             if names_to_remove:
                 original_count = len(selection.finalists)
                 selection.finalists = [
-                    f for f in selection.finalists
-                    if f.name.lower() not in names_to_remove
+                    f for f in selection.finalists if f.name.lower() not in names_to_remove
                 ]
                 removed_count = original_count - len(selection.finalists)
 
@@ -907,8 +895,7 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
 
             # Also filter near_misses
             selection.near_misses = [
-                nm for nm in selection.near_misses
-                if nm.name.lower() not in names_to_remove
+                nm for nm in selection.near_misses if nm.name.lower() not in names_to_remove
             ]
 
             if result.notes:
@@ -1004,17 +991,17 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
                 full_markdown = full_markdown[1:-1]
 
             # Handle escaped newlines (literal \n instead of actual newlines)
-            if '\\n' in full_markdown and '\n' not in full_markdown:
-                full_markdown = full_markdown.replace('\\n', '\n')
+            if "\\n" in full_markdown and "\n" not in full_markdown:
+                full_markdown = full_markdown.replace("\\n", "\n")
 
             # Extract opening paragraphs as the hero summary
             # Split on double newlines to find paragraph breaks
-            paragraphs = [p.strip() for p in full_markdown.split('\n\n') if p.strip()]
+            paragraphs = [p.strip() for p in full_markdown.split("\n\n") if p.strip()]
             # Collect opening paragraphs that aren't headers, up to ~500 chars
             summary_parts = []
             summary_len = 0
             for p in paragraphs:
-                if p.startswith('#'):
+                if p.startswith("#"):
                     # Stop at first header after collecting some content
                     if summary_parts:
                         break
@@ -1024,7 +1011,11 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
                 # Stop if we have enough content (at least 2 paragraphs or 400+ chars)
                 if len(summary_parts) >= 2 or summary_len > 400:
                     break
-            summary_paragraph = '\n\n'.join(summary_parts) if summary_parts else (paragraphs[0] if paragraphs else "")
+            summary_paragraph = (
+                "\n\n".join(summary_parts)
+                if summary_parts
+                else (paragraphs[0] if paragraphs else "")
+            )
 
             combos = [f.combo for f in selection.finalists if f.combo is not None]
 
@@ -1035,9 +1026,7 @@ Perform a holistic sanity check. Flag any names that obviously violate the clien
                 finalists=selection.finalists,
                 combos=combos,
                 tradeoffs=["Review the report for tradeoffs."],
-                tie_break_tips=[
-                    "Read the report for tie-break tips."
-                ],
+                tie_break_tips=["Read the report for tie-break tips."],
             )
 
         except Exception as e:

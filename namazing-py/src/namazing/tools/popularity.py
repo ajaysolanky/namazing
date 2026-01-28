@@ -84,11 +84,7 @@ def _load_popularity_data() -> dict[str, dict[int, YearData]]:
             years.update(name_data.keys())
 
         for year in years:
-            year_entries = [
-                (name, data[year])
-                for name, data in result.items()
-                if year in data
-            ]
+            year_entries = [(name, data[year]) for name, data in result.items() if year in data]
             year_entries.sort(key=lambda x: x[1].count, reverse=True)
 
             for rank, (name, _) in enumerate(year_entries, start=1):
@@ -113,17 +109,13 @@ def get_popularity(name: str, region: str = "US") -> PopularityResult:
         PopularityResult with timeseries data if available.
     """
     if region != "US":
-        return PopularityResult(
-            notes="Popularity data is only available for the US."
-        )
+        return PopularityResult(notes="Popularity data is only available for the US.")
 
     data = _load_popularity_data()
     name_data = data.get(name)
 
     if not name_data:
-        return PopularityResult(
-            notes="No popularity data found for this name."
-        )
+        return PopularityResult(notes="No popularity data found for this name.")
 
     timeseries = sorted(name_data.values(), key=lambda x: x.year)
 

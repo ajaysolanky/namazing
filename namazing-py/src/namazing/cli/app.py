@@ -31,6 +31,7 @@ app = typer.Typer(
 
 console = Console()
 
+
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
@@ -103,15 +104,11 @@ def run(
 ) -> None:
     """Run the naming pipeline with the given brief."""
     if mode not in ("serial", "parallel"):
-        console.print(
-            f"[red]Error: Invalid mode '{mode}'. Use 'serial' or 'parallel'.[/red]"
-        )
+        console.print(f"[red]Error: Invalid mode '{mode}'. Use 'serial' or 'parallel'.[/red]")
         raise typer.Exit(1)
 
     if format not in ("rich", "json-stream"):
-        console.print(
-            f"[red]Error: Invalid format '{format}'. Use 'rich' or 'json-stream'.[/red]"
-        )
+        console.print(f"[red]Error: Invalid format '{format}'. Use 'rich' or 'json-stream'.[/red]")
         raise typer.Exit(1)
 
     run_mode: RunMode = "serial" if mode == "serial" else "parallel"
@@ -195,9 +192,7 @@ async def _run_pipeline(
                 )
 
             if output:
-                output.write_text(
-                    json.dumps(current.result.model_dump(), indent=2)
-                )
+                output.write_text(json.dumps(current.result.model_dump(), indent=2))
                 if format == "rich":
                     console.print(f"\nResults written to: {output}")
 

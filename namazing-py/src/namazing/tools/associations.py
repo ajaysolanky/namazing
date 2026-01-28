@@ -67,9 +67,7 @@ async def scan_neg_associations(name: str) -> AssociationResult:
     )
 
 
-async def scan_celebrity_associations(
-    first_name: str, surname: str
-) -> AssociationResult:
+async def scan_celebrity_associations(first_name: str, surname: str) -> AssociationResult:
     """Search for celebrities with the full name combination.
 
     This catches cases like "Rose Park" = Rosé from Blackpink, where the

@@ -60,7 +60,8 @@ jobs:
         run: npm ci
 
       - name: Run ESLint (web)
-        run: npm run lint --workspace apps/web
+        working-directory: apps/web
+        run: npm run lint
 
       - name: Build packages
         run: npm run build
@@ -83,7 +84,8 @@ jobs:
         run: npm ci
 
       - name: Run web tests
-        run: npm test --workspace apps/web
+        working-directory: apps/web
+        run: npm test
 
   # Integration test (optional, only on main)
   integration:
