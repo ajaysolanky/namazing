@@ -61,8 +61,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint (web)
-        working-directory: apps/web
-        run: npm run lint
+        run: cd apps/web && npm run lint
 
       - name: Build packages
         run: npm run build

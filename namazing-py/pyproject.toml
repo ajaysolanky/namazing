@@ -49,11 +49,5 @@ target-version = "py311"
 python_version = "3.11"
 # Strict mode disabled - codebase has pre-existing type issues to fix
 strict = false
-plugins = ["pydantic.mypy"]
 # Ignore missing type stubs for external packages
 ignore_missing_imports = true
-
-[tool.pydantic-mypy]
-init_forbid_extra = false
-init_typed = false
-warn_required_dynamic_aliases = false
