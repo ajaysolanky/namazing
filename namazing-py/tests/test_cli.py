@@ -6,7 +6,7 @@ from namazing.cli.app import app
 from namazing import __version__
 
 
-runner = CliRunner()
+runner = CliRunner(color=False)
 
 
 class TestCLI:
