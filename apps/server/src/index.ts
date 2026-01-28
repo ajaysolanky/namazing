@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
+import rateLimit from "express-rate-limit";
 import { pythonOrchestrator } from "./python-orchestrator.js";
 import { saveRun, getRun, deleteRun } from "./storage.js";
 
@@ -9,11 +10,29 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
+// Rate limiting: stricter for expensive operations (run creation)
+const runRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max: 10, // max 10 runs per minute per IP
+  message: { error: "Too many run requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting: more lenient for read operations
+const readRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max: 100, // max 100 reads per minute per IP
+  message: { error: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.get("/healthz", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
-app.post("/api/run", async (req: Request, res: Response) => {
+app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {
   const { brief, mode } = req.body || {};
   if (!brief || typeof brief !== "string") {
     return res.status(400).json({ error: "brief is required" });
@@ -38,7 +57,7 @@ app.post("/api/run", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/events/:runId", async (req: Request, res: Response) => {
+app.get("/api/events/:runId", readRateLimiter, async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first (has live events), fall back to disk
   const memoryRun = pythonOrchestrator.getRun(runId);
@@ -80,7 +99,7 @@ app.get("/api/events/:runId", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/result/:runId", async (req: Request, res: Response) => {
+app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first, fall back to disk
   const memoryRun = pythonOrchestrator.getRun(runId);

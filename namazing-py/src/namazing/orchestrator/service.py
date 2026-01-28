@@ -53,7 +53,11 @@ def use_stubs() -> bool:
 
 DEFAULT_REGION = "US"
 MAX_SERIAL_NAMES = 24
-CONCURRENCY = int(os.environ.get("AGENT_CONCURRENCY", "4"))
+CONCURRENCY = int(os.environ.get("AGENT_CONCURRENCY", "8"))
+
+# Maximum events to keep in memory per run (prevents unbounded memory growth)
+# Keeps most recent events when limit exceeded; critical events always preserved
+MAX_EVENTS_PER_RUN = 500
 
 
 # Type adapters for validation
@@ -202,8 +206,37 @@ class OrchestratorService:
         return unsubscribe
 
     def _emit(self, record: RunRecord, event: Event) -> None:
-        """Emit an event to all listeners."""
+        """Emit an event to all listeners.
+
+        Implements log rotation to prevent unbounded memory growth.
+        Critical events (Result, Error, Done, Start, Activity) are always preserved.
+        Log and Partial events are rotated when MAX_EVENTS_PER_RUN is exceeded.
+        """
         record.events.append(event)
+
+        # Rotate events if limit exceeded
+        if len(record.events) > MAX_EVENTS_PER_RUN:
+            # Separate critical vs rotatable events
+            critical_types = {"result", "error", "done", "start", "activity"}
+            critical_events = []
+            rotatable_events = []
+
+            for e in record.events:
+                if e.t in critical_types:
+                    critical_events.append(e)
+                else:
+                    rotatable_events.append(e)
+
+            # Keep all critical events + most recent rotatable events
+            max_rotatable = MAX_EVENTS_PER_RUN - len(critical_events)
+            if max_rotatable > 0:
+                kept_rotatable = rotatable_events[-max_rotatable:]
+            else:
+                kept_rotatable = []
+
+            # Reconstruct events list preserving approximate order
+            record.events = critical_events + kept_rotatable
+
         for listener in record.listeners:
             try:
                 listener(event)
@@ -719,22 +752,27 @@ class OrchestratorService:
             selection.near_misses = unique_misses
 
             # Code-enforced filtering: remove vetoed names from selection
-            from namazing.tools.validators import create_veto_filter, create_sibling_filter, create_prefix_filter, create_deity_filter
-            veto_filter = create_veto_filter(profile)
-            sibling_filter = create_sibling_filter(profile)
-            prefix_filter = create_prefix_filter(profile)
-            deity_filter = create_deity_filter(profile)
-
+            # Uses the same filter_candidates function as the generator stage
             original_finalist_count = len(selection.finalists)
-            selection.finalists = [
-                f for f in selection.finalists
-                if veto_filter(f.name) and sibling_filter(f.name) and prefix_filter(f.name) and deity_filter(f.name)
-            ]
+            selection.finalists = filter_candidates(
+                selection.finalists,
+                profile,
+                log_callback=lambda msg: self._emit(
+                    record,
+                    LogEvent(
+                        run_id=record.id,
+                        agent="expert-selector",
+                        msg=msg,
+                    ),
+                ),
+            )
+
             original_miss_count = len(selection.near_misses)
-            selection.near_misses = [
-                nm for nm in selection.near_misses
-                if veto_filter(nm.name) and sibling_filter(nm.name) and prefix_filter(nm.name) and deity_filter(nm.name)
-            ]
+            selection.near_misses = filter_candidates(
+                selection.near_misses,
+                profile,
+                # No log callback for near-misses to reduce noise
+            )
 
             filtered_finalists = original_finalist_count - len(selection.finalists)
             filtered_misses = original_miss_count - len(selection.near_misses)
@@ -744,7 +782,7 @@ class OrchestratorService:
                     LogEvent(
                         run_id=record.id,
                         agent="expert-selector",
-                        msg=f"Filtered {filtered_finalists} finalists and {filtered_misses} near-misses due to veto/sibling/prefix/deity constraints",
+                        msg=f"Filtered {filtered_finalists} finalists and {filtered_misses} near-misses due to constraint violations",
                     ),
                 )
 
