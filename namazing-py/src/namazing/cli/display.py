@@ -1,7 +1,6 @@
 """Rich display components for the CLI."""
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from rich.console import Console, Group
 from rich.live import Live

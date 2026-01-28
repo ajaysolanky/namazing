@@ -20,9 +20,9 @@ describe('NearMissesAccordion', () => {
       expect(screen.getByText('3 lovely names that almost made the cut')).toBeInTheDocument()
     })
 
-    it('should render "More Options" badge', () => {
+    it('should render "Other Names We Loved" badge', () => {
       render(<NearMissesAccordion nearMisses={mockNearMisses} />)
-      expect(screen.getByText('More Options')).toBeInTheDocument()
+      expect(screen.getByText('Other Names We Loved')).toBeInTheDocument()
     })
   })
 
@@ -40,41 +40,33 @@ describe('NearMissesAccordion', () => {
   })
 
   describe('Accordion Behavior', () => {
-    it('should expand when trigger is clicked', async () => {
+    // Note: The accordion has defaultValue="near-misses" so it starts expanded
+    it('should show near misses by default (accordion starts open)', () => {
       render(<NearMissesAccordion nearMisses={mockNearMisses} />)
 
-      // Click the trigger
-      fireEvent.click(screen.getByText('Honorable Mentions'))
-
-      // Content should be visible
+      // Content should be visible immediately since accordion starts open
       expect(screen.getByText('Luna')).toBeInTheDocument()
       expect(screen.getByText('Beautiful but too popular right now')).toBeInTheDocument()
     })
 
-    it('should show all near misses when expanded', async () => {
+    it('should show all near misses', () => {
       render(<NearMissesAccordion nearMisses={mockNearMisses} />)
-
-      fireEvent.click(screen.getByText('Honorable Mentions'))
 
       expect(screen.getByText('Luna')).toBeInTheDocument()
       expect(screen.getByText('Atlas')).toBeInTheDocument()
       expect(screen.getByText('Ivy')).toBeInTheDocument()
     })
 
-    it('should show all reasons when expanded', async () => {
+    it('should show all reasons', () => {
       render(<NearMissesAccordion nearMisses={mockNearMisses} />)
-
-      fireEvent.click(screen.getByText('Honorable Mentions'))
 
       expect(screen.getByText('Beautiful but too popular right now')).toBeInTheDocument()
       expect(screen.getByText('Strong name but might be too unusual')).toBeInTheDocument()
       expect(screen.getByText('Lovely but conflicts with family name')).toBeInTheDocument()
     })
 
-    it('should show numbered badges when expanded', async () => {
+    it('should show numbered badges', () => {
       render(<NearMissesAccordion nearMisses={mockNearMisses} />)
-
-      fireEvent.click(screen.getByText('Honorable Mentions'))
 
       expect(screen.getByText('1')).toBeInTheDocument()
       expect(screen.getByText('2')).toBeInTheDocument()

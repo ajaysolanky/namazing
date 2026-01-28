@@ -2,28 +2,26 @@
 
 import asyncio
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Annotated, Optional
 
 from dotenv import load_dotenv
 
-# Load environment variables early
+# Load environment variables early (must happen before other imports that use env vars)
 load_dotenv(Path(__file__).parents[4] / ".env")
-load_dotenv() # Load local .env if present as well
+load_dotenv()  # Load local .env if present as well
 
-import typer
-from rich.console import Console
+import typer  # noqa: E402
+from rich.console import Console  # noqa: E402
 
-from namazing import __version__
-from namazing.orchestrator.service import (
+from namazing import __version__  # noqa: E402
+from namazing.orchestrator.service import (  # noqa: E402
     OrchestratorService,
     RunMode,
-    RunRecord,
 )
-from namazing.schemas.events import Event
-from namazing.cli.display import PipelineDisplay, print_results, print_error
+from namazing.schemas.events import Event  # noqa: E402
+from namazing.cli.display import PipelineDisplay, print_results, print_error  # noqa: E402
 
 app = typer.Typer(
     name="namazing",

@@ -66,7 +66,7 @@ describe('FinalistCard', () => {
       }
       render(<FinalistCard name="Stella" why="Test" combo={combo} />)
 
-      expect(screen.getByText('Perfect Pairing')).toBeInTheDocument()
+      expect(screen.getByText('Suggested Middle Name')).toBeInTheDocument()
       expect(screen.getByText('Perfect flow')).toBeInTheDocument()
       // The combo section contains "first & middle" format
       expect(screen.getByText('&')).toBeInTheDocument()
@@ -74,7 +74,7 @@ describe('FinalistCard', () => {
 
     it('should not render combo section when not provided', () => {
       render(<FinalistCard name="Luna" why="Test" />)
-      expect(screen.queryByText('Perfect pairing')).not.toBeInTheDocument()
+      expect(screen.queryByText('Suggested Middle Name')).not.toBeInTheDocument()
     })
   })
 

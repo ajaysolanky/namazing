@@ -1,6 +1,5 @@
 """Tests for validators module."""
 
-import pytest
 
 from namazing.schemas.profile import SessionProfile, Veto, HonorNames
 from namazing.tools.validators import (

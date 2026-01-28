@@ -1,7 +1,6 @@
 """Tests for prompt loading."""
 
 import pytest
-from pathlib import Path
 
 from namazing.orchestrator.prompts import (
     load_prompt_segments,

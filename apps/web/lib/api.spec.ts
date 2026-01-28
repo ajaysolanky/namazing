@@ -74,7 +74,8 @@ describe('api', () => {
       const result = await fetchResult('run-456')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/result/run-456')
+        expect.stringContaining('/api/result/run-456'),
+        { cache: 'no-store' }
       )
       expect(result).toEqual(mockResult)
     })

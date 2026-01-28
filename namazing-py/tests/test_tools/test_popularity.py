@@ -1,8 +1,6 @@
 """Tests for popularity tools."""
 
 import pytest
-import tempfile
-import os
 from pathlib import Path
 
 from namazing.tools.popularity import (

@@ -89,7 +89,7 @@ async def call_llm(
                      with open("llm_debug.log", "a") as f:
                         f.write(f"\n--- REQUEST ({model}) ---\n")
                         f.write(json.dumps(payload, indent=2))
-                        f.write(f"\n--- RESPONSE ---\n")
+                        f.write("\n--- RESPONSE ---\n")
                         f.write(json.dumps(data, indent=2))
                         f.write("\n------------------------\n")
 

@@ -1,6 +1,5 @@
 """Tests for the CLI."""
 
-import pytest
 from typer.testing import CliRunner
 
 from namazing.cli.app import app

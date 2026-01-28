@@ -11,12 +11,12 @@ describe('ComboShowcase', () => {
   describe('Rendering', () => {
     it('should render section header', () => {
       render(<ComboShowcase combos={mockCombos} />)
-      expect(screen.getByText('Perfect Pairings')).toBeInTheDocument()
+      expect(screen.getByText('First & Middle Name Pairings')).toBeInTheDocument()
     })
 
     it('should render description text', () => {
       render(<ComboShowcase combos={mockCombos} />)
-      expect(screen.getByText(/combinations that flow beautifully/i)).toBeInTheDocument()
+      expect(screen.getByText(/chosen for rhythm, meaning, and flow/i)).toBeInTheDocument()
     })
 
     it('should render badge', () => {

@@ -38,13 +38,7 @@ vi.mock('./NameDetailModal', () => ({
   ),
 }))
 
-vi.mock('./ComboShowcase', () => ({
-  ComboShowcase: ({ combos }: { combos: unknown[] }) => (
-    <div data-testid="combo-showcase">
-      <span>{combos.length} combos</span>
-    </div>
-  ),
-}))
+// Note: ComboShowcase is no longer used - combos are now passed directly to FinalistCard
 
 vi.mock('./NearMissesAccordion', () => ({
   NearMissesAccordion: ({ nearMisses }: { nearMisses: unknown[] }) => (
@@ -186,28 +180,7 @@ describe('ReportLayout', () => {
     })
   })
 
-  describe('Combo Showcase', () => {
-    it('should render combo showcase when combos exist', () => {
-      render(<ReportLayout runId="test-123" result={mockResult} />)
-
-      expect(screen.getByTestId('combo-showcase')).toBeInTheDocument()
-    })
-
-    it('should not render combo showcase when no combos', () => {
-      const resultNoCombos = {
-        ...mockResult,
-        report: {
-          ...mockResult.report,
-          combos: [],
-          finalists: mockResult.report.finalists.map(f => ({ ...f, combo: undefined })),
-        },
-      }
-
-      render(<ReportLayout runId="test-123" result={resultNoCombos} />)
-
-      expect(screen.queryByTestId('combo-showcase')).not.toBeInTheDocument()
-    })
-  })
+  // Note: Combo showcase was removed - combos are now embedded in FinalistCard components
 
   describe('Tradeoffs Section', () => {
     it('should render tradeoffs when they exist', () => {
