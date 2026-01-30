@@ -263,8 +263,8 @@ describe('transformToSessionProfile', () => {
     expect(profile.family.surname).toBe('Smith')
     expect(profile.family.siblings).toEqual(['Emma'])
     expect(profile.family.honor_names).toEqual(['Rose'])
-    expect(profile.preferences.style_lanes).toContain('classic')
-    expect(profile.preferences.style_lanes).toContain('modern')
+    expect(profile.preferences.naming_themes).toContain('classic')
+    expect(profile.preferences.naming_themes).toContain('modern')
     expect(profile.preferences.nickname_tolerance).toBe('high')
     expect(profile.vetoes.hard).toEqual(['Karen'])
     expect(profile.raw_brief).toContain('girl names')
@@ -312,6 +312,6 @@ describe('transformToSessionProfile', () => {
 
     expect(profile.family.surname).toBe('Brown')
     expect(profile.family.siblings).toEqual([])
-    expect(profile.preferences.style_lanes).toEqual([])
+    expect(profile.preferences.naming_themes).toEqual([])
   })
 })
