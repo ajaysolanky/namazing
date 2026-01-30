@@ -32,7 +32,7 @@ class TestLoadPromptSegments:
         """Test loading the name-generator prompt."""
         segments = load_prompt_segments("name-generator")
 
-        assert "Lane Generator" in segments.system
+        assert "Theme Generator" in segments.system
         assert "40-60 candidate" in segments.instruction
 
     def test_loads_researcher(self):
