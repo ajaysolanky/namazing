@@ -19,11 +19,8 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
       transition={{ duration: 0.6 }}
       className={cn("relative", className)}
     >
-      {/* Decorative background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-studio-cream/50 to-white/80 rounded-3xl -z-10" />
-
       {/* Content wrapper */}
-      <div className="relative p-8 sm:p-12 lg:p-16 rounded-3xl border border-studio-ink/5 shadow-soft backdrop-blur-sm">
+      <div className="relative p-8 sm:p-12 lg:p-16 rounded-3xl bg-white border border-studio-ink/5 shadow-card">
         {/* Decorative corner flourishes */}
         <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-studio-rose/30 rounded-tl-lg" />
         <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-studio-sage/30 rounded-tr-lg" />
