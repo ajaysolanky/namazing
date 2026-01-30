@@ -35,13 +35,14 @@ def sample_profile():
 
     return SessionProfile(
         raw_brief="Test brief for a girl",
+        gender="girl",
         family=HonorNames(
             surname="Thompson",
             siblings=["Oliver", "Charlotte"],
             honor_names=["Margaret", "Rose"],
         ),
         preferences=Preferences(
-            style_lanes=["traditional feminine", "literary", "nature"],
+            naming_themes=["traditional feminine", "literary", "nature"],
             length_pref="short-to-medium",
             nickname_tolerance="medium",
         ),

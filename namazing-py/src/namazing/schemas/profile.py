@@ -26,7 +26,7 @@ class HonorNames(BaseModel):
 class Preferences(BaseModel):
     """Naming preferences extracted from the brief."""
 
-    style_lanes: list[str] | None = None
+    naming_themes: list[str] | None = None
     avoid_endings: list[str] | None = None
     nickname_tolerance: Literal["low", "medium", "high"] | None = None
     length_pref: Literal["short", "short-to-medium", "any"] | None = None
@@ -46,6 +46,7 @@ class SessionProfile(BaseModel):
     """Complete parsed session profile from client brief."""
 
     raw_brief: str
+    gender: Literal["boy", "girl", "unknown"] | None = None
     family: HonorNames | None = None
     preferences: Preferences | None = None
     themes: list[str] | None = None

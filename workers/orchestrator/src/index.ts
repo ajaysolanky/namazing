@@ -61,14 +61,14 @@ const CONCURRENCY = Number(process.env.AGENT_CONCURRENCY ?? "8");
 
 type Candidate = {
   name: string;
-  lane: string;
+  theme: string;
   rationale: string;
   theme_links: string[];
 };
 
 const CandidateInputSchema = z.object({
   name: z.string(),
-  lane: z.string(),
+  theme: z.string(),
   rationale: z.string(),
   theme_links: z.union([z.array(z.string()), z.string()]).optional(),
 });
@@ -80,7 +80,7 @@ const CandidateArraySchema = z
   .transform((items): Candidate[] =>
     items.map((item) => ({
       name: item.name,
-      lane: item.lane,
+      theme: item.theme,
       rationale: item.rationale,
       theme_links: Array.isArray(item.theme_links)
         ? item.theme_links
@@ -377,7 +377,7 @@ function shouldLimitCandidates(mode: RunMode) {
   return mode === "serial";
 }
 
-const SAMPLE_LANES_GIRL: Record<string, string[]> = {
+const SAMPLE_THEMES_GIRL: Record<string, string[]> = {
   "traditional feminine": ["Eleanor", "Margot", "Vivienne", "Helena", "Clara"],
   literary: ["Isolde", "Beatrice", "Ophelia", "Rowena", "Celeste"],
   nature: ["Iris", "Willow", "Juniper", "Wren", "Marigold"],
@@ -385,7 +385,7 @@ const SAMPLE_LANES_GIRL: Record<string, string[]> = {
   heritage: ["Liora", "Mireille", "Annelise", "Sabine", "Selene"],
 };
 
-const SAMPLE_LANES_BOY: Record<string, string[]> = {
+const SAMPLE_THEMES_BOY: Record<string, string[]> = {
   "classic masculine": ["James", "William", "Thomas", "Henry", "Arthur"],
   literary: ["Atticus", "Holden", "Sawyer", "Finn", "Sebastian"],
   nature: ["River", "Rowan", "Jasper", "August", "Silas"],
@@ -393,7 +393,7 @@ const SAMPLE_LANES_BOY: Record<string, string[]> = {
   heritage: ["Killian", "Otto", "Maddox", "Merrick", "Malcolm"],
 };
 
-const SAMPLE_LANES = SAMPLE_LANES_GIRL; // Default for backwards compat if needed
+const SAMPLE_THEMES = SAMPLE_THEMES_GIRL; // Default for backwards compat if needed
 
 type ResearchToolsSnapshot = {
   heuristics: {
@@ -468,6 +468,7 @@ function stubProfile(brief: string): SessionProfile {
 
   return SessionProfileSchema.parse({
     raw_brief: brief,
+    gender: isBoy ? "boy" : isGirl ? "girl" : "unknown",
     family: {
       surname: surnameMatch ? surnameMatch[1].trim() : undefined,
       siblings,
@@ -475,7 +476,7 @@ function stubProfile(brief: string): SessionProfile {
       special_initials_include: initials,
     },
     preferences: {
-      style_lanes: isBoy ? Object.keys(SAMPLE_LANES_BOY) : Object.keys(SAMPLE_LANES_GIRL),
+      naming_themes: isBoy ? Object.keys(SAMPLE_THEMES_BOY) : Object.keys(SAMPLE_THEMES_GIRL),
       length_pref: "short-to-medium",
       nickname_tolerance: "medium",
     },
@@ -487,9 +488,9 @@ function stubProfile(brief: string): SessionProfile {
 
 function stubCandidates(profile?: SessionProfile): Candidate[] {
   const entries: Candidate[] = [];
-  // Heuristic: check if the first lane in preferences matches a boy lane key
-  const isBoy = profile?.preferences?.style_lanes?.some(lane => Object.keys(SAMPLE_LANES_BOY).includes(lane)) ?? false;
-  const source = isBoy ? SAMPLE_LANES_BOY : SAMPLE_LANES_GIRL;
+  // Use the explicit gender field from the profile
+  const isBoy = profile?.gender === "boy";
+  const source = isBoy ? SAMPLE_THEMES_BOY : SAMPLE_THEMES_GIRL;
 
   // Extract user favorites from brief
   // Matches "So far we have A, B, C..."
@@ -511,19 +512,19 @@ function stubCandidates(profile?: SessionProfile): Candidate[] {
   likedNames.forEach(name => {
       entries.push({
         name,
-        lane: "user-favorite",
+        theme: "user-favorite",
         rationale: "Explicitly mentioned as a contender in the brief.",
         theme_links: [],
       });
   });
 
-  Object.entries(source).forEach(([lane, names]) => {
+  Object.entries(source).forEach(([theme, names]) => {
     names.forEach((name) => {
       if (!likedNames.has(name)) {
         entries.push({
           name,
-          lane,
-          rationale: `${name} carries a ${lane} energy that suits the brief.`,
+          theme,
+          rationale: `${name} carries a ${theme} energy that suits the brief.`,
           theme_links: [],
         });
       }
@@ -534,7 +535,7 @@ function stubCandidates(profile?: SessionProfile): Candidate[] {
   return entries.filter(e => !hardVetoes.includes(e.name));
 }
 
-function stubCard(name: string, lane: string, profile: SessionProfile): NameCard {
+function stubCard(name: string, theme: string, profile: SessionProfile): NameCard {
   const syllables = countSyllables(name);
   const ipa = roughIPA(name);
   const honorNames = profile.family?.honor_names ?? [];
@@ -542,9 +543,10 @@ function stubCard(name: string, lane: string, profile: SessionProfile): NameCard
 
   return NameCardSchema.parse({
     name,
+    theme,
     ipa,
     syllables,
-    meaning: `${lane} inspired meaning placeholder for ${name}.`,
+    meaning: `${theme} inspired meaning placeholder for ${name}.`,
     origins: ["Stub"],
     variants: [`${name}a`, `${name}e`].filter((variant) => variant !== name),
     nicknames: {
@@ -829,7 +831,7 @@ export class OrchestratorService {
       t: "activity",
       runId: record.id,
       agent: "generator",
-      msg: "creating name lanes",
+      msg: "creating naming themes",
     });
 
     if (USE_STUBS) {
@@ -923,7 +925,7 @@ export class OrchestratorService {
 
       if (USE_STUBS) {
         await delay(120);
-        const card = stubCard(candidate.name, candidate.lane, profile);
+        const card = stubCard(candidate.name, candidate.theme, profile);
         this.emit(record, {
           t: "partial",
           runId: record.id,
@@ -951,7 +953,7 @@ export class OrchestratorService {
             note: "You have access to the browser.run tool for web searches. Use it to find name meanings, origins, popularity, and cultural context. Cite sources conversationally.",
           },
         };
-        const card = await runJsonAgent<NameCard>({
+        const rawCard = await runJsonAgent<NameCard>({
           promptSlug: "researcher",
           model: DEFAULT_MODELS.nameResearcher,
           userInput: JSON.stringify(userPayload),
@@ -959,6 +961,9 @@ export class OrchestratorService {
           temperature: 0.4,
           enableTools: true,
         });
+
+        // Preserve the generator's theme on the researched card
+        const card: NameCard = { ...rawCard, theme: rawCard.theme ?? candidate.theme };
 
         this.emit(record, {
           t: "partial",
@@ -984,7 +989,7 @@ export class OrchestratorService {
           name: candidate.name,
           msg: `Researcher fell back to stub data: ${msg}`,
         });
-        const card = stubCard(candidate.name, candidate.lane, profile);
+        const card = stubCard(candidate.name, candidate.theme, profile);
         this.emit(record, {
           t: "partial",
           runId: record.id,

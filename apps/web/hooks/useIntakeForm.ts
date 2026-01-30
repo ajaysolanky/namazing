@@ -150,12 +150,12 @@ export function useIntakeForm() {
 
 // Transform form data to SessionProfile format for API
 export function transformToSessionProfile(data: IntakeFormData) {
-  const styleLanes: string[] = [];
-  if (data.stylePreferences.includes("classic")) styleLanes.push("classic");
-  if (data.stylePreferences.includes("modern")) styleLanes.push("modern");
-  if (data.stylePreferences.includes("unique")) styleLanes.push("unique");
-  if (data.stylePreferences.includes("traditional")) styleLanes.push("traditional");
-  if (data.stylePreferences.includes("nature")) styleLanes.push("nature-inspired");
+  const namingThemes: string[] = [];
+  if (data.stylePreferences.includes("classic")) namingThemes.push("classic");
+  if (data.stylePreferences.includes("modern")) namingThemes.push("modern");
+  if (data.stylePreferences.includes("unique")) namingThemes.push("unique");
+  if (data.stylePreferences.includes("traditional")) namingThemes.push("traditional");
+  if (data.stylePreferences.includes("nature")) namingThemes.push("nature-inspired");
 
   // Build raw brief from form data
   const briefParts: string[] = [];
@@ -175,8 +175,8 @@ export function transformToSessionProfile(data: IntakeFormData) {
     briefParts.push(`Siblings: ${siblingStr}.`);
   }
 
-  if (styleLanes.length > 0) {
-    briefParts.push(`Style preferences: ${styleLanes.join(", ")}.`);
+  if (namingThemes.length > 0) {
+    briefParts.push(`Style preferences: ${namingThemes.join(", ")}.`);
   }
 
   if (data.lengthPreference !== "any") {
@@ -212,6 +212,7 @@ export function transformToSessionProfile(data: IntakeFormData) {
 
   return {
     raw_brief: briefParts.join(" "),
+    gender: data.babyGender ?? "unknown",
     family: {
       surname: data.surname,
       siblings: data.siblings.map((s) => s.name).filter(Boolean),
@@ -220,7 +221,7 @@ export function transformToSessionProfile(data: IntakeFormData) {
       special_initials_avoid: [],
     },
     preferences: {
-      style_lanes: styleLanes,
+      naming_themes: namingThemes,
       avoid_endings: [],
       nickname_tolerance: data.nicknameTolerance,
       length_pref: data.lengthPreference,

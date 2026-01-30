@@ -32,7 +32,7 @@ NOTE: This example shows the OUTPUT FORMAT only. The names shown are placeholder
 
 2. **MUTUAL EXCLUSIVITY**: A name can appear in EITHER finalists OR near_misses, never both. Finalists are your top recommendations; near_misses are names that almost made it but had specific drawbacks.
 
-3. **GENDER ACCURACY**: Only select names appropriate for the specified gender. If gender is unknown, ensure balanced representation.
+3. **GENDER ACCURACY**: Use `SessionProfile.gender` as the authoritative gender. Only select names appropriate for that gender. If gender is "unknown", ensure balanced representation.
 
 4. **CULTURAL FIT**: If multiple cultures are specified, ensure finalists represent a balanced mix - do NOT skew heavily toward one culture.
 

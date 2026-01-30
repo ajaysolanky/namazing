@@ -20,7 +20,7 @@ Look for ANY explicit constraints in the brief such as:
 - Length requirements (e.g., "2-3 syllables only")
 
 ## CHECK 2: GENDER MATCH
-If the brief specifies a gender (e.g., "expecting a girl", "baby boy"):
+Use `SessionProfile.gender` as the authoritative gender signal ("boy", "girl", or "unknown"):
 - Flag any names that are clearly the wrong gender
 - Flag names that are typically the opposite gender in the specified cultural context
 

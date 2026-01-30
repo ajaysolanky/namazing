@@ -53,6 +53,7 @@ class NameCard(BaseModel):
     """Complete research card for a candidate name."""
 
     name: str
+    theme: str | None = None
     ipa: str
     syllables: int
     meaning: str | None = None

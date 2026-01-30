@@ -13,6 +13,22 @@ import { fetchResult } from "@/lib/api";
 import type { ActivityEvent, NameCard } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+// Soft color palette for naming themes — cycled by index
+const THEME_COLORS = [
+  { bg: "bg-sky-50", border: "border-sky-200", dot: "bg-sky-400" },
+  { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-400" },
+  { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-400" },
+  { bg: "bg-violet-50", border: "border-violet-200", dot: "bg-violet-400" },
+  { bg: "bg-rose-50", border: "border-rose-200", dot: "bg-rose-400" },
+  { bg: "bg-teal-50", border: "border-teal-200", dot: "bg-teal-400" },
+  { bg: "bg-orange-50", border: "border-orange-200", dot: "bg-orange-400" },
+] as const;
+
+function getThemeColor(theme: string, allThemes: string[]) {
+  const index = allThemes.indexOf(theme);
+  return THEME_COLORS[index >= 0 ? index % THEME_COLORS.length : 0];
+}
+
 interface ProcessingViewProps {
   runId: string;
 }
@@ -24,9 +40,29 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [topNames, setTopNames] = useState<string[]>([]);
+  const [themes, setThemes] = useState<string[]>([]);
+  const [nameThemeMap, setNameThemeMap] = useState<Record<string, string>>({});
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleEvent = useCallback((event: ActivityEvent) => {
     setEvents((prev) => [...prev, event]);
+
+    // Extract unique themes and name→theme mapping from generator partial events
+    if (event.t === "partial" && event.agent === "generator" && event.field === "candidates") {
+      const candidates = event.value as Array<{ name?: string; theme?: string }> | undefined;
+      if (Array.isArray(candidates)) {
+        const uniqueThemes = [...new Set(
+          candidates.map((c) => c.theme).filter((t): t is string => !!t && t !== "user-favorite")
+        )];
+        setThemes(uniqueThemes);
+
+        const mapping: Record<string, string> = {};
+        for (const c of candidates) {
+          if (c.name && c.theme) mapping[c.name] = c.theme;
+        }
+        setNameThemeMap(mapping);
+      }
+    }
 
     // Handle result and partial events
     if (event.t === "result" || event.t === "partial") {
@@ -69,7 +105,8 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
     return () => unsubscribe();
   }, [runId, handleEvent]);
 
-  const handleViewResults = async () => {
+  const handleViewResults = () => {
+    setIsNavigating(true);
     router.push(`/report/${runId}`);
   };
 
@@ -189,7 +226,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
             transition={{ delay: 0.1 }}
           >
             <Card variant="cream" padding="lg">
-              <StageIndicator events={events} />
+              <StageIndicator events={events} themes={themes} />
             </Card>
           </motion.div>
 
@@ -233,29 +270,33 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin">
                     <AnimatePresence>
-                      {discoveredNames.map((card, index) => (
-                        <motion.div
-                          key={card.name}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.03, duration: 0.2 }}
-                          className={cn(
-                            "p-3 rounded-xl border transition-all",
-                            topNames.includes(card.name)
-                              ? "bg-studio-sage/20 border-studio-sage/30"
-                              : "bg-studio-sand/30 border-transparent hover:bg-white hover:shadow-soft"
-                          )}
-                        >
-                          <div className="font-display text-lg text-studio-ink">
-                            {card.name}
-                          </div>
-                          {card.meaning && (
-                            <div className="text-xs text-studio-ink/50 mt-1 line-clamp-2">
-                              {card.meaning}
+                      {discoveredNames.map((card, index) => {
+                        const cardTheme = nameThemeMap[card.name];
+                        const color = cardTheme ? getThemeColor(cardTheme, themes) : null;
+                        return (
+                          <motion.div
+                            key={card.name}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.03, duration: 0.2 }}
+                            className={cn(
+                              "p-3 rounded-xl border-l-[3px] transition-all",
+                              color
+                                ? `${color.bg} ${color.border}`
+                                : "bg-studio-sand/30 border-transparent"
+                            )}
+                          >
+                            <div className="font-display text-lg text-studio-ink">
+                              {card.name}
                             </div>
-                          )}
-                        </motion.div>
-                      ))}
+                            {card.meaning && (
+                              <div className="text-xs text-studio-ink/50 mt-1 line-clamp-2">
+                                {card.meaning}
+                              </div>
+                            )}
+                          </motion.div>
+                        );
+                      })}
                     </AnimatePresence>
                   </div>
                 )}
@@ -293,12 +334,35 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center gap-4"
               >
-                <Button size="lg" onClick={handleViewResults}>
-                  View your personalized report
+                <Button
+                  variant="terracotta"
+                  size="xl"
+                  shimmer
+                  onClick={handleViewResults}
+                  disabled={isNavigating}
+                >
+                  {isNavigating ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Preparing your report…
+                    </>
+                  ) : (
+                    "View your personalized report"
+                  )}
                 </Button>
-                <p className="text-sm text-studio-ink/40">
-                  Your curated shortlist with detailed insights awaits
-                </p>
+                {!isNavigating && (
+                  <p className="text-sm text-studio-ink/40">
+                    Your curated shortlist with detailed insights awaits
+                  </p>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

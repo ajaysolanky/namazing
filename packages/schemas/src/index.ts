@@ -20,7 +20,7 @@ export const HonorNamesSchema = z.object({
 });
 
 export const PreferencesSchema = z.object({
-  style_lanes: z.array(z.string()).optional(),
+  naming_themes: z.array(z.string()).optional(),
   avoid_endings: z.array(z.string()).optional(),
   nickname_tolerance: z.enum(["low", "medium", "high"]).optional(),
   length_pref: z.enum(["short", "short-to-medium", "any"]).optional(),
@@ -35,6 +35,7 @@ export const VetoSchema = z.object({
 
 export const SessionProfileSchema = z.object({
   raw_brief: z.string(),
+  gender: z.enum(["boy", "girl", "unknown"]).optional(),
   family: HonorNamesSchema.optional(),
   preferences: PreferencesSchema.optional(),
   themes: flexibleStringArray,
@@ -80,6 +81,7 @@ const ComboSchema = z.object({
 
 export const NameCardSchema = z.object({
   name: z.string(),
+  theme: z.string().optional(),
   ipa: z.string(),
   syllables: z.number(),
   meaning: z.string().nullable().optional(),

@@ -18,38 +18,29 @@ interface FinalistCardProps {
   index?: number;
 }
 
-// Cultural accent colors and styles based on origin
-function getCulturalStyle(origins: string[] | null | undefined) {
-  if (!origins || origins.length === 0) return null;
+// Theme color palette — matches the processing page's THEME_COLORS
+const THEME_STYLES = [
+  { bg: "bg-sky-50", text: "text-sky-700", dot: "bg-sky-400", accent: "#38bdf8" },
+  { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400", accent: "#fbbf24" },
+  { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400", accent: "#34d399" },
+  { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-400", accent: "#a78bfa" },
+  { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-400", accent: "#fb7185" },
+  { bg: "bg-teal-50", text: "text-teal-700", dot: "bg-teal-400", accent: "#2dd4bf" },
+  { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400", accent: "#fb923c" },
+] as const;
 
-  const origin = origins[0].toLowerCase();
+// Stable hash so the same theme always gets the same color
+function hashTheme(theme: string): number {
+  let hash = 0;
+  for (let i = 0; i < theme.length; i++) {
+    hash = (hash * 31 + theme.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
 
-  // Chinese/East Asian
-  if (origin.includes("chinese") || origin.includes("mandarin") || origin.includes("cantonese")) {
-    return { accentColor: "#dc2626", borderClass: "cultural-chinese", label: "Chinese" };
-  }
-  // Irish/Celtic
-  if (origin.includes("irish") || origin.includes("celtic") || origin.includes("gaelic")) {
-    return { accentColor: "#16a34a", borderClass: "cultural-irish", label: "Irish" };
-  }
-  // Hebrew/Jewish
-  if (origin.includes("hebrew") || origin.includes("jewish")) {
-    return { accentColor: "#2563eb", borderClass: "cultural-hebrew", label: "Hebrew" };
-  }
-  // Arabic
-  if (origin.includes("arabic") || origin.includes("muslim")) {
-    return { accentColor: "#d97706", borderClass: "cultural-arabic", label: "Arabic" };
-  }
-  // Japanese
-  if (origin.includes("japanese")) {
-    return { accentColor: "#e11d48", borderClass: "cultural-japanese", label: "Japanese" };
-  }
-  // Indian/Sanskrit
-  if (origin.includes("indian") || origin.includes("sanskrit") || origin.includes("hindi")) {
-    return { accentColor: "#ea580c", borderClass: "cultural-indian", label: "Indian" };
-  }
-
-  return null;
+function getThemeStyle(theme: string | undefined | null) {
+  if (!theme || theme === "user-favorite") return null;
+  return THEME_STYLES[hashTheme(theme) % THEME_STYLES.length];
 }
 
 export function FinalistCard({
@@ -63,7 +54,7 @@ export function FinalistCard({
   const isTopPick = index === 0;
   const isTopThree = index < 3;
 
-  const culturalStyle = getCulturalStyle(nameCard?.origins);
+  const themeStyle = getThemeStyle(nameCard?.theme);
 
   // Get a meaningful descriptor for the name
   const getMeaningPreview = () => {
@@ -123,10 +114,7 @@ export function FinalistCard({
             ))}
           </div>
 
-          <div className={cn(
-            "relative p-10 sm:p-14 lg:p-16",
-            culturalStyle?.borderClass
-          )}>
+          <div className="relative p-10 sm:p-14 lg:p-16">
             {/* Top pick badge */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -176,11 +164,20 @@ export function FinalistCard({
                   {nameCard.syllables} syllable{nameCard.syllables !== 1 ? "s" : ""}
                 </span>
               )}
+              {nameCard?.theme && nameCard.theme !== "user-favorite" && (
+                <span
+                  className={cn(
+                    "px-4 py-2 rounded-full text-sm font-medium shadow-soft",
+                    themeStyle ? `${themeStyle.bg} ${themeStyle.text}` : "bg-white/80 text-studio-ink/70"
+                  )}
+                >
+                  {nameCard.theme}
+                </span>
+              )}
               {nameCard?.origins?.slice(0, 2).map((origin) => (
                 <span
                   key={origin}
                   className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-studio-ink/70 shadow-soft"
-                  style={culturalStyle ? { borderLeft: `3px solid ${culturalStyle.accentColor}` } : undefined}
                 >
                   {origin}
                 </span>
@@ -282,7 +279,6 @@ export function FinalistCard({
           className={cn(
             "relative h-full flex flex-col bg-white rounded-3xl overflow-hidden",
             isTopThree ? "shadow-glow" : "shadow-card",
-            culturalStyle?.borderClass
           )}
         >
           {/* Top accent bar */}
@@ -293,7 +289,7 @@ export function FinalistCard({
                 ? "bg-gradient-to-r from-studio-rose via-studio-sage to-studio-rose"
                 : "bg-gradient-to-r from-studio-sand via-studio-sage/30 to-studio-sand"
             )}
-            style={culturalStyle ? { background: `linear-gradient(90deg, ${culturalStyle.accentColor}40, ${culturalStyle.accentColor}20)` } : undefined}
+            style={themeStyle ? { background: `linear-gradient(90deg, ${themeStyle.accent}66, ${themeStyle.accent}33)` } : undefined}
           />
 
           <div className="p-6 sm:p-8 flex flex-col flex-1">
@@ -316,12 +312,15 @@ export function FinalistCard({
                   </>
                 )}
               </span>
-              {culturalStyle && (
+              {nameCard?.theme && nameCard.theme !== "user-favorite" && themeStyle && (
                 <span
-                  className="text-xs px-2 py-1 rounded-full"
-                  style={{ backgroundColor: `${culturalStyle.accentColor}15`, color: culturalStyle.accentColor }}
+                  className={cn(
+                    "text-xs px-2.5 py-1 rounded-full font-medium",
+                    themeStyle.bg,
+                    themeStyle.text,
+                  )}
                 >
-                  {culturalStyle.label}
+                  {nameCard.theme}
                 </span>
               )}
             </div>
@@ -347,8 +346,7 @@ export function FinalistCard({
             {meaningPreview && (
               <p className="text-sm text-studio-ink/60 font-medium mb-3 flex items-center gap-2">
                 <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: culturalStyle?.accentColor || "#d7e3d4" }}
+                  className={cn("w-1.5 h-1.5 rounded-full", themeStyle?.dot || "bg-studio-sage")}
                 />
                 {meaningPreview}
               </p>

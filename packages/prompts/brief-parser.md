@@ -9,6 +9,7 @@ CRITICAL: Read the ENTIRE brief carefully. Do not skip any sections. Clients oft
 
 Expected JSON Structure:
 {
+  "gender": "boy/girl/unknown",
   "family": {
     "surname": "string or null",
     "siblings": ["string"],
@@ -17,7 +18,7 @@ Expected JSON Structure:
     "middle_names": {"boy": "string or null", "girl": "string or null"}
   },
   "preferences": {
-    "style_lanes": ["string"],
+    "naming_themes": ["string"],
     "nickname_tolerance": "low/medium/high",
     "length_pref": "short/short-to-medium/any",
     "cultural_bounds": ["string"],

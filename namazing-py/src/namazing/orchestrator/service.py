@@ -397,7 +397,7 @@ class OrchestratorService:
             ActivityEvent(
                 run_id=record.id,
                 agent="generator",
-                msg="creating name lanes",
+                msg="creating naming themes",
             ),
         )
 
@@ -417,7 +417,7 @@ class OrchestratorService:
                     value=[
                         {
                             "name": c.name,
-                            "lane": c.lane,
+                            "theme": c.theme,
                             "rationale": c.rationale,
                             "theme_links": c.theme_links,
                         }
@@ -432,6 +432,10 @@ class OrchestratorService:
                     agent="generator",
                     payload=candidates,
                 ),
+            )
+            self._emit(
+                record,
+                DoneEvent(run_id=record.id, agent="generator"),
             )
             return candidates
 
@@ -459,7 +463,7 @@ class OrchestratorService:
             candidates = [
                 Candidate(
                     name=item.get("name", ""),
-                    lane=item.get("lane", ""),
+                    theme=item.get("theme", ""),
                     rationale=item.get("rationale", ""),
                     theme_links=item.get("theme_links", [])
                     if isinstance(item.get("theme_links"), list)
@@ -501,7 +505,7 @@ class OrchestratorService:
                     value=[
                         {
                             "name": c.name,
-                            "lane": c.lane,
+                            "theme": c.theme,
                             "rationale": c.rationale,
                             "theme_links": c.theme_links,
                         }
@@ -516,6 +520,10 @@ class OrchestratorService:
                     agent="generator",
                     payload=candidates,
                 ),
+            )
+            self._emit(
+                record,
+                DoneEvent(run_id=record.id, agent="generator"),
             )
             return candidates
 
@@ -541,7 +549,7 @@ class OrchestratorService:
                     value=[
                         {
                             "name": c.name,
-                            "lane": c.lane,
+                            "theme": c.theme,
                             "rationale": c.rationale,
                             "theme_links": c.theme_links,
                         }
@@ -556,6 +564,10 @@ class OrchestratorService:
                     agent="generator",
                     payload=candidates,
                 ),
+            )
+            self._emit(
+                record,
+                DoneEvent(run_id=record.id, agent="generator"),
             )
             return candidates
 
@@ -584,7 +596,7 @@ class OrchestratorService:
 
             if use_stubs():
                 await asyncio.sleep(0.12)
-                card = stub_card(candidate.name, candidate.lane, profile)
+                card = stub_card(candidate.name, candidate.theme, profile)
                 self._emit(
                     record,
                     PartialEvent(
@@ -611,7 +623,7 @@ class OrchestratorService:
                     "sessionProfile": profile.model_dump(),
                     "candidate": {
                         "name": candidate.name,
-                        "lane": candidate.lane,
+                        "theme": candidate.theme,
                         "rationale": candidate.rationale,
                         "theme_links": candidate.theme_links,
                     },
@@ -628,6 +640,10 @@ class OrchestratorService:
                     schema=NameCard,
                     temperature=0.4,
                 )
+
+                # Preserve the generator's theme on the researched card
+                if not card.theme:
+                    card.theme = candidate.theme
 
                 self._emit(
                     record,
@@ -663,7 +679,7 @@ class OrchestratorService:
                         msg=f"Researcher fell back to stub data: {error_msg}",
                     ),
                 )
-                card = stub_card(candidate.name, candidate.lane, profile)
+                card = stub_card(candidate.name, candidate.theme, profile)
                 self._emit(
                     record,
                     PartialEvent(

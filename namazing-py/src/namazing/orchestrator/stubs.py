@@ -17,8 +17,8 @@ from namazing.schemas.result import Report
 from namazing.tools.phonetics import rough_ipa, count_syllables
 
 
-# Sample name lanes for stub generation
-SAMPLE_LANES_GIRL: dict[str, list[str]] = {
+# Sample naming themes for stub generation
+SAMPLE_THEMES_GIRL: dict[str, list[str]] = {
     "traditional feminine": ["Eleanor", "Margot", "Vivienne", "Helena", "Clara"],
     "literary": ["Isolde", "Beatrice", "Ophelia", "Rowena", "Celeste"],
     "nature": ["Iris", "Willow", "Juniper", "Wren", "Marigold"],
@@ -26,7 +26,7 @@ SAMPLE_LANES_GIRL: dict[str, list[str]] = {
     "heritage": ["Liora", "Mireille", "Annelise", "Sabine", "Selene"],
 }
 
-SAMPLE_LANES_BOY: dict[str, list[str]] = {
+SAMPLE_THEMES_BOY: dict[str, list[str]] = {
     "classic masculine": ["James", "William", "Thomas", "Henry", "Arthur"],
     "literary": ["Atticus", "Holden", "Sawyer", "Finn", "Sebastian"],
     "nature": ["River", "Rowan", "Jasper", "August", "Silas"],
@@ -43,12 +43,12 @@ class Candidate:
     def __init__(
         self,
         name: str,
-        lane: str,
+        theme: str,
         rationale: str,
         theme_links: list[str] | None = None,
     ):
         self.name = name
-        self.lane = lane
+        self.theme = theme
         self.rationale = rationale
         self.theme_links = theme_links or []
 
@@ -80,10 +80,13 @@ def stub_profile(brief: str) -> SessionProfile:
     if initials_match:
         initials = [i.strip() for i in re.split(r"[,\s]+", initials_match.group(1)) if i.strip()]
 
-    style_lanes = list(SAMPLE_LANES_BOY.keys()) if is_boy else list(SAMPLE_LANES_GIRL.keys())
+    naming_themes = list(SAMPLE_THEMES_BOY.keys()) if is_boy else list(SAMPLE_THEMES_GIRL.keys())
+
+    gender = "boy" if is_boy else "girl" if is_girl else "unknown"
 
     return SessionProfile(
         raw_brief=brief,
+        gender=gender,
         family=HonorNames(
             surname=surname_match.group(1).strip() if surname_match else None,
             siblings=siblings,
@@ -91,12 +94,12 @@ def stub_profile(brief: str) -> SessionProfile:
             special_initials_include=initials,
         ),
         preferences=Preferences(
-            style_lanes=style_lanes,
+            naming_themes=naming_themes,
             length_pref="short-to-medium",
             nickname_tolerance="medium",
         ),
         region=[DEFAULT_REGION],
-        comments=f"Stubbed profile derived heuristically. Detected gender: {'boy' if is_boy else 'girl'}.",
+        comments=f"Stubbed profile derived heuristically. Detected gender: {gender}.",
     )
 
 
@@ -104,30 +107,18 @@ def stub_candidates(profile: SessionProfile | None = None) -> list[Candidate]:
     """Generate stubbed candidate names based on profile."""
     candidates: list[Candidate] = []
 
-    # Determine which lane set to use
-    is_girl = False
+    # Determine which theme set to use from the explicit gender field
+    is_girl = profile.gender == "girl" if profile and profile.gender else False
 
-    # Try to determine from parsed preferences
-    if profile and profile.preferences and profile.preferences.style_lanes:
-        is_girl = "traditional feminine" in profile.preferences.style_lanes
-    # Fallback: check raw brief if preferences are missing
-    elif profile and profile.raw_brief:
-        # Simple heuristic for gender (reusing logic from stub_profile)
-        brief = profile.raw_brief
-        is_boy_term = bool(re.search(r"\b(boy|son|brother|male)\b", brief, re.IGNORECASE))
-        is_girl_term = bool(re.search(r"\b(girl|daughter|sister|female)\b", brief, re.IGNORECASE))
-        if is_girl_term and not (is_boy_term and not is_girl_term):
-            is_girl = True
+    source = SAMPLE_THEMES_GIRL if is_girl else SAMPLE_THEMES_BOY
 
-    source = SAMPLE_LANES_GIRL if is_girl else SAMPLE_LANES_BOY
-
-    for lane, names in source.items():
+    for theme, names in source.items():
         for name in names:
             candidates.append(
                 Candidate(
                     name=name,
-                    lane=lane,
-                    rationale=f"{name} carries a {lane} energy that suits the brief.",
+                    theme=theme,
+                    rationale=f"{name} carries a {theme} energy that suits the brief.",
                     theme_links=[],
                 )
             )
@@ -161,7 +152,7 @@ def _honour_combos(name: str, honor_names: list[str]) -> list[Combo]:
     ]
 
 
-def stub_card(name: str, lane: str, profile: SessionProfile) -> NameCard:
+def stub_card(name: str, theme: str, profile: SessionProfile) -> NameCard:
     """Generate a stubbed NameCard for a candidate."""
     syllables = count_syllables(name)
     ipa = rough_ipa(name)
@@ -181,9 +172,10 @@ def stub_card(name: str, lane: str, profile: SessionProfile) -> NameCard:
 
     return NameCard(
         name=name,
+        theme=theme,
         ipa=ipa,
         syllables=syllables,
-        meaning=f"{lane} inspired meaning placeholder for {name}.",
+        meaning=f"{theme} inspired meaning placeholder for {name}.",
         origins=["Stub"],
         variants=[f"{name}a", f"{name}e"],
         nicknames=Nickname(

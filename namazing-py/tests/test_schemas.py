@@ -49,13 +49,14 @@ class TestSessionProfile:
         """Test creating a full profile."""
         profile = SessionProfile(
             raw_brief="Full brief text",
+            gender="girl",
             family=HonorNames(
                 surname="Smith",
                 siblings=["Alice", "Bob"],
                 honor_names=["Mary"],
             ),
             preferences=Preferences(
-                style_lanes=["classic", "modern"],
+                naming_themes=["classic", "modern"],
                 nickname_tolerance="high",
                 length_pref="short",
             ),
