@@ -8,106 +8,217 @@ import {
 } from "@react-pdf/renderer";
 import type { RunResult } from "@/lib/types";
 
-// Use Hyphenation callback to disable it (can cause issues)
+// Disable hyphenation (can cause layout issues)
 Font.registerHyphenationCallback((word) => [word]);
 
-// Note: Using built-in Helvetica font family for compatibility
-// Custom fonts can be added later with proper TTF files
+// Register Playfair Display for headings (serif, premium feel)
+Font.register({
+  family: "Playfair Display",
+  fonts: [
+    {
+      src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.ttf",
+      fontWeight: 400,
+    },
+    {
+      src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd6u3DXbtM.ttf",
+      fontWeight: 700,
+    },
+    {
+      src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTbtbK-F2rA0s.ttf",
+      fontStyle: "italic",
+      fontWeight: 400,
+    },
+  ],
+});
 
-// Design tokens
+// Register Lato for body text (clean sans-serif)
+Font.register({
+  family: "Lato",
+  fonts: [
+    {
+      src: "https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjxAwXjeu.ttf",
+      fontWeight: 300,
+    },
+    {
+      src: "https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wXg.ttf",
+      fontWeight: 400,
+    },
+    {
+      src: "https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwaPGR_p.ttf",
+      fontWeight: 700,
+    },
+  ],
+});
+
+// Design tokens — refined palette
 const colors = {
-  sand: "#f5efe6",
-  ink: "#1f2933",
-  rose: "#f8d4d8",
-  sage: "#d7e3d4",
-  cream: "#faf8f5",
-  inkLight: "#1f293399",
-  inkLighter: "#1f293366",
+  background: "#FAF9F6",
+  ink: "#2D2D2D",
+  inkBody: "#4A4A4A",
+  inkMuted: "#6B6B6B",
+  inkFaint: "#9B9B9B",
+  rose: "#f0d0d4",
+  sage: "#8BA889",
+  terracotta: "#C4725A",
+  cream: "#F5F2ED",
+  white: "#FFFFFF",
+  border: "rgba(0,0,0,0.06)",
 };
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: colors.sand,
+    backgroundColor: colors.background,
     padding: 48,
-    fontFamily: "Helvetica",
-    fontSize: 11,
-    color: colors.ink,
+    fontFamily: "Lato",
+    fontSize: 10.5,
+    fontWeight: 300,
+    color: colors.inkBody,
   },
+
+  // Header
   header: {
-    marginBottom: 32,
+    marginBottom: 36,
     textAlign: "center",
   },
   logo: {
-    fontFamily: "Times-Roman",
-    fontSize: 24,
-    color: colors.inkLight,
-    marginBottom: 8,
-  },
-  title: {
-    fontFamily: "Times-Roman",
-    fontSize: 32,
-    color: colors.ink,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: colors.inkLight,
+    fontFamily: "Lato",
+    fontSize: 8,
+    fontWeight: 400,
+    color: colors.inkMuted,
     textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  summary: {
-    fontSize: 12,
-    color: colors.inkLight,
-    lineHeight: 1.6,
-    textAlign: "center",
-    marginBottom: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontFamily: "Times-Roman",
-    fontSize: 20,
-    color: colors.ink,
-    marginBottom: 16,
-    marginTop: 24,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
+    letterSpacing: 4,
     marginBottom: 12,
   },
-  cardName: {
-    fontFamily: "Times-Roman",
-    fontSize: 18,
+  title: {
+    fontFamily: "Playfair Display",
+    fontSize: 36,
+    fontWeight: 700,
     color: colors.ink,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-  cardIpa: {
+  subtitle: {
+    fontFamily: "Lato",
     fontSize: 10,
-    color: colors.inkLighter,
-    marginBottom: 8,
+    fontWeight: 300,
+    color: colors.inkMuted,
+    letterSpacing: 0.5,
+  },
+
+  // Summary
+  summary: {
+    fontFamily: "Lato",
+    fontSize: 11,
+    fontWeight: 300,
+    color: colors.inkBody,
+    lineHeight: 1.7,
+    textAlign: "center",
+    marginBottom: 36,
+    paddingHorizontal: 48,
+    maxWidth: 480,
+    alignSelf: "center",
+  },
+
+  // Divider
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 24,
+    marginHorizontal: 80,
+  },
+
+  // Section titles
+  sectionTitle: {
+    fontFamily: "Playfair Display",
+    fontSize: 22,
+    fontWeight: 400,
+    color: colors.ink,
+    marginBottom: 16,
+    marginTop: 28,
+  },
+
+  // Name cards
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 28,
+    marginBottom: 14,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
+    shadowRadius: 30,
+  },
+  cardRank: {
+    fontFamily: "Lato",
+    fontSize: 8,
+    fontWeight: 400,
+    color: colors.inkFaint,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  cardName: {
+    fontFamily: "Playfair Display",
+    fontSize: 22,
+    fontWeight: 700,
+    color: colors.ink,
+    marginBottom: 3,
+  },
+  cardPronunciation: {
+    fontFamily: "Lato",
+    fontSize: 9,
+    fontWeight: 300,
+    color: colors.inkFaint,
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  cardMeaning: {
+    fontFamily: "Lato",
+    fontSize: 9.5,
+    fontWeight: 400,
+    color: colors.terracotta,
+    marginBottom: 6,
   },
   cardText: {
+    fontFamily: "Lato",
     fontSize: 10,
-    color: colors.inkLight,
-    lineHeight: 1.5,
+    fontWeight: 300,
+    color: colors.inkBody,
+    lineHeight: 1.6,
   },
+
+  // Combo / pairing box
   comboCard: {
-    backgroundColor: colors.cream,
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 12,
+  },
+  comboLabel: {
+    fontFamily: "Lato",
+    fontSize: 7.5,
+    fontWeight: 400,
+    color: colors.inkFaint,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    marginBottom: 4,
   },
   comboName: {
-    fontFamily: "Times-Roman",
-    fontSize: 14,
+    fontFamily: "Playfair Display",
+    fontStyle: "italic",
+    fontSize: 15,
     color: colors.ink,
     marginBottom: 4,
   },
   comboWhy: {
+    fontFamily: "Lato",
     fontSize: 9,
-    color: colors.inkLight,
+    fontWeight: 300,
+    color: colors.inkMuted,
+    lineHeight: 1.5,
   },
+
+  // Grid layout
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -118,48 +229,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     marginBottom: 12,
   },
+
+  // Tradeoffs
   tradeoffCard: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: colors.white,
+    borderRadius: 10,
+    padding: 14,
     marginBottom: 8,
     flexDirection: "row",
   },
   tradeoffNumber: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: colors.rose,
-    marginRight: 8,
+    marginRight: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   tradeoffNumberText: {
+    fontFamily: "Lato",
     fontSize: 9,
-    color: colors.inkLight,
+    fontWeight: 400,
+    color: colors.inkBody,
   },
   tradeoffText: {
     flex: 1,
+    fontFamily: "Lato",
     fontSize: 10,
-    color: colors.inkLight,
-    lineHeight: 1.5,
+    fontWeight: 300,
+    color: colors.inkBody,
+    lineHeight: 1.6,
   },
+
+  // Near misses
   nearMissCard: {
-    backgroundColor: colors.sand,
-    borderRadius: 6,
-    padding: 8,
+    backgroundColor: colors.cream,
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 6,
   },
   nearMissName: {
-    fontWeight: 600,
-    fontSize: 10,
+    fontFamily: "Playfair Display",
+    fontSize: 11,
+    fontWeight: 400,
     color: colors.ink,
     marginBottom: 2,
   },
   nearMissReason: {
+    fontFamily: "Lato",
     fontSize: 9,
-    color: colors.inkLighter,
+    fontWeight: 300,
+    color: colors.inkMuted,
+    lineHeight: 1.4,
   },
+
+  // Footer
   footer: {
     position: "absolute",
     bottom: 32,
@@ -168,14 +293,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   footerText: {
-    fontSize: 9,
-    color: colors.inkLighter,
+    fontFamily: "Lato",
+    fontSize: 8,
+    fontWeight: 300,
+    color: colors.inkFaint,
+    letterSpacing: 0.3,
   },
   pageNumber: {
-    fontSize: 9,
-    color: colors.inkLighter,
+    fontFamily: "Lato",
+    fontSize: 8,
+    fontWeight: 300,
+    color: colors.inkFaint,
     textAlign: "center",
-    marginTop: 8,
+    marginTop: 6,
   },
 });
 
@@ -212,6 +342,19 @@ function stripMarkdown(text: string): string {
     .replace(/^\s*\d+\.\s+/gm, '')       // numbered list -> text
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [link](url) -> link
     .trim();
+}
+
+// Convert IPA to simple phonetic spelling for font safety
+function simplifyPronunciation(name: string, ipa: string | undefined): string | null {
+  if (!ipa) return null;
+  // If IPA contains characters outside basic Latin + common punctuation,
+  // generate a simple phonetic spelling from the name instead
+  const hasExoticChars = /[^\x20-\x7E]/.test(ipa);
+  if (hasExoticChars) {
+    // Build a simple pronunciation guide from the name
+    return name.toUpperCase().split('').join('-').replace(/--+/g, '-');
+  }
+  return ipa;
 }
 
 export function ReportDocument({ result }: ReportDocumentProps) {
@@ -255,36 +398,43 @@ export function ReportDocument({ result }: ReportDocumentProps) {
 
   return (
     <Document>
-      {/* Single flowing page - react-pdf will create page breaks automatically */}
       <Page size="LETTER" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>namazing</Text>
-          <Text style={styles.subtitle}>Your personalized name consultation</Text>
           <Text style={styles.title}>The {surname} Family</Text>
+          <Text style={styles.subtitle}>Your personalized name consultation</Text>
         </View>
+
+        {/* Divider */}
+        <View style={styles.divider} />
 
         {/* Summary */}
         <Text style={styles.summary}>{cleanSummary}</Text>
 
         {/* Finalists */}
         <Text style={styles.sectionTitle}>Our Top Picks</Text>
-        {result.report.finalists.map((finalist) => {
+        {result.report.finalists.map((finalist, index) => {
           const nameCard = nameCardMap.get(finalist.name.toLowerCase());
+          const pronunciation = simplifyPronunciation(finalist.name, nameCard?.ipa);
           return (
             <View key={finalist.name} style={styles.card} wrap={false}>
+              <Text style={styles.cardRank}>
+                {index === 0 ? "Top Recommendation" : `#${index + 1}`}
+              </Text>
               <Text style={styles.cardName}>{finalist.name}</Text>
-              {nameCard?.ipa && (
-                <Text style={styles.cardIpa}>{nameCard.ipa}</Text>
+              {pronunciation && (
+                <Text style={styles.cardPronunciation}>{pronunciation}</Text>
               )}
-              <Text style={styles.cardText}>{finalist.why}</Text>
               {nameCard?.meaning && (
-                <Text style={[styles.cardText, { marginTop: 4 }]}>
+                <Text style={styles.cardMeaning}>
                   Meaning: {nameCard.meaning}
                 </Text>
               )}
+              <Text style={styles.cardText}>{finalist.why}</Text>
               {finalist.combo && (
                 <View style={styles.comboCard}>
+                  <Text style={styles.comboLabel}>Suggested pairing</Text>
                   <Text style={styles.comboName}>
                     {finalist.combo.first} {finalist.combo.middle}
                   </Text>
@@ -295,14 +445,15 @@ export function ReportDocument({ result }: ReportDocumentProps) {
           );
         })}
 
-        {/* Perfect Pairings - force page break before this section */}
+        {/* Perfect Pairings */}
         {allCombos.length > 0 && (
           <View break>
             <Text style={styles.sectionTitle}>First & Middle Name Pairings</Text>
             <View style={styles.grid}>
               {allCombos.slice(0, 6).map((combo) => (
                 <View key={`${combo.first}-${combo.middle}`} style={styles.gridItem}>
-                  <View style={[styles.card, { backgroundColor: colors.cream }]} wrap={false}>
+                  <View style={[styles.card, { padding: 18 }]} wrap={false}>
+                    <Text style={styles.comboLabel}>Pairing</Text>
                     <Text style={styles.comboName}>
                       {combo.first} {combo.middle}
                     </Text>
@@ -336,7 +487,7 @@ export function ReportDocument({ result }: ReportDocumentProps) {
             <View style={styles.grid}>
               {tieBreakTips.map((tip, index) => (
                 <View key={index} style={styles.gridItem}>
-                  <View style={[styles.card, { backgroundColor: colors.cream }]}>
+                  <View style={[styles.card, { padding: 18 }]}>
                     <Text style={styles.cardText}>{tip}</Text>
                   </View>
                 </View>
@@ -365,7 +516,7 @@ export function ReportDocument({ result }: ReportDocumentProps) {
         {/* Footer */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>
-            Generated by namazing - Finding the perfect name for your little one
+            Crafted with care by namazing
           </Text>
         </View>
 
