@@ -695,6 +695,103 @@ function ipaToPhonetic(ipa: string | undefined): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Lightweight markdown-to-react-pdf renderer
+// Handles: ## headings, **bold** inline, and plain paragraphs.
+// ---------------------------------------------------------------------------
+
+type MdNode =
+  | { type: "heading"; text: string }
+  | { type: "paragraph"; segments: MdSegment[] };
+
+type MdSegment =
+  | { bold: true; text: string }
+  | { bold: false; text: string };
+
+function parseMarkdown(markdown: string): MdNode[] {
+  const lines = markdown.split("\n");
+  const nodes: MdNode[] = [];
+  let paraLines: string[] = [];
+
+  function flushParagraph() {
+    const raw = paraLines.join(" ").trim();
+    paraLines = [];
+    if (!raw) return;
+    // Parse **bold** segments
+    const segments: MdSegment[] = [];
+    const parts = raw.split(/(\*\*[^*]+\*\*)/g);
+    for (const part of parts) {
+      if (!part) continue;
+      const boldMatch = part.match(/^\*\*(.+)\*\*$/);
+      if (boldMatch) {
+        segments.push({ bold: true, text: boldMatch[1] });
+      } else {
+        segments.push({ bold: false, text: part });
+      }
+    }
+    if (segments.length > 0) {
+      nodes.push({ type: "paragraph", segments });
+    }
+  }
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.+)/);
+    if (headingMatch) {
+      flushParagraph();
+      nodes.push({ type: "heading", text: headingMatch[1].trim() });
+      continue;
+    }
+    // Skip top-level headings (# Title) — the section title is rendered separately
+    if (/^#\s+/.test(line)) continue;
+    if (line.trim() === "") {
+      flushParagraph();
+      continue;
+    }
+    paraLines.push(line.trim());
+  }
+  flushParagraph();
+
+  return nodes;
+}
+
+function MarkdownSection({ markdown }: { markdown: string }) {
+  const nodes = parseMarkdown(markdown);
+  return (
+    <>
+      {nodes.map((node, i) => {
+        if (node.type === "heading") {
+          return (
+            <Text key={i} style={styles.reportHeading}>
+              {s(node.text)}
+            </Text>
+          );
+        }
+        // Paragraph with mixed bold/plain segments
+        return (
+          <Text key={i} style={styles.reportBody}>
+            {node.segments.map((seg, j) =>
+              seg.bold ? (
+                <Text
+                  key={j}
+                  style={{
+                    fontFamily: "Playfair Display",
+                    fontStyle: "italic",
+                    fontWeight: 400,
+                  }}
+                >
+                  {s(seg.text)}
+                </Text>
+              ) : (
+                <Text key={j}>{s(seg.text)}</Text>
+              )
+            )}
+          </Text>
+        );
+      })}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Render helpers for expanded finalist cards
 // ---------------------------------------------------------------------------
 
@@ -769,12 +866,6 @@ export function ReportDocument({ result }: ReportDocumentProps) {
   const tradeoffs = filterPlaceholders(result.report.tradeoffs);
   const tieBreakTips = filterPlaceholders(result.report.tie_break_tips);
 
-  // Clean the summary
-  const cleanSummary = stripMarkdown(result.report.summary || "");
-
-  // Get top-3 finalist names for cover page preview
-  const top3Names = result.report.finalists.slice(0, 3).map(f => f.name);
-
   // Build a date string for the consultation
   const consultationDate = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -816,65 +907,6 @@ export function ReportDocument({ result }: ReportDocumentProps) {
             Your personalized name consultation
           </Text>
 
-          {/* Divider */}
-          <View style={[styles.divider, { marginHorizontal: 120, marginBottom: 36 }]} />
-
-          {/* Summary paragraph */}
-          <Text style={[styles.summary, { marginBottom: 44, paddingHorizontal: 32 }]}>{cleanSummary}</Text>
-
-          {/* What's Inside preview */}
-          <View style={{
-            backgroundColor: colors.white,
-            borderRadius: 14,
-            padding: 28,
-            paddingHorizontal: 48,
-            alignItems: "center",
-            width: "80%",
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.06,
-            shadowRadius: 20,
-          }}>
-            <Text style={{
-              fontFamily: "Lato",
-              fontSize: 7.5,
-              fontWeight: 400,
-              color: colors.inkFaint,
-              textTransform: "uppercase",
-              letterSpacing: 2,
-              marginBottom: 12,
-            }}>
-              Inside Your Report
-            </Text>
-            <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: 14 }}>
-              {top3Names.map((name, i) => (
-                <View key={name} style={{ flexDirection: "row", alignItems: "center" }}>
-                  {i > 0 && (
-                    <Text style={{ fontFamily: "Lato", fontSize: 10, color: colors.inkFaint, marginHorizontal: 10 }}>
-                      {"\u00B7"}
-                    </Text>
-                  )}
-                  <Text style={{
-                    fontFamily: "Playfair Display",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: colors.ink,
-                  }}>
-                    {name}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <Text style={{
-              fontFamily: "Lato",
-              fontSize: 9,
-              fontWeight: 300,
-              color: colors.inkMuted,
-            }}>
-              {result.report.finalists.length} curated names with full research, pairings, and expert notes
-            </Text>
-          </View>
-
           {/* Date */}
           <Text style={{
             fontFamily: "Lato",
@@ -889,6 +921,25 @@ export function ReportDocument({ result }: ReportDocumentProps) {
 
         <Footer />
       </Page>
+
+      {/* ---- Your Consultation (narrative markdown) ---- */}
+      {result.report.markdown && (
+        <Page size="LETTER" style={styles.page}>
+          <Text style={styles.sectionTitle}>Your Consultation</Text>
+
+          {/* Decorative accent line */}
+          <View style={{
+            width: 36,
+            height: 1.5,
+            backgroundColor: colors.terracotta,
+            marginBottom: 20,
+          }} />
+
+          <MarkdownSection markdown={result.report.markdown} />
+
+          <Footer />
+        </Page>
+      )}
 
       {/* ---- Finalist Cards (flowing, not one-per-page) ---- */}
       <Page size="LETTER" style={styles.page}>
