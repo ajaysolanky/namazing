@@ -957,13 +957,13 @@ export function ReportDocument({ result }: ReportDocumentProps) {
           return (
             <View key={finalist.name} style={[
               styles.card,
-              isHero && {
+              isHero ? {
                 backgroundColor: "#FDF6F0",
                 borderWidth: 1.5,
                 borderColor: colors.terracotta,
                 padding: 32,
                 marginBottom: 18,
-              },
+              } : {},
             ]}>
               {/* Card header — kept together with "Why This Name" via minPresenceAhead
                   so the header never appears orphaned at the bottom of a page */}
@@ -972,7 +972,7 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <Text style={[
                     styles.cardRank,
-                    isHero && { color: colors.terracotta, fontSize: 9, fontWeight: 700 },
+                    isHero ? { color: colors.terracotta, fontSize: 9, fontWeight: 700 } : {},
                   ]}>
                     {isHero ? "Our Top Recommendation" : `# ${index + 1}`}
                   </Text>
@@ -999,7 +999,7 @@ export function ReportDocument({ result }: ReportDocumentProps) {
 
                 <Text style={[
                   styles.cardName,
-                  isHero && { fontSize: 28, marginBottom: 4 },
+                  isHero ? { fontSize: 28, marginBottom: 4 } : {},
                 ]}>
                   {finalist.name}
                 </Text>
@@ -1095,7 +1095,7 @@ export function ReportDocument({ result }: ReportDocumentProps) {
               {bestCombo && (
                 <View wrap={false} style={[
                   styles.comboCard,
-                  isHero && { backgroundColor: colors.white, borderColor: colors.rose },
+                  isHero ? { backgroundColor: colors.white, borderColor: colors.rose } : {},
                 ]}>
                   <Text style={styles.comboLabel}>Suggested Pairing</Text>
                   <Text style={{
