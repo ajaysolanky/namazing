@@ -85,6 +85,15 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
 
   const surname = result.profile.family?.surname || "Family";
 
+  // Determine the pre-selected middle name (if any) based on baby gender
+  const middleNames = result.profile.family?.middle_names;
+  const gender = result.profile.gender;
+  const preSelectedMiddle = gender === "boy"
+    ? middleNames?.boy
+    : gender === "girl"
+      ? middleNames?.girl
+      : middleNames?.boy || middleNames?.girl || undefined;
+
   // Create a map of name cards for quick lookup
   const nameCardMap = useMemo(() => {
     const map = new Map<string, NameCard>();
@@ -169,6 +178,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
                 nameCard={nameCardMap.get(finalist.name.toLowerCase())}
                 onViewDetails={() => handleViewDetails(finalist.name)}
                 index={index}
+                preSelectedMiddle={preSelectedMiddle}
               />
             ))}
           </div>

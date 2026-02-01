@@ -539,7 +539,8 @@ function stubCard(name: string, theme: string, profile: SessionProfile): NameCar
   const syllables = countSyllables(name);
   const ipa = roughIPA(name);
   const honorNames = profile.family?.honor_names ?? [];
-  const comboSuggestions = honourCombos(name, honorNames);
+  const middleNames = profile.family?.middle_names;
+  const comboSuggestions = honourCombos(name, honorNames, profile.gender, middleNames);
 
   return NameCardSchema.parse({
     name,
@@ -627,8 +628,24 @@ function stubReport(profile: SessionProfile, selection: ExpertSelection): RunRes
 
 function honourCombos(
   name: string,
-  honor: string[]
+  honor: string[],
+  gender?: string,
+  middleNames?: { boy?: string; girl?: string },
 ): Array<{ first: string; middle: string; why: string }> {
+  // Check for a pre-selected middle name
+  if (middleNames && (gender === "boy" || gender === "girl")) {
+    const chosen = middleNames[gender];
+    if (chosen) {
+      return [
+        {
+          first: name,
+          middle: chosen,
+          why: `Pairs with your chosen middle name ${chosen}.`,
+        },
+      ];
+    }
+  }
+
   if (honor.length === 0) {
     return [
       {

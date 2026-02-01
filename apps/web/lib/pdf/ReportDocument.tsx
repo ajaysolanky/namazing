@@ -866,6 +866,15 @@ export function ReportDocument({ result }: ReportDocumentProps) {
   const tradeoffs = filterPlaceholders(result.report.tradeoffs);
   const tieBreakTips = filterPlaceholders(result.report.tie_break_tips);
 
+  // Determine the pre-selected middle name (if any) based on baby gender
+  const middleNames = result.profile.family?.middle_names;
+  const gender = result.profile.gender;
+  const preSelectedMiddle = gender === "boy"
+    ? middleNames?.boy
+    : gender === "girl"
+      ? middleNames?.girl
+      : middleNames?.boy || middleNames?.girl || undefined;
+
   // Build a date string for the consultation
   const consultationDate = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -1097,7 +1106,11 @@ export function ReportDocument({ result }: ReportDocumentProps) {
                   styles.comboCard,
                   isHero ? { backgroundColor: colors.white, borderColor: colors.rose } : {},
                 ]}>
-                  <Text style={styles.comboLabel}>Suggested Pairing</Text>
+                  <Text style={styles.comboLabel}>
+                    {preSelectedMiddle && bestCombo.middle.toLowerCase() === preSelectedMiddle.toLowerCase()
+                      ? "Your Chosen Middle Name"
+                      : "Suggested Pairing"}
+                  </Text>
                   <Text style={{
                     fontFamily: "Playfair Display",
                     fontStyle: "italic",

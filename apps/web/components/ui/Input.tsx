@@ -9,7 +9,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id, ...props }, ref) => {
+  ({ className, label, error, id, placeholder, ...props }, ref) => {
     const [focused, setFocused] = useState(false);
     const hasValue = props.value !== undefined && props.value !== "";
 
@@ -31,6 +31,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={id}
+          placeholder={label ? undefined : placeholder}
           className={cn(
             "w-full bg-white border rounded-xl px-4 transition-all duration-200",
             "focus:outline-none focus:ring-2 focus:ring-studio-terracotta/20 focus:border-studio-terracotta/40 focus:shadow-soft",

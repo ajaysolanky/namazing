@@ -126,8 +126,29 @@ def stub_candidates(profile: SessionProfile | None = None) -> list[Candidate]:
     return candidates
 
 
-def _honour_combos(name: str, honor_names: list[str]) -> list[Combo]:
-    """Generate combo suggestions honoring family names."""
+def _honour_combos(
+    name: str,
+    honor_names: list[str],
+    gender: str | None = None,
+    middle_names: dict[str, str | None] | None = None,
+) -> list[Combo]:
+    """Generate combo suggestions honoring family names.
+
+    If a pre-selected middle name exists for the baby's gender, return a single
+    combo using it.  Otherwise fall back to honor_names / generic logic.
+    """
+    # Check for a pre-selected middle name
+    if middle_names and gender in ("boy", "girl"):
+        chosen = middle_names.get(gender)
+        if chosen:
+            return [
+                Combo(
+                    first=name,
+                    middle=chosen,
+                    why=f"Pairs with your chosen middle name {chosen}.",
+                ),
+            ]
+
     if not honor_names:
         return [
             Combo(
@@ -159,7 +180,14 @@ def stub_card(name: str, theme: str, profile: SessionProfile) -> NameCard:
     honor_names = (
         profile.family.honor_names if profile.family and profile.family.honor_names else []
     )
-    combo_suggestions = _honour_combos(name, honor_names)
+    middle_names = (
+        profile.family.middle_names.model_dump()
+        if profile.family and profile.family.middle_names
+        else None
+    )
+    combo_suggestions = _honour_combos(
+        name, honor_names, gender=profile.gender, middle_names=middle_names
+    )
 
     surname = (profile.family.surname if profile.family else None) or "family surname"
     siblings = profile.family.siblings if profile.family else None

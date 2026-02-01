@@ -38,7 +38,7 @@ class ResearchedName:
     name: str
     syllables: int
     ipa: str
-    lane: str
+    theme: str
 
 
 @dataclass
@@ -49,7 +49,7 @@ class DisplayState:
     mode: str
     stages: list[PipelineStage] = field(default_factory=list)
     researched_names: list[ResearchedName] = field(default_factory=list)
-    candidate_lanes: dict[str, str] = field(default_factory=dict)
+    candidate_themes: dict[str, str] = field(default_factory=dict)
     total_candidates: int = 0
     current_message: str = ""
 
@@ -124,7 +124,7 @@ class PipelineDisplay:
         table.add_column("Name", style="cyan", width=12)
         table.add_column("Syllables", justify="center", width=9)
         table.add_column("IPA", width=15)
-        table.add_column("Lane", width=20)
+        table.add_column("Theme", width=20)
 
         # Show last 8 researched names
         for name in self.state.researched_names[-8:]:
@@ -132,7 +132,7 @@ class PipelineDisplay:
                 name.name,
                 str(name.syllables),
                 name.ipa,
-                name.lane,
+                name.theme,
             )
 
         # Add progress info
@@ -217,23 +217,23 @@ class PipelineDisplay:
                 value = event.value
                 if isinstance(value, list):
                     self.state.total_candidates = len(value)
-                    # Store lanes
+                    # Store themes
                     for c in value:
-                        if isinstance(c, dict) and "name" in c and "lane" in c:
-                            self.state.candidate_lanes[c["name"]] = c["lane"]
+                        if isinstance(c, dict) and "name" in c and "theme" in c:
+                            self.state.candidate_themes[c["name"]] = c["theme"]
 
             elif event.agent == "researcher" and event.field == "card":
                 value = event.value
                 if isinstance(value, dict):
                     name = value.get("name", "")
-                    # Find the lane for this name
-                    lane = self.state.candidate_lanes.get(name, "unknown")
+                    # Find the theme for this name
+                    theme = self.state.candidate_themes.get(name, "unknown")
                     self.state.researched_names.append(
                         ResearchedName(
                             name=name,
                             syllables=value.get("syllables", 0),
                             ipa=value.get("ipa", ""),
-                            lane=lane,
+                            theme=theme,
                         )
                     )
 

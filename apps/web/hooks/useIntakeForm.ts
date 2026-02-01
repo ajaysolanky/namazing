@@ -32,6 +32,8 @@ export const intakeFormSchema = z.object({
   culturalConsiderations: z.array(z.string()).default([]),
   familyTraditions: z.string().default(""),
   honorNames: z.array(z.string()).default([]),
+  middleNameBoy: z.string().default(""),
+  middleNameGirl: z.string().default(""),
 
   // Freeform step
   additionalNotes: z.string().default(""),
@@ -51,6 +53,8 @@ const defaultFormData: IntakeFormData = {
   culturalConsiderations: [],
   familyTraditions: "",
   honorNames: [],
+  middleNameBoy: "",
+  middleNameGirl: "",
   additionalNotes: "",
 };
 
@@ -198,6 +202,13 @@ export function transformToSessionProfile(data: IntakeFormData) {
     briefParts.push(`Honor names to consider: ${data.honorNames.join(", ")}.`);
   }
 
+  if (data.middleNameBoy) {
+    briefParts.push(`Pre-selected middle name for a boy: ${data.middleNameBoy}.`);
+  }
+  if (data.middleNameGirl) {
+    briefParts.push(`Pre-selected middle name for a girl: ${data.middleNameGirl}.`);
+  }
+
   if (data.culturalConsiderations.length > 0) {
     briefParts.push(`Cultural considerations: ${data.culturalConsiderations.join(", ")}.`);
   }
@@ -219,6 +230,12 @@ export function transformToSessionProfile(data: IntakeFormData) {
       honor_names: data.honorNames,
       special_initials_include: [],
       special_initials_avoid: [],
+      middle_names: (data.middleNameBoy || data.middleNameGirl)
+        ? {
+            ...(data.middleNameBoy ? { boy: data.middleNameBoy } : {}),
+            ...(data.middleNameGirl ? { girl: data.middleNameGirl } : {}),
+          }
+        : undefined,
     },
     preferences: {
       naming_themes: namingThemes,

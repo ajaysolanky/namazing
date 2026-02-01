@@ -11,12 +11,18 @@ const flexibleStringArray = z.preprocess((val) => {
   return val;
 }, z.array(z.string()).optional());
 
+export const MiddleNamesSchema = z.object({
+  boy: z.string().optional(),
+  girl: z.string().optional(),
+});
+
 export const HonorNamesSchema = z.object({
   surname: z.string().optional(),
   siblings: z.array(z.string()).optional(),
   honor_names: z.array(z.string()).optional(),
   special_initials_include: z.array(z.string()).optional(),
   special_initials_avoid: z.array(z.string()).optional(),
+  middle_names: MiddleNamesSchema.optional(),
 });
 
 export const PreferencesSchema = z.object({

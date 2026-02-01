@@ -15,6 +15,8 @@ const createMockFormData = (overrides: Partial<IntakeFormData> = {}): IntakeForm
   culturalConsiderations: [],
   familyTraditions: '',
   honorNames: [],
+  middleNameBoy: "",
+  middleNameGirl: "",
   additionalNotes: '',
   ...overrides,
 })

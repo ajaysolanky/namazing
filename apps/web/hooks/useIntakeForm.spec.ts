@@ -255,6 +255,8 @@ describe('transformToSessionProfile', () => {
       culturalConsiderations: ['Irish heritage'],
       familyTraditions: 'Family tradition',
       honorNames: ['Rose'],
+      middleNameBoy: '',
+      middleNameGirl: '',
       additionalNotes: 'Extra notes',
     }
 
@@ -284,6 +286,8 @@ describe('transformToSessionProfile', () => {
       culturalConsiderations: [],
       familyTraditions: '',
       honorNames: [],
+      middleNameBoy: '',
+      middleNameGirl: '',
       additionalNotes: '',
     }
 
@@ -305,6 +309,8 @@ describe('transformToSessionProfile', () => {
       culturalConsiderations: [],
       familyTraditions: '',
       honorNames: [],
+      middleNameBoy: '',
+      middleNameGirl: '',
       additionalNotes: '',
     }
 

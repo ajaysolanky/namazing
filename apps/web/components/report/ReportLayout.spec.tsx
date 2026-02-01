@@ -67,7 +67,7 @@ const mockResult: RunResult = {
       special_initials_avoid: [],
     },
     preferences: {
-      style_lanes: [],
+      naming_themes: [],
       avoid_endings: [],
       nickname_tolerance: 'medium',
       length_pref: 'any',
