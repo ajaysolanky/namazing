@@ -33,21 +33,23 @@ app.get("/healthz", (_req: Request, res: Response) => {
 });
 
 app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {
-  const { brief, mode } = req.body || {};
+  const { brief, mode, userId } = req.body || {};
   if (!brief || typeof brief !== "string") {
     return res.status(400).json({ error: "brief is required" });
   }
 
   try {
     const runMode = mode === "parallel" ? "parallel" : "serial";
-    console.log(`[API] Starting new run (mode: ${runMode})`);
-    const run = pythonOrchestrator.startRun(brief, runMode);
-    
-    // Save to disk (exclude process object)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { process: _proc, ...serializable } = run;
-    await saveRun(serializable as any);
-    
+    console.log(`[API] Starting new run (mode: ${runMode}, userId: ${userId || "anonymous"})`);
+    const run = await pythonOrchestrator.startRun(brief, runMode, userId);
+
+    // Save to disk for legacy fallback (exclude process object)
+    if (!userId) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { process: _proc, ...serializable } = run;
+      await saveRun(serializable as any);
+    }
+
     console.log(`[API] Run created: ${run.id}`);
 
     res.json({ runId: run.id, mode: run.mode });

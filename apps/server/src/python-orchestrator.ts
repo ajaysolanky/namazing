@@ -3,9 +3,9 @@ import path from "path";
 import { EventEmitter } from "eventemitter3";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
-import { saveRun } from "./storage.js";
+import { createRun, saveRun, saveRunResult, updateRunStatus } from "./storage.js";
+import { supabase } from "./supabase.js";
 
-// Helper for ESM __dirname equivalent if needed, but process.cwd() is safer for mono-repo execution
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -26,28 +26,34 @@ export class PythonOrchestrator {
   private cwd: string;
 
   constructor() {
-    // Assuming the server is started from the project root via "npm run dev" or similar
-    // But if started from apps/server directly, adjust.
     let rootDir = process.cwd();
     if (rootDir.endsWith("apps/server")) {
       rootDir = path.resolve(rootDir, "../..");
     }
-    
+
     this.cwd = path.resolve(rootDir, "namazing-py");
     this.pythonPath = path.resolve(this.cwd, ".venv/bin/python");
   }
 
-  startRun(brief: string, mode: "serial" | "parallel"): RunContext {
-    const id = uuid();
+  async startRun(brief: string, mode: "serial" | "parallel", userId?: string): Promise<RunContext> {
+    let id: string;
+
+    // Use Supabase-generated ID if authenticated, else fallback
+    if (userId && supabase) {
+      id = await createRun(userId, brief, mode);
+    } else {
+      id = uuid();
+    }
+
     const emitter = new EventEmitter();
-    
+
     console.log(`[PythonOrchestrator] Spawning: ${this.pythonPath} -m namazing.cli.app run ...`);
 
     const child = spawn(
       this.pythonPath,
       [
-        "-m", "namazing.cli.app", "run", 
-        brief, 
+        "-m", "namazing.cli.app", "run",
+        brief,
         "--mode", mode,
         "--format", "json-stream",
         "--no-stubs"
@@ -79,28 +85,36 @@ export class PythonOrchestrator {
     child.stdout.on("data", (data) => {
       buffer += data.toString();
       const lines = buffer.split("\n");
-      // Process all complete lines
       buffer = lines.pop() || "";
 
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
           const event = JSON.parse(line);
-          
+
           if (event.t === "run-complete") {
              run.result = event.result;
              run.status = "completed";
-             // Save completed run to disk
-             const { process: _proc, emitter: _em, ...serializable } = run;
-             saveRun(serializable as any).catch((err) => {
-               console.error("[PythonOrchestrator] Failed to save run:", err);
-             });
+             // Save to Supabase if available
+             if (supabase && userId) {
+               saveRunResult(id, event.result).catch((err) => {
+                 console.error("[PythonOrchestrator] Failed to save result:", err);
+               });
+               updateRunStatus(id, "completed").catch((err) => {
+                 console.error("[PythonOrchestrator] Failed to update status:", err);
+               });
+             } else {
+               const { process: _proc, emitter: _em, ...serializable } = run;
+               saveRun(serializable as any).catch((err) => {
+                 console.error("[PythonOrchestrator] Failed to save run:", err);
+               });
+             }
              continue;
           }
 
           run.events.push(event);
           run.emitter.emit("event", event);
-          
+
         } catch (e) {
           console.error("[PythonOrchestrator] Failed to parse JSON:", line);
         }
@@ -114,7 +128,6 @@ export class PythonOrchestrator {
     child.on("close", (code) => {
       console.log(`[PythonOrchestrator] Process exited with code ${code}`);
 
-      // Process any remaining buffered data
       if (buffer.trim()) {
         try {
           const event = JSON.parse(buffer);
@@ -134,13 +147,18 @@ export class PythonOrchestrator {
       if (code !== 0 && run.status !== "completed") {
         run.status = "failed";
         run.emitter.emit("event", { t: "error", msg: `Process exited with code ${code}` });
+        if (supabase && userId) {
+          updateRunStatus(id, "failed").catch(() => {});
+        }
       }
 
-      // Save final state to disk
-      const { process: _proc, emitter: _em, ...serializable } = run;
-      saveRun(serializable as any).catch((err) => {
-        console.error("[PythonOrchestrator] Failed to save run:", err);
-      });
+      // Final save for legacy file storage
+      if (!supabase || !userId) {
+        const { process: _proc, emitter: _em, ...serializable } = run;
+        saveRun(serializable as any).catch((err) => {
+          console.error("[PythonOrchestrator] Failed to save run:", err);
+        });
+      }
     });
 
     return run;

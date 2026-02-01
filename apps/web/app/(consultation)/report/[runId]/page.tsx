@@ -1,6 +1,7 @@
 import { ReportLayout } from "@/components/report";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { createClient } from "@/lib/supabase/server";
 import { fetchResult } from "@/lib/api";
 import { notFound } from "next/navigation";
 
@@ -16,10 +17,30 @@ interface ReportPageProps {
 }
 
 async function getResult(runId: string) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  // Try fetching from Supabase first (completed runs)
+  const { data: run } = await supabase
+    .from("runs")
+    .select("user_id, run_results(result)")
+    .eq("id", runId)
+    .single();
+
+  if (run) {
+    // Ownership check
+    if (run.user_id !== user.id) return null;
+
+    const results = Array.isArray(run.run_results) ? run.run_results[0] : run.run_results;
+    if (results?.result) return results.result;
+  }
+
+  // Fallback: fetch from Express (in-progress or legacy runs)
   try {
-    const result = await fetchResult(runId);
-    return result;
-  } catch (error) {
+    return await fetchResult(runId);
+  } catch {
     return null;
   }
 }

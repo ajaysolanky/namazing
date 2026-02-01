@@ -1,17 +1,19 @@
+import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { StudioApp } from './StudioApp'
-import * as api from '../lib/api'
-import * as sse from '../lib/sse'
 
-// Mock the API and SSE modules
+const mockStartRun = vi.fn().mockResolvedValue({ runId: 'test-run-id' })
+const mockFetchResult = vi.fn()
+const mockSubscribeToRun = vi.fn().mockReturnValue(vi.fn()) // returns unsubscribe
+
 vi.mock('../lib/api', () => ({
-  startRun: vi.fn(),
-  fetchResult: vi.fn()
+  startRun: (...args: any[]) => mockStartRun(...args),
+  fetchResult: (...args: any[]) => mockFetchResult(...args),
 }))
 
 vi.mock('../lib/sse', () => ({
-  subscribeToRun: vi.fn()
+  subscribeToRun: (...args: any[]) => mockSubscribeToRun(...args),
 }))
 
 // Mock URL.createObjectURL and revokeObjectURL
@@ -21,126 +23,240 @@ global.URL.revokeObjectURL = vi.fn()
 describe('StudioApp', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Default mock implementations
-    vi.mocked(api.startRun).mockResolvedValue({ runId: 'test-run-id' })
-    vi.mocked(sse.subscribeToRun).mockReturnValue(() => {}) // unsubscribe fn
+    mockStartRun.mockResolvedValue({ runId: 'test-run-id' })
+    mockSubscribeToRun.mockReturnValue(vi.fn())
   })
 
-  it('should render initial state correctly', () => {
-    render(<StudioApp />)
-    
-    expect(screen.getByRole('heading', { name: 'Namazing' })).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/Paste your client’s brief/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
-    // Download buttons should not be visible yet
-    expect(screen.queryByText('Download JSON')).not.toBeInTheDocument()
-  })
-
-  it('should show error when starting with empty brief', async () => {
-    render(<StudioApp />)
-    
-    const startBtn = screen.getByRole('button', { name: 'Start' })
-    fireEvent.click(startBtn)
-    
-    expect(screen.getByText('Please paste a client brief to start.')).toBeInTheDocument()
-    expect(api.startRun).not.toHaveBeenCalled()
-  })
-
-  it('should start run when brief is provided', async () => {
-    render(<StudioApp />)
-    
-    const briefInput = screen.getByPlaceholderText(/Paste your client’s brief/i)
-    fireEvent.change(briefInput, { target: { value: 'We want a classic name.' } })
-    
-    const startBtn = screen.getByRole('button', { name: 'Start' })
-    fireEvent.click(startBtn)
-    
-    await waitFor(() => {
-      expect(api.startRun).toHaveBeenCalledWith('We want a classic name.', 'serial')
-      expect(screen.getByText('Running...')).toBeInTheDocument()
-    })
-    
-    expect(sse.subscribeToRun).toHaveBeenCalledWith('test-run-id', expect.any(Function))
-  })
-
-  it('should update state based on SSE events', async () => {
-    // We need to capture the callback passed to subscribeToRun
-    let capturedCallback: (event: Record<string, unknown>) => void = () => {}
-    vi.mocked(sse.subscribeToRun).mockImplementation((runId, cb) => {
-      capturedCallback = cb
-      return () => {}
+  describe('Initial render', () => {
+    it('renders the heading', () => {
+      render(<StudioApp />)
+      expect(screen.getByRole('heading', { name: 'Namazing' })).toBeInTheDocument()
     })
 
-    render(<StudioApp />)
-    
-    // Start run
-    const briefInput = screen.getByPlaceholderText(/Paste your client’s brief/i)
-    fireEvent.change(briefInput, { target: { value: 'Test brief' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
-    
-    await waitFor(() => {
-      expect(api.startRun).toHaveBeenCalled()
+    it('renders the brief textarea', () => {
+      render(<StudioApp />)
+      expect(screen.getByPlaceholderText(/Paste your client\u2019s brief/i)).toBeInTheDocument()
     })
 
-    // Simulate partial card event
-    const cardEvent = {
-      t: 'partial',
-      field: 'card',
-      value: {
-        name: 'Luna',
-        ipa: 'luna',
-        syllables: 2
+    it('renders the Start button', () => {
+      render(<StudioApp />)
+      expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
+    })
+
+    it('does not show download buttons initially', () => {
+      render(<StudioApp />)
+      expect(screen.queryByText('Download JSON')).not.toBeInTheDocument()
+      expect(screen.queryByText('Download Markdown')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Empty brief validation', () => {
+    it('shows error when clicking Start with empty brief', () => {
+      render(<StudioApp />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      expect(screen.getByText('Please paste a client brief to start.')).toBeInTheDocument()
+      expect(mockStartRun).not.toHaveBeenCalled()
+    })
+
+    it('shows error when brief is only whitespace', () => {
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: '   ' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      expect(screen.getByText('Please paste a client brief to start.')).toBeInTheDocument()
+      expect(mockStartRun).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Starting a run', () => {
+    it('calls startRun with brief and mode when brief has content', async () => {
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'We want a classic name.' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => {
+        expect(mockStartRun).toHaveBeenCalledWith('We want a classic name.', 'serial')
+      })
+    })
+
+    it('shows "Running..." text while the run is in progress', async () => {
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'A brief' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Running...')).toBeInTheDocument()
+      })
+    })
+
+    it('subscribes to SSE events after receiving runId', async () => {
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'Test brief' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => {
+        expect(mockSubscribeToRun).toHaveBeenCalledWith('test-run-id', expect.any(Function))
+      })
+    })
+  })
+
+  describe('SSE event handling', () => {
+    async function startRunAndCaptureCallback() {
+      let capturedCallback: (event: Record<string, unknown>) => void = () => {}
+      mockSubscribeToRun.mockImplementation((_runId: string, cb: (event: Record<string, unknown>) => void) => {
+        capturedCallback = cb
+        return vi.fn()
+      })
+
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'Test brief' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => {
+        expect(mockStartRun).toHaveBeenCalled()
+      })
+
+      return capturedCallback
+    }
+
+    it('handles card partial events', async () => {
+      const callback = await startRunAndCaptureCallback()
+
+      act(() => {
+        callback({
+          t: 'partial',
+          field: 'card',
+          value: {
+            name: 'Luna',
+            ipa: 'luna',
+            syllables: 2,
+          },
+        })
+      })
+
+      expect(screen.getByText('Luna')).toBeInTheDocument()
+    })
+
+    it('handles result event from report-composer and fetches result', async () => {
+      const mockResult = {
+        profile: { family: { surname: 'Doe' } },
+        report: {
+          summary: 'Done.',
+          finalists: [],
+          tradeoffs: [],
+          tie_break_tips: [],
+        },
+        candidates: [],
       }
-    }
-    
-    act(() => {
-      capturedCallback(cardEvent)
+      mockFetchResult.mockResolvedValue(mockResult)
+
+      const callback = await startRunAndCaptureCallback()
+
+      act(() => {
+        callback({ t: 'result', agent: 'report-composer' })
+      })
+
+      await waitFor(() => {
+        expect(mockFetchResult).toHaveBeenCalledWith('test-run-id')
+      })
+
+      // Download buttons appear when result is set
+      await waitFor(() => {
+        expect(screen.getByText('Download JSON')).toBeInTheDocument()
+        expect(screen.getByText('Download Markdown')).toBeInTheDocument()
+      })
+
+      // Running state should clear, Start button should return
+      expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Luna')).toBeInTheDocument()
-    expect(screen.getByText('luna')).toBeInTheDocument()
+    it('handles error events', async () => {
+      const callback = await startRunAndCaptureCallback()
+
+      act(() => {
+        callback({ t: 'error', msg: 'Something went wrong on the server' })
+      })
+
+      expect(screen.getByText('Something went wrong on the server')).toBeInTheDocument()
+      // Running state should clear
+      expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
+    })
   })
 
-  it('should handle run completion and result fetching', async () => {
-    let capturedCallback: (event: Record<string, unknown>) => void = () => {}
-    vi.mocked(sse.subscribeToRun).mockImplementation((runId, cb) => {
-      capturedCallback = cb
-      return () => {}
+  describe('Download buttons', () => {
+    it('appear when result is available', async () => {
+      const mockResult = {
+        profile: { family: { surname: 'Doe' } },
+        report: {
+          summary: 'Done.',
+          finalists: [],
+          tradeoffs: [],
+          tie_break_tips: [],
+        },
+        candidates: [],
+      }
+      mockFetchResult.mockResolvedValue(mockResult)
+
+      let capturedCallback: (event: Record<string, unknown>) => void = () => {}
+      mockSubscribeToRun.mockImplementation((_runId: string, cb: (event: Record<string, unknown>) => void) => {
+        capturedCallback = cb
+        return vi.fn()
+      })
+
+      render(<StudioApp />)
+
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'Brief content' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => expect(mockStartRun).toHaveBeenCalled())
+
+      act(() => {
+        capturedCallback({ t: 'result', agent: 'report-composer' })
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText('Download JSON')).toBeInTheDocument()
+        expect(screen.getByText('Download Markdown')).toBeInTheDocument()
+      })
     })
+  })
 
-    const mockResult = {
-      profile: { family: { surname: 'Doe' } },
-      report: {
-        summary: 'Done.',
-        finalists: [],
-        tradeoffs: [],
-        tie_break_tips: []
-      },
-      candidates: []
-    }
-    vi.mocked(api.fetchResult).mockResolvedValue(mockResult)
+  describe('Error handling', () => {
+    it('shows error when startRun rejects', async () => {
+      mockStartRun.mockRejectedValueOnce(new Error('Network failure'))
 
-    render(<StudioApp />)
-    
-    // Start...
-    fireEvent.change(screen.getByPlaceholderText(/Paste your client’s brief/i), { target: { value: 'Test' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
-    
-    await waitFor(() => expect(api.startRun).toHaveBeenCalled())
+      render(<StudioApp />)
 
-    // Complete event
-    act(() => {
-      capturedCallback({ t: 'result', agent: 'report-composer' })
+      fireEvent.change(screen.getByPlaceholderText(/Paste your client\u2019s brief/i), {
+        target: { value: 'Some brief' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Network failure')).toBeInTheDocument()
+      })
+
+      // Running state should clear
+      expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
     })
-
-    await waitFor(() => {
-      expect(api.fetchResult).toHaveBeenCalledWith('test-run-id')
-    })
-    
-    // Should see download buttons
-    expect(screen.getByText('Download JSON')).toBeInTheDocument()
-    
-    // And running state should clear
-    expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
   })
 })

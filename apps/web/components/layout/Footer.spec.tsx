@@ -14,9 +14,23 @@ describe('Footer', () => {
       expect(screen.getByText('namazing')).toBeInTheDocument()
     })
 
-    it('should render tagline', () => {
+    it('should render product links', () => {
       render(<Footer />)
-      expect(screen.getByText('Finding the perfect name for your little one')).toBeInTheDocument()
+      expect(screen.getByText('How it Works')).toBeInTheDocument()
+      expect(screen.getByText('Pricing')).toBeInTheDocument()
+      expect(screen.getByText('FAQ')).toBeInTheDocument()
+    })
+
+    it('should render legal links', () => {
+      render(<Footer />)
+      expect(screen.getByText('Privacy Policy')).toBeInTheDocument()
+      expect(screen.getByText('Terms of Service')).toBeInTheDocument()
+    })
+
+    it('should render copyright', () => {
+      render(<Footer />)
+      const year = new Date().getFullYear()
+      expect(screen.getByText(new RegExp(`${year} Namazing`))).toBeInTheDocument()
     })
   })
 

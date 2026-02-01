@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
@@ -7,6 +8,13 @@ export async function GET(
   { params }: { params: { runId: string } }
 ) {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const response = await fetch(`${BACKEND_URL}/api/result/${params.runId}`, {
       headers: {
         "Cache-Control": "no-store",

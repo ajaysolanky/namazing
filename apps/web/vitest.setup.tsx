@@ -94,6 +94,29 @@ vi.mock('framer-motion', () => {
   }
 })
 
+// Mock useAuth hook
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    signOut: vi.fn(),
+  }),
+}))
+
+// Mock @/lib/supabase/client
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
+      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      signOut: vi.fn(),
+      signInWithPassword: vi.fn(),
+      signInWithOAuth: vi.fn(),
+      signUp: vi.fn(),
+    },
+  }),
+}))
+
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),

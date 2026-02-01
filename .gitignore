@@ -46,3 +46,5 @@ report-*.png
 # Test/temp files
 kimi-k2-*.json
 namazing-py/MODEL_CONFIGURATION.md
+temp/
+.playwright-mcp/

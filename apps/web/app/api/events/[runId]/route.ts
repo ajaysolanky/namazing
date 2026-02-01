@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
@@ -7,6 +8,13 @@ export async function GET(
   { params }: { params: { runId: string } }
 ) {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
     const response = await fetch(`${BACKEND_URL}/api/events/${params.runId}`, {
       headers: {
         Accept: "text/event-stream",
@@ -14,7 +22,6 @@ export async function GET(
       },
     });
 
-    // Stream the SSE response through
     return new Response(response.body, {
       headers: {
         "Content-Type": "text/event-stream",
