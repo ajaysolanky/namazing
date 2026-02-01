@@ -3,6 +3,8 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportDocument } from "@/lib/pdf/ReportDocument";
 import { fetchResult } from "@/lib/api";
 
+const PDF_TIMEOUT_MS = 30_000; // 30 seconds
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { runId: string } }
@@ -20,10 +22,13 @@ export async function GET(
       );
     }
 
-    // Generate PDF buffer
-    const pdfBuffer = await renderToBuffer(
-      ReportDocument({ result })
-    );
+    // Generate PDF buffer with a timeout to prevent blocking the event loop indefinitely
+    const pdfBuffer = await Promise.race([
+      renderToBuffer(ReportDocument({ result })),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("PDF generation timed out")), PDF_TIMEOUT_MS)
+      ),
+    ]);
 
     // Get surname for filename
     const surname = result.profile.family?.surname || "family";
@@ -37,6 +42,7 @@ export async function GET(
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Length": uint8Array.byteLength.toString(),
       },
     });
   } catch (error) {

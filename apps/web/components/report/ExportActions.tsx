@@ -21,7 +21,10 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
     setIsDownloading(true);
     setDownloadError(null);
     try {
-      const response = await fetch(`/api/pdf/${runId}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60_000);
+      const response = await fetch(`/api/pdf/${runId}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Failed to generate PDF (${response.status})`);

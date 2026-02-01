@@ -157,7 +157,7 @@ describe('ExportActions', () => {
       fireEvent.click(screen.getByRole('button', { name: /download pdf/i }))
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/pdf/test-123')
+        expect(global.fetch).toHaveBeenCalledWith('/api/pdf/test-123', expect.objectContaining({ signal: expect.any(AbortSignal) }))
       })
     })
 
