@@ -30,7 +30,7 @@ describe('HeritageStep', () => {
 
     it('should render cultural backgrounds section', () => {
       render(<HeritageStep formData={createMockFormData()} updateField={vi.fn()} />)
-      expect(screen.getByText('Cultural backgrounds to explore')).toBeInTheDocument()
+      expect(screen.getByText('Cultural heritage')).toBeInTheDocument()
     })
 
     it('should render region groups', () => {
@@ -43,12 +43,12 @@ describe('HeritageStep', () => {
 
     it('should render honor names section', () => {
       render(<HeritageStep formData={createMockFormData()} updateField={vi.fn()} />)
-      expect(screen.getByText('Anyone to honor?')).toBeInTheDocument()
+      expect(screen.getByText('Family names')).toBeInTheDocument()
     })
 
     it('should render family traditions section', () => {
       render(<HeritageStep formData={createMockFormData()} updateField={vi.fn()} />)
-      expect(screen.getByText('Family naming traditions')).toBeInTheDocument()
+      expect(screen.getByText('Naming traditions')).toBeInTheDocument()
     })
   })
 
@@ -119,7 +119,7 @@ describe('HeritageStep', () => {
       const updateField = vi.fn()
       render(<HeritageStep formData={createMockFormData()} updateField={updateField} />)
 
-      const honorInput = screen.getByPlaceholderText('Name of person to honor')
+      const honorInput = screen.getByPlaceholderText('Grandparent, relative, or loved one...')
       fireEvent.change(honorInput, { target: { value: 'Grandma Rose' } })
       fireEvent.click(screen.getAllByText('Add')[1])
 

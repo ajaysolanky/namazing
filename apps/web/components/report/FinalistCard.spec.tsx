@@ -69,8 +69,8 @@ describe('FinalistCard', () => {
 
       expect(screen.getByText('Suggested Middle Name')).toBeInTheDocument()
       expect(screen.getByText('Perfect flow')).toBeInTheDocument()
-      // The combo section contains "first & middle" format
-      expect(screen.getByText('&')).toBeInTheDocument()
+      // The combo section contains "first + middle" format
+      expect(screen.getByText('+')).toBeInTheDocument()
     })
 
     it('should not render combo section when not provided', () => {
