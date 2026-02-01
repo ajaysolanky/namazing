@@ -115,18 +115,29 @@ describe('ExportActions', () => {
 
   describe('PDF Download', () => {
     it('should show loading state while downloading', async () => {
-      global.fetch = vi.fn().mockImplementation(() =>
-        new Promise((resolve) => setTimeout(() => resolve({
-          ok: true,
-          blob: () => Promise.resolve(new Blob()),
-        }), 100))
-      )
+      let resolveBlob!: (value: Blob) => void
+      const blobPromise = new Promise<Blob>((r) => { resolveBlob = r })
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        blob: () => blobPromise,
+      })
+
+      // Stub URL APIs so the finally block doesn't throw
+      global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test')
+      global.URL.revokeObjectURL = vi.fn()
 
       render(<ExportActions runId="test-123" surname="Johnson" />)
 
       fireEvent.click(screen.getByRole('button', { name: /download pdf/i }))
 
       expect(screen.getByText('Generating PDF...')).toBeInTheDocument()
+
+      // Resolve the pending blob so the handler completes and state is cleaned up
+      resolveBlob(new Blob(['test'], { type: 'application/pdf' }))
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /download pdf/i })).toBeInTheDocument()
+      })
     })
 
     it('should download PDF with correct filename', async () => {
@@ -154,6 +165,7 @@ describe('ExportActions', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
+        json: () => Promise.resolve({}),
       })
 
       render(<ExportActions runId="test-123" surname="Johnson" />)
@@ -162,6 +174,11 @@ describe('ExportActions', () => {
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalled()
+      })
+
+      // Wait for the handler to fully complete (setIsDownloading(false) in finally block)
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /download pdf/i })).toBeInTheDocument()
       })
 
       consoleSpy.mockRestore()
