@@ -84,6 +84,13 @@ export function Header() {
                           >
                             Dashboard
                           </Link>
+                          <Link
+                            href="/settings"
+                            className="block px-4 py-2 text-sm text-studio-ink/70 hover:bg-studio-cream transition-colors"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            Settings
+                          </Link>
                           <button
                             onClick={handleSignOut}
                             className="w-full text-left px-4 py-2 text-sm text-studio-ink/70 hover:bg-studio-cream transition-colors"
@@ -151,6 +158,13 @@ export function Header() {
                       onClick={() => setMobileOpen(false)}
                     >
                       Dashboard
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="block text-sm font-medium text-studio-ink/70 hover:text-studio-ink transition-colors py-1"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Settings
                     </Link>
                     <button
                       onClick={() => { handleSignOut(); setMobileOpen(false); }}

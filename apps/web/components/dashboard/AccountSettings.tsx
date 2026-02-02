@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { updateProfile, deleteAccount } from "@/app/(dashboard)/dashboard/actions";
+import { updateProfile, deleteAccount } from "@/app/(dashboard)/settings/actions";
 
 interface AccountSettingsProps {
   displayName: string;

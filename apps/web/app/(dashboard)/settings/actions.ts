@@ -17,6 +17,7 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
 
   revalidatePath("/dashboard");
+  revalidatePath("/settings");
 }
 
 export async function deleteAccount() {
