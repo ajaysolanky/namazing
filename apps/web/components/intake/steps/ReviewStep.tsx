@@ -71,7 +71,7 @@ export function ReviewStep({ formData }: ReviewStepProps) {
               <p className="text-sm text-studio-ink/60">
                 Looking for {genderLabel}
                 {formData.siblings.length > 0 && (
-                  <> to join {formData.siblings.map((s) => s.name).join(" and ")}</>
+                  <>, a sibling for {formData.siblings.map((s) => s.name).join(" and ")}</>
                 )}
               </p>
             </div>

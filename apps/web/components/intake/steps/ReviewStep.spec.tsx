@@ -85,7 +85,7 @@ describe('ReviewStep', () => {
       })
       render(<ReviewStep formData={formData} />)
 
-      expect(screen.getByText(/to join Emma and Jack/i)).toBeInTheDocument()
+      expect(screen.getByText(/a sibling for Emma and Jack/i)).toBeInTheDocument()
     })
   })
 

@@ -176,7 +176,7 @@ export function transformToSessionProfile(data: IntakeFormData) {
     const siblingStr = data.siblings
       .map((s) => s.age ? `${s.name} (${s.age})` : s.name)
       .join(", ");
-    briefParts.push(`Siblings: ${siblingStr}.`);
+    briefParts.push(`Existing children (siblings for the new baby): ${siblingStr}.`);
   }
 
   if (namingThemes.length > 0) {
@@ -191,7 +191,7 @@ export function transformToSessionProfile(data: IntakeFormData) {
     const considering = data.namesConsidering
       .map((n) => n.notes ? `${n.name} (${n.notes})` : n.name)
       .join(", ");
-    briefParts.push(`Names being considered: ${considering}.`);
+    briefParts.push(`Names the client LIKES and wants us to INCLUDE or suggest similar to: ${considering}.`);
   }
 
   if (data.namesToAvoid.length > 0) {
@@ -246,6 +246,7 @@ export function transformToSessionProfile(data: IntakeFormData) {
       frozen_callback: false,
     },
     themes: data.stylePreferences,
+    names_considering: data.namesConsidering.map((n) => n.name).filter(Boolean),
     vetoes: {
       hard: data.namesToAvoid,
       soft: [],

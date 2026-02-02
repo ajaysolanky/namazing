@@ -26,6 +26,7 @@ Expected JSON Structure:
     "phonetic_constraints": ["string"]
   },
   "themes": ["string"],
+  "names_considering": ["string"],
   "vetoes": {
     "hard": ["string"],
     "soft": ["string"]
@@ -42,7 +43,8 @@ EXTRACTION CHECKLIST:
 4. Cultural backgrounds: What cultures/languages must the name work in?
 5. Phonetic rules: Any sounds to avoid? (e.g., "no R", "avoid L endings")
 6. Hard vetoes: Names explicitly rejected
-7. Example names: Names given as style references (add to soft vetoes)
-8. Middle names: Are specific middle names already chosen?
-9. Themes: Nature, strength, literary, etc.
-10. Popularity preference: Top 100 ok? Or want something unique?
+7. Names considering: Names the client explicitly likes or is considering. These should be placed in `names_considering` and INCLUDED or used as strong style signals, NOT excluded or vetoed.
+8. Example names: Names given purely as style references (not ones the client likes) — add to soft vetoes.
+9. Middle names: Are specific middle names already chosen?
+10. Themes: Nature, strength, literary, etc.
+11. Popularity preference: Top 100 ok? Or want something unique?

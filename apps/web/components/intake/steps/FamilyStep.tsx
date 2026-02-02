@@ -60,10 +60,10 @@ export function FamilyStep({ formData, updateField }: FamilyStepProps) {
         {/* Siblings */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-studio-ink">
-            Siblings (if any)
+            Other children (if any)
           </label>
           <p className="text-sm text-studio-ink/50">
-            If you have other children, we&apos;ll make sure the names flow well together.
+            If this baby will have brothers or sisters, we&apos;ll make sure the names complement each other.
           </p>
 
           {/* Sibling list */}
@@ -94,7 +94,7 @@ export function FamilyStep({ formData, updateField }: FamilyStepProps) {
           <div className="flex gap-2">
             <div className="flex-1">
               <Input
-                placeholder="Name"
+                placeholder="Child's name"
                 value={newSiblingName}
                 onChange={(e) => setNewSiblingName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addSibling()}

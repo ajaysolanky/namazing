@@ -51,6 +51,7 @@ class SessionProfile(BaseModel):
     preferences: Preferences | None = None
     themes: list[str] | None = None
     vetoes: Veto | None = None
+    names_considering: list[str] | None = None
     region: list[str] | None = None
     target_popularity_band: str | None = None
     comments: str | None = None

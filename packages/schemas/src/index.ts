@@ -44,6 +44,7 @@ export const SessionProfileSchema = z.object({
   gender: z.enum(["boy", "girl", "unknown"]).optional(),
   family: HonorNamesSchema.optional(),
   preferences: PreferencesSchema.optional(),
+  names_considering: z.array(z.string()).optional(),
   themes: flexibleStringArray,
   vetoes: VetoSchema.optional(),
   region: flexibleStringArray,

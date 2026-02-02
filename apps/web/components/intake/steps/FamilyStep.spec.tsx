@@ -35,12 +35,12 @@ describe('FamilyStep', () => {
 
     it('should render siblings section', () => {
       render(<FamilyStep formData={createMockFormData()} updateField={vi.fn()} />)
-      expect(screen.getByText('Siblings (if any)')).toBeInTheDocument()
+      expect(screen.getByText('Other children (if any)')).toBeInTheDocument()
     })
 
     it('should render add sibling form', () => {
       render(<FamilyStep formData={createMockFormData()} updateField={vi.fn()} />)
-      expect(screen.getByPlaceholderText('Name')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText("Child's name")).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Age')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument()
     })
@@ -70,7 +70,7 @@ describe('FamilyStep', () => {
       const updateField = vi.fn()
       render(<FamilyStep formData={createMockFormData()} updateField={updateField} />)
 
-      fireEvent.change(screen.getByPlaceholderText('Name'), {
+      fireEvent.change(screen.getByPlaceholderText("Child's name"), {
         target: { value: 'Emma' },
       })
       fireEvent.change(screen.getByPlaceholderText('Age'), {
@@ -85,7 +85,7 @@ describe('FamilyStep', () => {
       const updateField = vi.fn()
       render(<FamilyStep formData={createMockFormData()} updateField={updateField} />)
 
-      const nameInput = screen.getByPlaceholderText('Name')
+      const nameInput = screen.getByPlaceholderText("Child's name")
       fireEvent.change(nameInput, { target: { value: 'Jack' } })
       fireEvent.keyDown(nameInput, { key: 'Enter' })
 
@@ -104,7 +104,7 @@ describe('FamilyStep', () => {
     it('should clear input fields after adding sibling', () => {
       render(<FamilyStep formData={createMockFormData()} updateField={vi.fn()} />)
 
-      const nameInput = screen.getByPlaceholderText('Name')
+      const nameInput = screen.getByPlaceholderText("Child's name")
       const ageInput = screen.getByPlaceholderText('Age')
 
       fireEvent.change(nameInput, { target: { value: 'Emma' } })

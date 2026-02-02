@@ -51,7 +51,8 @@ Before generating ANY names, explicitly extract and acknowledge:
 3. **Explicit Phonetic Constraints**: Any sounds to avoid? (e.g., "no R start", "no L end")
 4. **Hard Vetoes**: Names explicitly rejected by the client
 5. **Sibling Names**: Names of existing children (avoid similar names)
-6. **Example Names**: Names given as STYLE REFERENCES (do NOT suggest these exact names)
+6. **Names Considering** (`names_considering`): Names the client explicitly LIKES. These SHOULD be included in your output or used as strong style signals. They are NOT exclusions.
+7. **Example Names**: Names given purely as STYLE REFERENCES that are NOT in `names_considering` (do NOT suggest these exact names)
 
 ---
 
@@ -86,7 +87,7 @@ Before finalizing your response, verify EACH candidate against these rules:
    - Violate stated length preferences
    - Conflict with stated style preferences
 
-11. **EXAMPLE NAMES ARE EXCLUSIONS**: If the brief provides example names to illustrate style preferences (e.g., "we like names like Luna and Nova"), these are STYLE REFERENCES ONLY. Do NOT include these exact names in your output unless the brief explicitly says "we want Luna" or similar.
+11. **NAMES CONSIDERING vs EXAMPLE NAMES**: If `names_considering` lists names the client likes, these SHOULD be included in your output — they are user favorites, not exclusions. Only pure style examples (names NOT in `names_considering`) are exclusions. Do NOT exclude names that appear in the `names_considering` field.
 
 12. **POPULARITY CONSTRAINTS**: If the brief mentions popularity requirements (e.g., "not in top 20", "avoid trendy names"), respect them. Do NOT suggest names that are currently in the US/UK Top 50 if the client wants to avoid common names.
 

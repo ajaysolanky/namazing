@@ -263,6 +263,21 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
                   )}
                 </h2>
 
+                {/* Theme color legend */}
+                {themes.length > 0 && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-4">
+                    {themes.map((theme) => {
+                      const color = getThemeColor(theme, themes);
+                      return (
+                        <div key={theme} className="flex items-center gap-1.5">
+                          <span className={cn("w-2.5 h-2.5 rounded-full", color.dot)} />
+                          <span className="text-xs text-studio-ink/60 capitalize">{theme}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {discoveredNames.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-40 text-studio-ink/40">
                     <p className="text-sm">Names will appear here as they&apos;re discovered...</p>

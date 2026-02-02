@@ -440,6 +440,14 @@ function stubProfile(brief: string): SessionProfile {
     vetoes.push(myVetoMatch[1]);
   }
 
+  // Extract names the client likes
+  const consideringMatch = brief.match(/(?:so\s*far\s*we\s*have|Names\s+the\s+client\s+LIKES[^:]*:)\s*:?\s*([A-Za-z ,()]+)/i);
+  const namesConsidering: string[] = [];
+  if (consideringMatch) {
+    const raw = consideringMatch[1].replace(/\band\b/g, ",").replace(/\([^)]*\)/g, "");
+    namesConsidering.push(...raw.split(/[,]+/).map(s => s.trim()).filter(s => s && /^[A-Z][a-z]+$/.test(s)));
+  }
+
   // Simple heuristic for gender
   const isBoy = /\b(boy|son|brother|male)\b/i.test(brief);
   const isGirl = /\b(girl|daughter|sister|female)\b/i.test(brief) && !isBoy;
@@ -480,6 +488,7 @@ function stubProfile(brief: string): SessionProfile {
       length_pref: "short-to-medium",
       nickname_tolerance: "medium",
     },
+    names_considering: namesConsidering.length ? namesConsidering : undefined,
     vetoes: { hard: vetoes },
     region: [DEFAULT_REGION],
     comments: `Stubbed profile derived heuristically. Detected gender: ${isBoy ? "boy" : "girl"}.`,
@@ -493,11 +502,14 @@ function stubCandidates(profile?: SessionProfile): Candidate[] {
   const source = isBoy ? SAMPLE_THEMES_BOY : SAMPLE_THEMES_GIRL;
 
   // Extract user favorites from brief
-  // Matches "So far we have A, B, C..."
-  const likedMatch = profile?.raw_brief.match(/(?:so\s*far\s*we\s*have)\s*:?\s*([A-Za-z ,]+)/i);
+  // Matches "So far we have A, B, C..." or "Names the client LIKES ... : A, B, C"
+  const likedMatch = profile?.raw_brief.match(/(?:so\s*far\s*we\s*have|Names\s+the\s+client\s+LIKES[^:]*:)\s*:?\s*([A-Za-z ,()]+)/i);
   const likedNames = new Set<string>();
   
-  if (likedMatch) {
+  // Prefer structured names_considering field
+  if (profile?.names_considering?.length) {
+    profile.names_considering.forEach(name => likedNames.add(name));
+  } else if (likedMatch) {
     const raw = likedMatch[1].replace(/\band\b/g, ",");
     raw.split(/[,]+/).forEach(s => {
       const clean = s.trim();
