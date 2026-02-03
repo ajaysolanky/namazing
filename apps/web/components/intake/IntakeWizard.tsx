@@ -80,9 +80,13 @@ export function IntakeWizard() {
       router.push(`/processing/${runId}`);
       // Reset form after a delay to ensure navigation has started
       setTimeout(() => resetForm(), 500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to start run:", err);
-      setError("Something went wrong. Please try again.");
+      if (err?.code === "DAILY_LIMIT") {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
       setIsSubmitting(false);
     }
   };

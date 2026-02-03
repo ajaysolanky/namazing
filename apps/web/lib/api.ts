@@ -20,6 +20,14 @@ export async function startRun(brief: string, mode: RunMode) {
     body: JSON.stringify({ brief, mode }),
   });
   if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    if (res.status === 429 && body?.dailyLimit) {
+      const err = new Error(
+        `You've reached your daily limit of ${body.dailyLimit} naming sessions. Please try again tomorrow.`
+      );
+      (err as any).code = "DAILY_LIMIT";
+      throw err;
+    }
     throw new Error(`Failed to start run: ${res.status}`);
   }
   return (await res.json()) as { runId: string; mode: RunMode };

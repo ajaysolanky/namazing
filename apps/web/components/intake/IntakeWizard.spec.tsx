@@ -1,3 +1,4 @@
+import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { IntakeWizard } from './IntakeWizard'
@@ -79,6 +80,17 @@ vi.mock('./steps/FreeformStep', () => ({
 }))
 vi.mock('./steps/ReviewStep', () => ({
   ReviewStep: () => <div data-testid="review-step">Review Step</div>,
+}))
+vi.mock('./ProgressIndicator', () => ({
+  ProgressIndicator: ({ currentStep }: { currentStep: number }) => (
+    <div data-testid="progress-indicator">Step {currentStep}</div>
+  ),
+}))
+vi.mock('@/components/ui/Button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}))
+vi.mock('@/components/layout/Container', () => ({
+  Container: ({ children }: any) => <div>{children}</div>,
 }))
 
 describe('IntakeWizard', () => {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
+const DAILY_RUN_LIMIT = 5;
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,32 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Enforce daily run limit
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+
+    const { count, error: countError } = await supabase
+      .from("runs")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", todayUTC.toISOString());
+
+    if (countError) {
+      console.error("Failed to check daily run count:", countError);
+      return NextResponse.json(
+        { error: "Failed to check usage limits" },
+        { status: 500 }
+      );
+    }
+
+    const runsToday = count ?? 0;
+    if (runsToday >= DAILY_RUN_LIMIT) {
+      return NextResponse.json(
+        { error: "Daily limit reached", dailyLimit: DAILY_RUN_LIMIT, runsToday },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();

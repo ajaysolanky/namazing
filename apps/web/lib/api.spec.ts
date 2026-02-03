@@ -47,9 +47,22 @@ describe('api', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
+        json: () => Promise.resolve({ error: 'Internal error' }),
       })
 
       await expect(startRun('test', 'full')).rejects.toThrow('Failed to start run: 500')
+    })
+
+    it('should throw daily limit error on 429', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        json: () => Promise.resolve({ error: 'Daily limit reached', dailyLimit: 5, runsToday: 5 }),
+      })
+
+      await expect(startRun('test', 'full')).rejects.toThrow(
+        "You've reached your daily limit of 5 naming sessions"
+      )
     })
 
     it('should throw error on network failure', async () => {
