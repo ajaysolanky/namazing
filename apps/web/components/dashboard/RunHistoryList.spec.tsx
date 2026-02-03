@@ -5,13 +5,13 @@ import { RunHistoryList } from "./RunHistoryList";
 describe("RunHistoryList", () => {
   it("renders empty state with heading when no runs", () => {
     render(<RunHistoryList runs={[]} />);
-    expect(screen.getByText("No consultations yet")).toBeInTheDocument();
+    expect(screen.getByText("Your naming journey begins here")).toBeInTheDocument();
   });
 
   it("renders empty state with descriptive text when no runs", () => {
     render(<RunHistoryList runs={[]} />);
     expect(
-      screen.getByText("Start your first AI-powered baby name consultation."),
+      screen.getByText("Start your first consultation and discover names chosen just for your family."),
     ).toBeInTheDocument();
   });
 
@@ -46,8 +46,8 @@ describe("RunHistoryList", () => {
 
     expect(screen.getByText("First consultation")).toBeInTheDocument();
     expect(screen.getByText("Second consultation")).toBeInTheDocument();
-    expect(screen.getByText("completed")).toBeInTheDocument();
-    expect(screen.getByText("running")).toBeInTheDocument();
+    expect(screen.getByText("Complete")).toBeInTheDocument();
+    expect(screen.getByText("Running")).toBeInTheDocument();
   });
 
   it("does not render empty state when runs are provided", () => {
@@ -104,10 +104,7 @@ describe("RunHistoryList", () => {
     expect(screen.getByText("Run 2")).toBeInTheDocument();
     expect(screen.getByText("Run 3")).toBeInTheDocument();
 
-    // Count the number of run cards by looking for elements with the specific class pattern
-    const runCards = container.querySelectorAll(
-      ".bg-white\\/80.backdrop-blur-sm.rounded-2xl",
-    );
-    expect(runCards.length).toBe(3);
+    // Count the number of run cards by looking for brief text elements
+    expect(screen.getAllByText(/^Run \d$/)).toHaveLength(3);
   });
 });

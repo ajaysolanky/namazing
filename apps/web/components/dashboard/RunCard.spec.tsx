@@ -19,25 +19,25 @@ describe("RunCard", () => {
 
   it("renders status badge for completed status", () => {
     render(<RunCard run={baseRun} />);
-    expect(screen.getByText("completed")).toBeInTheDocument();
+    expect(screen.getByText("Complete")).toBeInTheDocument();
   });
 
   it("renders status badge for running status", () => {
     const runningRun = { ...baseRun, status: "running" };
     render(<RunCard run={runningRun} />);
-    expect(screen.getByText("running")).toBeInTheDocument();
+    expect(screen.getByText("Running")).toBeInTheDocument();
   });
 
   it("renders status badge for failed status", () => {
     const failedRun = { ...baseRun, status: "failed" };
     render(<RunCard run={failedRun} />);
-    expect(screen.getByText("failed")).toBeInTheDocument();
+    expect(screen.getByText("Failed")).toBeInTheDocument();
   });
 
   it("renders status badge for pending status", () => {
     const pendingRun = { ...baseRun, status: "pending" };
     render(<RunCard run={pendingRun} />);
-    expect(screen.getByText("pending")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
   });
 
   it("renders truncated brief text when brief is a string", () => {
@@ -158,8 +158,8 @@ describe("RunCard", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders mode in uppercase", () => {
+  it("does not render mode text (removed from UI)", () => {
     render(<RunCard run={baseRun} />);
-    expect(screen.getByText("guided")).toBeInTheDocument();
+    expect(screen.queryByText("guided")).not.toBeInTheDocument();
   });
 });

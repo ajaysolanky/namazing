@@ -60,10 +60,10 @@ describe('HeroSection', () => {
       expect(screen.getByText('Sample from our curated collections')).toBeInTheDocument()
     })
 
-    it('should render Eliana name card with meaning', () => {
+    it('should render Amara name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Eliana')).toBeInTheDocument()
-      expect(screen.getByText('God has answered')).toBeInTheDocument()
+      expect(screen.getByText('Amara')).toBeInTheDocument()
+      expect(screen.getByText('Grace, eternal')).toBeInTheDocument()
     })
 
     it('should render Rowan name card with meaning', () => {
@@ -72,16 +72,16 @@ describe('HeroSection', () => {
       expect(screen.getByText('Little red one')).toBeInTheDocument()
     })
 
-    it('should render Sienna name card with meaning', () => {
+    it('should render Kenji name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Sienna')).toBeInTheDocument()
-      expect(screen.getByText('From Siena')).toBeInTheDocument()
+      expect(screen.getByText('Kenji')).toBeInTheDocument()
+      expect(screen.getByText('Intelligent second son')).toBeInTheDocument()
     })
 
-    it('should render Theodore name card with meaning', () => {
+    it('should render Zara name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Theodore')).toBeInTheDocument()
-      expect(screen.getByText('Divine gift')).toBeInTheDocument()
+      expect(screen.getByText('Zara')).toBeInTheDocument()
+      expect(screen.getByText('Blooming flower')).toBeInTheDocument()
     })
   })
 })
