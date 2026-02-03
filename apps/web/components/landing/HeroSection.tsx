@@ -71,16 +71,27 @@ function AnimatedHeadline({ children, className }: { children: string; className
 
 function NamePreviewCard({ name, meaning, delay }: { name: string; meaning: string; delay: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay }}
-      className="bg-white rounded-2xl p-4 shadow-soft border border-studio-ink/5"
-    >
-      <div className="font-display text-2xl text-studio-ink">{name}</div>
-      <div className="text-sm text-studio-ink/50 mt-1">{meaning}</div>
-    </motion.div>
+    <Link href={`/sample/${name.toLowerCase()}` as any} className="h-full">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay }}
+        whileHover={{ scale: 1.04, y: -2 }}
+        className="relative bg-white rounded-2xl p-4 pr-8 shadow-soft border border-studio-ink/5 cursor-pointer group h-full"
+      >
+        <div className="font-display text-2xl text-studio-ink">{name}</div>
+        <div className="text-sm text-studio-ink/50 mt-1 line-clamp-1">{meaning}</div>
+        <svg
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-ink/20 group-hover:text-studio-terracotta transition-colors"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -232,11 +243,11 @@ export function HeroSection() {
               Sample from our curated collections
             </p>
           </motion.div>
-          <div className="flex justify-center gap-4 flex-wrap">
-            <NamePreviewCard name="Eliana" meaning="God has answered" delay={0} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            <NamePreviewCard name="Amara" meaning="Grace, eternal" delay={0} />
             <NamePreviewCard name="Rowan" meaning="Little red one" delay={0.1} />
-            <NamePreviewCard name="Sienna" meaning="From Siena" delay={0.2} />
-            <NamePreviewCard name="Theodore" meaning="Divine gift" delay={0.3} />
+            <NamePreviewCard name="Kenji" meaning="Intelligent second son" delay={0.2} />
+            <NamePreviewCard name="Zara" meaning="Blooming flower" delay={0.3} />
           </div>
         </Container>
       </section>

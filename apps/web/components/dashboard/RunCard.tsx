@@ -89,7 +89,6 @@ export function RunCard({ run }: RunCardProps) {
               </span>
             )}
           </div>
-          <span className="text-xs text-studio-ink/30 uppercase">{run.mode}</span>
         </div>
 
         {topName && (

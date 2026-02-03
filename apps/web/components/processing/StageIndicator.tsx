@@ -5,16 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { ActivityEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const THEME_DOT_COLORS = [
-  "bg-sky-400",
-  "bg-amber-400",
-  "bg-emerald-400",
-  "bg-violet-400",
-  "bg-rose-400",
-  "bg-teal-400",
-  "bg-orange-400",
-] as const;
-
 const STAGES = [
   {
     id: "brief-parser",
@@ -155,10 +145,9 @@ const STAGES = [
 
 interface StageIndicatorProps {
   events: ActivityEvent[];
-  themes?: string[];
 }
 
-export function StageIndicator({ events, themes }: StageIndicatorProps) {
+export function StageIndicator({ events }: StageIndicatorProps) {
   const stages = useMemo(() => {
     return STAGES.map((stage) => {
       const hasActivity = events.some(
@@ -333,28 +322,6 @@ export function StageIndicator({ events, themes }: StageIndicatorProps) {
               </motion.div>
             </AnimatePresence>
 
-            {/* Naming theme pills for the generator stage */}
-            {stage.id === "generator" && (stage.status === "active" || stage.status === "done") && themes && themes.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="mt-2.5 flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] leading-relaxed"
-              >
-                {themes.map((theme, i) => (
-                  <motion.span
-                    key={theme}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.06, duration: 0.2 }}
-                    className="inline-flex items-center gap-1"
-                  >
-                    <span className={cn("w-1.5 h-1.5 rounded-full", THEME_DOT_COLORS[i % THEME_DOT_COLORS.length])} />
-                    <span className="text-studio-ink/50">{theme}</span>
-                  </motion.span>
-                ))}
-              </motion.div>
-            )}
           </motion.div>
         ))}
       </div>

@@ -110,7 +110,10 @@ const mockResult: RunResult = {
     tie_break_tips: ['Try calling out the name at the park'],
   },
   selection: {
-    finalists: ['Luna', 'Oliver'],
+    finalists: [
+      { name: 'Luna', why: 'A celestial beauty' },
+      { name: 'Oliver', why: 'A timeless classic' },
+    ],
     near_misses: [
       { name: 'Emma', reason: 'Too popular' },
     ],

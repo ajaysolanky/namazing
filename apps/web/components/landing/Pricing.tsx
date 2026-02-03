@@ -41,11 +41,14 @@ export function Pricing() {
         >
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-soft border border-studio-ink/5 text-center">
             <div className="mb-6">
-              <span className="inline-block px-3 py-1 bg-studio-sage/20 rounded-full text-sm text-studio-ink/60 mb-4">
-                Free tier
+              <span className="inline-block px-3 py-1 bg-studio-terracotta/15 rounded-full text-sm text-studio-terracotta font-medium mb-4">
+                Early Access
               </span>
-              <div className="font-display text-5xl text-studio-ink mb-1">$0</div>
-              <p className="text-sm text-studio-ink/50">Free forever</p>
+              <div className="flex items-baseline justify-center gap-3 mb-1">
+                <span className="font-display text-2xl text-studio-ink/30 line-through">$49</span>
+                <span className="font-display text-5xl text-studio-ink">$0</span>
+              </div>
+              <p className="text-sm text-studio-ink/50">Free during early access — normally $49</p>
             </div>
 
             <ul className="space-y-3 mb-8 text-left">

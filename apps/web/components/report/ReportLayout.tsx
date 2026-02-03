@@ -6,7 +6,7 @@ import type { RunResult, NameCard } from "@/lib/types";
 import { Container } from "@/components/layout/Container";
 import { Card } from "@/components/ui/Card";
 import { ReportHero } from "./ReportHero";
-import { FinalistCard } from "./FinalistCard";
+import { FinalistCard, type ThemeColorMap } from "./FinalistCard";
 import { NameDetailModal } from "./NameDetailModal";
 import { NearMissesAccordion } from "./NearMissesAccordion";
 import { ExportActions } from "./ExportActions";
@@ -103,6 +103,39 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
     return map;
   }, [result.candidates]);
 
+  // Compute maximally-distinct theme color assignments
+  const THEME_STYLES = [
+    { bg: "bg-sky-50", text: "text-sky-700", dot: "bg-sky-400", accent: "#38bdf8" },
+    { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400", accent: "#fbbf24" },
+    { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400", accent: "#34d399" },
+    { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-400", accent: "#a78bfa" },
+    { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-400", accent: "#fb7185" },
+    { bg: "bg-teal-50", text: "text-teal-700", dot: "bg-teal-400", accent: "#2dd4bf" },
+    { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400", accent: "#fb923c" },
+  ] as const;
+
+  const themeColorMap = useMemo<ThemeColorMap>(() => {
+    const themes = Array.from(
+      new Set(
+        result.report.finalists
+          .map((f) => nameCardMap.get(f.name.toLowerCase())?.theme)
+          .filter((t): t is string => !!t && t !== "user-favorite")
+      )
+    ).sort();
+
+    const map: ThemeColorMap = {};
+    const paletteSize = THEME_STYLES.length;
+    const count = themes.length;
+    themes.forEach((theme, i) => {
+      // Spread indices evenly across the palette
+      const idx = count <= paletteSize
+        ? Math.round((i * paletteSize) / Math.max(count, 1)) % paletteSize
+        : i % paletteSize;
+      map[theme] = THEME_STYLES[idx];
+    });
+    return map;
+  }, [result.report.finalists, nameCardMap]);
+
   // Filter out placeholder content
   const tradeoffs = filterPlaceholders(result.report.tradeoffs);
   const tieBreakTips = filterPlaceholders(result.report.tie_break_tips);
@@ -124,7 +157,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
   return (
     <div className="min-h-screen bg-studio-sand">
       {/* Hero */}
-      <ReportHero surname={surname} summary={result.report.summary} />
+      <ReportHero surname={surname} summary={result.report.summary} brief={result.profile.raw_brief} />
 
       {/* Main content */}
       <Container size="lg" className="py-16 sm:py-20 space-y-16 sm:space-y-20">
@@ -174,11 +207,10 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
                 key={finalist.name}
                 name={finalist.name}
                 why={finalist.why}
-                combo={finalist.combo}
                 nameCard={nameCardMap.get(finalist.name.toLowerCase())}
                 onViewDetails={() => handleViewDetails(finalist.name)}
                 index={index}
-                preSelectedMiddle={preSelectedMiddle}
+                themeColorMap={themeColorMap}
               />
             ))}
           </div>

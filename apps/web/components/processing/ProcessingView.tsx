@@ -226,7 +226,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
             transition={{ delay: 0.1 }}
           >
             <Card variant="cream" padding="lg">
-              <StageIndicator events={events} themes={themes} />
+              <StageIndicator events={events} />
             </Card>
           </motion.div>
 

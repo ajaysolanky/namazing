@@ -5,19 +5,16 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { NameCard } from "@/lib/types";
 
+// Map of theme string -> style, passed from parent for max color separation
+export type ThemeColorMap = Record<string, typeof THEME_STYLES[number]>;
+
 interface FinalistCardProps {
   name: string;
   why: string;
-  combo?: {
-    first: string;
-    middle: string;
-    why: string;
-  };
   nameCard?: NameCard;
   onViewDetails?: () => void;
   index?: number;
-  /** The pre-selected middle name (if any) so we can label it "Your Middle Name" */
-  preSelectedMiddle?: string;
+  themeColorMap?: ThemeColorMap;
 }
 
 // Theme color palette — matches the processing page's THEME_COLORS
@@ -48,21 +45,17 @@ function getThemeStyle(theme: string | undefined | null) {
 export function FinalistCard({
   name,
   why,
-  combo,
   nameCard,
   onViewDetails,
   index = 0,
-  preSelectedMiddle,
+  themeColorMap,
 }: FinalistCardProps) {
   const isTopPick = index === 0;
   const isTopThree = index < 3;
 
-  // Determine if this combo uses the family's pre-selected middle name
-  const isChosenMiddle = combo && preSelectedMiddle
-    ? combo.middle.toLowerCase() === preSelectedMiddle.toLowerCase()
-    : combo?.why.includes("chosen") ?? false;
-
-  const themeStyle = getThemeStyle(nameCard?.theme);
+  const themeStyle = themeColorMap && nameCard?.theme
+    ? themeColorMap[nameCard.theme] ?? null
+    : getThemeStyle(nameCard?.theme);
 
   // Get a meaningful descriptor for the name
   const getMeaningPreview = () => {
@@ -202,27 +195,26 @@ export function FinalistCard({
               {why}
             </motion.p>
 
-            {/* Middle name pairing - prominent section */}
-            {combo && (
+            {/* Nicknames */}
+            {nameCard?.nicknames && (nameCard.nicknames.intended?.length || nameCard.nicknames.likely?.length) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="max-w-lg mx-auto mb-10"
+                className="mb-10"
               >
-                <div className="p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-soft border border-studio-ink/5">
-                  <div className="flex items-center gap-2 text-xs text-studio-ink/50 uppercase tracking-wider mb-3">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    {isChosenMiddle ? "Your Middle Name" : "Suggested Middle Name"}
-                  </div>
-                  <div className="font-display text-3xl text-studio-ink mb-2 flex items-center justify-center gap-4">
-                    <span>{combo.first}</span>
-                    <span className="text-studio-ink/20 text-2xl font-light">+</span>
-                    <span className="text-studio-terracotta">{combo.middle}</span>
-                  </div>
-                  <p className="text-studio-ink/60 text-center">{combo.why}</p>
+                <p className="text-xs text-studio-ink/50 uppercase tracking-wider text-center mb-2">Nicknames</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                {nameCard.nicknames.intended?.map((nick) => (
+                  <span key={nick} className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-studio-ink font-medium shadow-soft border border-studio-ink/5">
+                    {nick}
+                  </span>
+                ))}
+                {nameCard.nicknames.likely?.map((nick) => (
+                  <span key={nick} className="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-studio-ink/60 shadow-soft border border-studio-ink/5">
+                    {nick}
+                  </span>
+                ))}
                 </div>
               </motion.div>
             )}
@@ -385,24 +377,22 @@ export function FinalistCard({
               </div>
             )}
 
-            {/* Middle name combo */}
-            {combo && (
-              <div className="mt-5 p-4 bg-gradient-to-br from-studio-sage/15 to-studio-rose/10 rounded-2xl border border-studio-sage/20">
-                <p className="text-xs text-studio-ink/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                  {isChosenMiddle ? "Your Middle Name" : "Suggested Middle Name"}
-                </p>
-                <p className="font-display text-xl text-studio-ink">
-                  {combo.first} <span className="text-studio-ink/30 font-light">+</span> {combo.middle}
-                </p>
-                <p className="text-sm text-studio-ink/60 mt-1.5 leading-relaxed">{combo.why}</p>
+            {/* Nicknames */}
+            {nameCard?.nicknames && (nameCard.nicknames.intended?.length || nameCard.nicknames.likely?.length) && (
+              <div className="mt-5">
+                <p className="text-xs text-studio-ink/40 uppercase tracking-wider mb-1.5">Nicknames</p>
+                <div className="flex flex-wrap gap-1.5">
+                {nameCard.nicknames.intended?.map((nick) => (
+                  <span key={nick} className="px-2.5 py-1 bg-studio-sage/20 rounded-full text-xs font-medium text-studio-ink">
+                    {nick}
+                  </span>
+                ))}
+                {nameCard.nicknames.likely?.map((nick) => (
+                  <span key={nick} className="px-2.5 py-1 bg-studio-sand/80 rounded-full text-xs text-studio-ink/60">
+                    {nick}
+                  </span>
+                ))}
+                </div>
               </div>
             )}
 

@@ -9,6 +9,7 @@ import { Container } from "@/components/layout/Container";
 interface ReportHeroProps {
   surname: string;
   summary: string;
+  brief?: string;
 }
 
 // Sparkle component for celebratory effect
@@ -32,7 +33,7 @@ function Sparkle({ delay, x, y }: { delay: number; x: number; y: number }) {
   );
 }
 
-export function ReportHero({ surname, summary }: ReportHeroProps) {
+export function ReportHero({ surname, summary, brief }: ReportHeroProps) {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -115,6 +116,20 @@ export function ReportHero({ surname, summary }: ReportHeroProps) {
               </span>
             </motion.div>
 
+            {/* Input brief context */}
+            {brief && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="max-w-xl mx-auto"
+              >
+                <p className="text-sm sm:text-base text-studio-ink/40 font-light italic leading-relaxed">
+                  &ldquo;{brief}&rdquo;
+                </p>
+              </motion.div>
+            )}
+
             {/* Main celebration heading */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -125,7 +140,7 @@ export function ReportHero({ surname, summary }: ReportHeroProps) {
               <p className="text-studio-ink/50 text-xl font-light tracking-wide">
                 Introducing names for
               </p>
-              <h1 className="font-display text-6xl sm:text-7xl md:text-8xl text-studio-ink leading-none">
+              <h1 className="font-display text-6xl sm:text-7xl md:text-8xl text-studio-ink leading-none pb-2">
                 The {surname}
                 <span className="block text-4xl sm:text-5xl md:text-6xl mt-2 bg-gradient-to-r from-studio-rose via-studio-ink to-studio-sage bg-clip-text text-transparent">
                   Family

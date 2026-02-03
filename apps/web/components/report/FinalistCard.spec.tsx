@@ -57,25 +57,21 @@ describe('FinalistCard', () => {
     })
   })
 
-  describe('Combo Suggestion', () => {
-    it('should render combo when provided', () => {
-      const combo = {
-        first: 'Stella',
-        middle: 'Rose',
-        why: 'Perfect flow',
+  describe('Nicknames', () => {
+    it('should render nicknames when nameCard has them', () => {
+      const nameCardWithNicknames = {
+        ...mockNameCard,
+        nicknames: { intended: ['Lu'], likely: ['Lulu'] },
       }
-      // Use index > 0 to not trigger top pick layout
-      render(<FinalistCard name="Stella" why="Test" combo={combo} index={1} />)
+      render(<FinalistCard name="Luna" why="Test" nameCard={nameCardWithNicknames} index={1} />)
 
-      expect(screen.getByText('Suggested Middle Name')).toBeInTheDocument()
-      expect(screen.getByText('Perfect flow')).toBeInTheDocument()
-      // The combo section contains "first + middle" format
-      expect(screen.getByText('+')).toBeInTheDocument()
+      expect(screen.getByText('Lu')).toBeInTheDocument()
+      expect(screen.getByText('Lulu')).toBeInTheDocument()
     })
 
-    it('should not render combo section when not provided', () => {
-      render(<FinalistCard name="Luna" why="Test" />)
-      expect(screen.queryByText('Suggested Middle Name')).not.toBeInTheDocument()
+    it('should not render nicknames section when not provided', () => {
+      render(<FinalistCard name="Luna" why="Test" nameCard={mockNameCard} index={1} />)
+      expect(screen.queryByText('Lu')).not.toBeInTheDocument()
     })
   })
 
