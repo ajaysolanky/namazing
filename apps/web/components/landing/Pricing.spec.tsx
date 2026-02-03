@@ -22,19 +22,20 @@ describe('Pricing', () => {
   })
 
   describe('Pricing Card', () => {
-    it('should render "Free tier" badge', () => {
+    it('should render "Early Access" badge', () => {
       render(<Pricing />)
-      expect(screen.getByText('Free tier')).toBeInTheDocument()
+      expect(screen.getByText('Early Access')).toBeInTheDocument()
     })
 
-    it('should render "$0" price', () => {
+    it('should render "$0" price with struck-through "$49"', () => {
       render(<Pricing />)
       expect(screen.getByText('$0')).toBeInTheDocument()
+      expect(screen.getByText('$49')).toBeInTheDocument()
     })
 
-    it('should render "Free forever" text', () => {
+    it('should render early access pricing description', () => {
       render(<Pricing />)
-      expect(screen.getByText('Free forever')).toBeInTheDocument()
+      expect(screen.getByText(/Free during early access/)).toBeInTheDocument()
     })
   })
 
