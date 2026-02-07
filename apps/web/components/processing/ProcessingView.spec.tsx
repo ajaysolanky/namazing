@@ -67,7 +67,7 @@ describe('ProcessingView', () => {
     it('should subscribe to run events on mount', () => {
       render(<ProcessingView runId="test-run-123" />)
 
-      expect(sse.subscribeToRun).toHaveBeenCalledWith('test-run-123', expect.any(Function))
+      expect(sse.subscribeToRun).toHaveBeenCalledWith('test-run-123', expect.any(Function), expect.any(Function))
     })
 
     it('should unsubscribe on unmount', () => {
