@@ -77,7 +77,10 @@ async def search_web(
                     for item in organic[:top_k]
                 ]
         except Exception as e:
-            print(f"[search] SerpAPI failed for query='{query}': {type(e).__name__}: {e}", file=sys.stderr)
+            print(
+                f"[search] SerpAPI failed for query='{query}': {type(e).__name__}: {e}",
+                file=sys.stderr,
+            )
 
     # Default stubbed response when provider unavailable
     return [
