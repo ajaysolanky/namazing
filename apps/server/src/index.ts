@@ -149,5 +149,5 @@ app.delete("/api/run/:runId", async (req: Request, res: Response) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`[server] API server listening on http://0.0.0.0:${PORT}`);
+  console.log(`[server] Listening on http://0.0.0.0:${PORT}`);
 });
