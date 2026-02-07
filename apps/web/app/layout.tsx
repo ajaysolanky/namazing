@@ -3,6 +3,7 @@ import "./globals.css";
 import { Fraunces, Inter } from "next/font/google";
 import { Agentation } from "agentation";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -51,6 +52,7 @@ export default function RootLayout({
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-studio-sand text-studio-ink flex flex-col">
         <PostHogProvider>
+          <GlobalErrorHandler />
           {children}
         </PostHogProvider>
         {process.env.NODE_ENV === "development" && <Agentation />}

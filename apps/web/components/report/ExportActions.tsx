@@ -45,7 +45,8 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
       document.body.removeChild(a);
       posthog.capture("report_pdf_downloaded", { run_id: runId });
     } catch (error) {
-      console.error("Failed to download PDF:", error);
+      console.error("[export] Failed to download PDF:", error);
+      posthog.capture("pdf_error", { run_id: runId, error: error instanceof Error ? error.message : String(error) });
       setDownloadError(error instanceof Error ? error.message : "Failed to download PDF");
     } finally {
       setIsDownloading(false);
@@ -59,7 +60,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      console.error("[export] Failed to copy link:", error);
     }
   };
 

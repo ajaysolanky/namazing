@@ -73,7 +73,7 @@ export function useIntakeForm() {
           setFormData({ ...defaultFormData, ...parsed.formData });
           setCurrentStep(parsed.currentStep || 0);
         } catch (e) {
-          console.error("Failed to parse saved form data", e);
+          console.error("[storage] Failed to parse saved form data", e);
         }
       }
       setIsLoaded(true);

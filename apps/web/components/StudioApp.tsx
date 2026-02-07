@@ -52,13 +52,13 @@ export function StudioApp() {
             if (payload && typeof payload === 'object' && 'report' in payload && 'candidates' in payload) {
               setResult(payload as RunResult);
             } else {
-              console.error("Invalid result payload shape", payload);
+              console.error("[studio] Invalid result payload shape", payload);
               setError("Received malformed result from server");
             }
             setIsRunning(false);
           })
           .catch((err) => {
-            console.error("Failed to fetch result", err);
+            console.error("[studio] Failed to fetch result", err);
             setError("Failed to load results. Please try again.");
             setIsRunning(false);
           });

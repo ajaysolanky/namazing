@@ -91,8 +91,9 @@ def _load_popularity_data() -> dict[str, dict[int, YearData]]:
                 result[name][year].rank = rank
 
     except FileNotFoundError:
-        # Return empty data if file not found
-        pass
+        import sys
+
+        print("[popularity] CSV not found, returning empty data", file=sys.stderr)
 
     _popularity_data = result
     return _popularity_data

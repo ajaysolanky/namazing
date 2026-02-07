@@ -3,6 +3,8 @@
 import asyncio
 import json
 import os
+import sys
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
 from uuid import uuid4
@@ -136,6 +138,10 @@ class OrchestratorService:
     def __init__(self, allow_stubs: bool = True) -> None:
         self._runs: dict[str, RunRecord] = {}
         self.allow_stubs = allow_stubs
+        print(
+            f"[pipeline] init: stubs={'on' if allow_stubs else 'off'} concurrency={CONCURRENCY}",
+            file=sys.stderr,
+        )
 
     def _check_stubs_allowed(self) -> None:
         """Raise error if stubs are required but disabled."""
@@ -243,23 +249,53 @@ class OrchestratorService:
         record.status = "running"
 
         try:
+            run_tag = record.id[:8]
+
             # Stage 1: Parse brief
+            t0 = time.monotonic()
             profile = await self._run_brief_parser(record, record.brief)
+            print(
+                f"[pipeline] run={run_tag} brief-parser {time.monotonic() - t0:.1f}s",
+                file=sys.stderr,
+            )
 
             # Stage 2: Generate candidates
+            t0 = time.monotonic()
             candidates = await self._run_name_generator(record, profile)
+            print(
+                f"[pipeline] run={run_tag} generator {time.monotonic() - t0:.1f}s", file=sys.stderr
+            )
 
             # Stage 3: Research names
+            t0 = time.monotonic()
             cards = await self._run_research(record, profile, candidates)
+            print(
+                f"[pipeline] run={run_tag} researcher {time.monotonic() - t0:.1f}s", file=sys.stderr
+            )
 
             # Stage 4: Select finalists
+            t0 = time.monotonic()
             selection = await self._run_expert_selector(record, profile, cards)
+            print(
+                f"[pipeline] run={run_tag} expert-selector {time.monotonic() - t0:.1f}s",
+                file=sys.stderr,
+            )
 
             # Stage 4.5: Sanity check - holistic validation against original brief
+            t0 = time.monotonic()
             selection = await self._run_sanity_checker(record, record.brief, selection)
+            print(
+                f"[pipeline] run={run_tag} sanity-checker {time.monotonic() - t0:.1f}s",
+                file=sys.stderr,
+            )
 
             # Stage 5: Compose report
+            t0 = time.monotonic()
             report = await self._run_report_composer(record, profile, cards, selection)
+            print(
+                f"[pipeline] run={run_tag} report-composer {time.monotonic() - t0:.1f}s",
+                file=sys.stderr,
+            )
 
             # Assemble final result
             result = RunResult(

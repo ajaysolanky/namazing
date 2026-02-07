@@ -103,11 +103,14 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
     // Handle errors
     if (event.t === "error") {
       setError(event.msg);
+      posthog.capture("consultation_failed", { run_id: runId, error: event.msg, stage: event.agent });
     }
   }, []);
 
   useEffect(() => {
-    const unsubscribe = subscribeToRun(runId, handleEvent);
+    const unsubscribe = subscribeToRun(runId, handleEvent, () => {
+      setError("Connection lost. Your consultation may still be running — try refreshing.");
+    });
     return () => unsubscribe();
   }, [runId, handleEvent]);
 

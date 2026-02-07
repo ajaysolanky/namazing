@@ -125,7 +125,7 @@ export class PythonOrchestrator {
     });
 
     child.stderr.on("data", (data) => {
-      console.error(`[PythonOrchestrator] stderr: ${data}`);
+      console.error(`[PythonOrchestrator] run=${id} stderr: ${data}`);
     });
 
     child.on("close", (code) => {

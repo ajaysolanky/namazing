@@ -89,7 +89,7 @@ export function IntakeWizard() {
       // Reset form after a delay to ensure navigation has started
       setTimeout(() => resetForm(), 500);
     } catch (err: any) {
-      console.error("Failed to start run:", err);
+      console.error("[intake] Failed to start run:", err);
       if (err?.code === "DAILY_LIMIT") {
         setError(err.message);
       } else {

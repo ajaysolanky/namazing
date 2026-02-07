@@ -10,6 +10,14 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    console.log(`[http] ${req.method} ${req.path} ${res.statusCode} ${Date.now() - start}ms`);
+  });
+  next();
+});
+
 // Rate limiting: stricter for expensive operations (run creation)
 const runRateLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute window
@@ -143,9 +151,14 @@ app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Respons
 
 app.delete("/api/run/:runId", async (req: Request, res: Response) => {
   const { runId } = req.params;
-  console.log(`[API] Deleting run: runId=${runId}`);
-  await deleteRun(runId);
-  res.status(204).end();
+  try {
+    console.log(`[API] Deleting run: runId=${runId}`);
+    await deleteRun(runId);
+    res.status(204).end();
+  } catch (error) {
+    console.error(`[API] Failed to delete run: runId=${runId}`, error);
+    res.status(500).json({ error: "Failed to delete run" });
+  }
 });
 
 app.listen(PORT, "0.0.0.0", () => {

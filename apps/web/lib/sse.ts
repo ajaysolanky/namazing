@@ -5,7 +5,8 @@ import { SSE_BASE_URL } from "./config";
 
 export function subscribeToRun(
   runId: string,
-  onEvent: (event: ActivityEvent) => void
+  onEvent: (event: ActivityEvent) => void,
+  onError?: () => void
 ) {
   const source = new EventSource(`${SSE_BASE_URL}/api/events/${runId}`);
   source.onmessage = (event) => {
@@ -13,12 +14,13 @@ export function subscribeToRun(
       const data = JSON.parse(event.data) as ActivityEvent;
       onEvent(data);
     } catch (error) {
-      console.error("Failed to parse SSE event", error);
+      console.error("[sse] Failed to parse event", error);
     }
   };
   source.onerror = (error) => {
-    console.error("SSE connection error", error);
+    console.error("[sse] Connection error", error);
     source.close();
+    onError?.();
   };
   return () => source.close();
 }
