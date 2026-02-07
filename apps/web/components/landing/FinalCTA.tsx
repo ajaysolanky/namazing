@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 export function FinalCTA() {
   return (
@@ -24,7 +25,7 @@ export function FinalCTA() {
           <p className="text-studio-ink/60 mb-8 max-w-md mx-auto">
             Your perfect baby name is waiting. Start your personalized consultation today.
           </p>
-          <Link href="/sign-up">
+          <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "final", label: "Begin your journey" })}>
             <Button variant="terracotta" size="lg">
               Begin your journey
             </Button>

@@ -15,6 +15,7 @@ import { ReviewStep } from "./steps/ReviewStep";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { startRun } from "@/lib/api";
+import posthog from "posthog-js";
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -49,8 +50,14 @@ export function IntakeWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const stepNames = ["welcome", "family", "style", "names", "heritage", "details", "review"] as const;
+
   const handleNext = () => {
     if (validateStep(currentStep)) {
+      posthog.capture("intake_step_completed", {
+        step_number: currentStep,
+        step_name: stepNames[currentStep],
+      });
       setDirection(1);
       nextStep();
     }
@@ -75,6 +82,7 @@ export function IntakeWizard() {
     try {
       const profile = transformToSessionProfile(formData);
       const { runId } = await startRun(profile.raw_brief, "parallel");
+      posthog.capture("consultation_started", { run_id: runId });
       // Navigate first, then reset form in the background
       // This prevents the form from flashing back to step 0
       router.push(`/processing/${runId}`);

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,10 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    posthog.capture("signup_started", { method: "page_view" });
+  }, []);
 
   async function handleEmailSignUp(e: React.FormEvent) {
     e.preventDefault();
@@ -34,11 +39,13 @@ export default function SignUpPage() {
       return;
     }
 
+    posthog.capture("signup_completed", { method: "email" });
     router.push("/dashboard");
     router.refresh();
   }
 
   async function handleGoogleSignUp() {
+    posthog.capture("signup_started", { method: "google" });
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

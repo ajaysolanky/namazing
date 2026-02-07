@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { RunCard } from "./RunCard";
+import posthog from "posthog-js";
 
 interface RunHistoryListProps {
   runs: Array<{
@@ -80,7 +81,7 @@ export function RunHistoryList({ runs }: RunHistoryListProps) {
               ))}
             </div>
 
-            <Link href="/intake">
+            <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "dashboard_empty", label: "Start consultation" })}>
               <Button variant="terracotta" size="md">
                 Start consultation
               </Button>

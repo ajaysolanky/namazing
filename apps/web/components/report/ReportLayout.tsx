@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { RunResult, NameCard } from "@/lib/types";
 import { Container } from "@/components/layout/Container";
@@ -11,6 +11,7 @@ import { NameDetailModal } from "./NameDetailModal";
 import { NearMissesAccordion } from "./NearMissesAccordion";
 import { ExportActions } from "./ExportActions";
 import { MarkdownContent } from "./MarkdownContent";
+import posthog from "posthog-js";
 
 interface ReportLayoutProps {
   runId: string;
@@ -83,6 +84,11 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
   const [selectedName, setSelectedName] = useState<NameCard | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  useEffect(() => {
+    const isSample = runId.startsWith("sample-");
+    posthog.capture(isSample ? "sample_report_viewed" : "report_viewed", { run_id: runId });
+  }, [runId]);
+
   const surname = result.profile.family?.surname || "Family";
 
   // Determine the pre-selected middle name (if any) based on baby gender
@@ -144,6 +150,7 @@ export function ReportLayout({ runId, result }: ReportLayoutProps) {
   const handleViewDetails = (name: string) => {
     const card = nameCardMap.get(name.toLowerCase());
     if (card) {
+      posthog.capture("name_detail_viewed", { name, run_id: runId });
       setSelectedName(card);
       setModalOpen(true);
     }

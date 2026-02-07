@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { StageIndicator } from "./StageIndicator";
@@ -12,6 +12,7 @@ import { subscribeToRun } from "@/lib/sse";
 import { fetchResult } from "@/lib/api";
 import type { ActivityEvent, NameCard } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import posthog from "posthog-js";
 
 // Soft color palette for naming themes — cycled by index
 const THEME_COLORS = [
@@ -43,6 +44,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
   const [themes, setThemes] = useState<string[]>([]);
   const [nameThemeMap, setNameThemeMap] = useState<Record<string, string>>({});
   const [isNavigating, setIsNavigating] = useState(false);
+  const completionTracked = useRef(false);
 
   const handleEvent = useCallback((event: ActivityEvent) => {
     setEvents((prev) => [...prev, event]);
@@ -92,6 +94,10 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
     // Handle completion
     if (event.t === "done" && event.agent === "report-composer") {
       setIsComplete(true);
+      if (!completionTracked.current) {
+        completionTracked.current = true;
+        posthog.capture("consultation_completed", { run_id: runId });
+      }
     }
 
     // Handle errors

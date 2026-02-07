@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportDocument } from "@/lib/pdf/ReportDocument";
 import { fetchResult } from "@/lib/api";
+import { SAMPLE_REPORTS } from "@/lib/sample-data";
 
 const PDF_TIMEOUT_MS = 30_000; // 30 seconds
 
@@ -12,8 +13,14 @@ export async function GET(
   try {
     const { runId } = params;
 
-    // Fetch the result data
-    const result = await fetchResult(runId);
+    // Use static sample data for sample reports, otherwise fetch from backend
+    let result;
+    if (runId.startsWith("sample-")) {
+      const sampleName = runId.replace("sample-", "");
+      result = SAMPLE_REPORTS[sampleName];
+    } else {
+      result = await fetchResult(runId);
+    }
 
     if (!result) {
       return NextResponse.json(

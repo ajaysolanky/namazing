@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 export default function SignInPage() {
   return (
@@ -37,11 +38,13 @@ function SignInForm() {
       return;
     }
 
+    posthog.capture("signin_completed", { method: "email" });
     router.push(next as any);
     router.refresh();
   }
 
   async function handleGoogleSignIn() {
+    posthog.capture("signin_started", { method: "google" });
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

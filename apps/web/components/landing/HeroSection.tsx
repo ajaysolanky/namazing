@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 function AnimatedBlob({ className, delay = 0 }: { className: string; delay?: number }) {
   return (
@@ -193,7 +194,7 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="mt-10 flex flex-col items-center gap-4"
           >
-            <Link href="/sign-up">
+            <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "hero", label: "Get started free" })}>
               <Button variant="terracotta" size="xl" className="animate-gentle-bounce">
                 Get started free
               </Button>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import posthog from "posthog-js";
 
 interface ExportActionsProps {
   runId: string;
@@ -42,6 +43,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      posthog.capture("report_pdf_downloaded", { run_id: runId });
     } catch (error) {
       console.error("Failed to download PDF:", error);
       setDownloadError(error instanceof Error ? error.message : "Failed to download PDF");
@@ -53,6 +55,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
+      posthog.capture("report_shared", { method: "copy_link", run_id: runId });
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (error) {
@@ -64,6 +67,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   const shareText = `Check out the baby names we're considering for the ${surname} family!`;
 
   const shareToTwitter = () => {
+    posthog.capture("report_shared", { method: "twitter", run_id: runId });
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank",
@@ -72,6 +76,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   };
 
   const shareToFacebook = () => {
+    posthog.capture("report_shared", { method: "facebook", run_id: runId });
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       "_blank",
@@ -80,6 +85,7 @@ export function ExportActions({ runId, surname }: ExportActionsProps) {
   };
 
   const shareViaEmail = () => {
+    posthog.capture("report_shared", { method: "email", run_id: runId });
     window.location.href = `mailto:?subject=${encodeURIComponent(
       `Baby names for the ${surname} family`
     )}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;

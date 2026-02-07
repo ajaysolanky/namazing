@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 const features = [
   "Full 5-stage AI consultation pipeline",
@@ -67,7 +68,7 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Link href="/sign-up">
+            <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "pricing", label: "Get started free" })}>
               <Button variant="terracotta" size="lg" className="w-full">
                 Get started free
               </Button>

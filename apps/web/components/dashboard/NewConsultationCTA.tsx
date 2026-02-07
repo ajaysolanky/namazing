@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import posthog from "posthog-js";
 
 export function NewConsultationCTA() {
   return (
@@ -28,7 +29,7 @@ export function NewConsultationCTA() {
           <p className="text-studio-ink/60 mb-6 max-w-lg">
             Tell us about your family, your values, and what matters most — our AI experts will curate a shortlist of names just for you.
           </p>
-          <Link href="/intake">
+          <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "dashboard_new", label: "Begin consultation" })}>
             <Button variant="terracotta" size="md">
               Begin consultation
             </Button>

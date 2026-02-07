@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import posthog from "posthog-js";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -27,6 +28,7 @@ export function useAuth() {
   }, []);
 
   async function signOut() {
+    posthog.capture("signout");
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
