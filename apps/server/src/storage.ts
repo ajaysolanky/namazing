@@ -38,6 +38,7 @@ export async function createRun(
       .select("id")
       .single();
     if (error) throw error;
+    console.log(`[storage] createRun: runId=${data.id} userId=${userId}`);
     return data.id;
   }
   // Fallback: caller generates ID
@@ -66,7 +67,11 @@ export async function saveRunResult(
     const { error } = await supabase
       .from("run_results")
       .upsert({ run_id: runId, result, report_markdown: markdown ?? null });
-    if (error) console.error("[storage] saveRunResult error:", error);
+    if (error) {
+      console.error("[storage] saveRunResult error:", error);
+    } else {
+      console.log(`[storage] saveRunResult: runId=${runId}`);
+    }
     return;
   }
 }
@@ -84,6 +89,7 @@ export async function getRun(runId: string): Promise<RunRecord | null> {
     return { ...data, result };
   }
   // Fallback to file
+  console.log(`[storage] getRun: falling back to file storage for runId=${runId}`);
   const filePath = path.join(STORAGE_DIR, `${runId}.json`);
   try {
     const raw = await fs.readFile(filePath, "utf-8");

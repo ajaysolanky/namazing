@@ -15,6 +15,8 @@ export async function GET(
       return new Response("Unauthorized", { status: 401 });
     }
 
+    console.log(`[api/events] SSE proxy: userId=${user.id} runId=${params.runId}`);
+
     const response = await fetch(`${BACKEND_URL}/api/events/${params.runId}`, {
       headers: {
         Accept: "text/event-stream",
@@ -30,7 +32,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error(`[api/events] Proxy error for runId=${params.runId}:`, error);
     return new Response("Failed to connect to backend", { status: 502 });
   }
 }

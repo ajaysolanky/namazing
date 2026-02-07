@@ -11,11 +11,17 @@ export async function updateProfile(formData: FormData) {
 
   const displayName = formData.get("displayName") as string;
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({ display_name: displayName, updated_at: new Date().toISOString() })
     .eq("id", user.id);
 
+  if (error) {
+    console.error(`[settings] Failed to update profile for user ${user.id}:`, error);
+    throw new Error("Failed to update profile");
+  }
+
+  console.log(`[settings] Profile updated for user ${user.id}`);
   revalidatePath("/dashboard");
   revalidatePath("/settings");
 }
@@ -26,8 +32,14 @@ export async function deleteAccount() {
   if (!user) redirect("/sign-in");
 
   // Delete profile (cascades to runs and results)
-  await supabase.from("profiles").delete().eq("id", user.id);
+  const { error } = await supabase.from("profiles").delete().eq("id", user.id);
 
+  if (error) {
+    console.error(`[settings] Failed to delete account for user ${user.id}:`, error);
+    throw new Error("Failed to delete account");
+  }
+
+  console.log(`[settings] Account deleted for user ${user.id}`);
   await supabase.auth.signOut();
   redirect("/");
 }

@@ -3,6 +3,8 @@
 import asyncio
 import json
 import os
+import sys
+import time
 from typing import Any, TypeVar
 
 import httpx
@@ -62,6 +64,8 @@ async def call_llm(
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
+    t0 = time.monotonic()
+
     for attempt in range(max_retries):
         try:
             async with httpx.AsyncClient() as client:
@@ -78,6 +82,10 @@ async def call_llm(
                 if response.status_code == 429:
                     if attempt < max_retries - 1:
                         wait = (attempt + 1) * 2
+                        print(
+                            f"[llm] Rate limited (429) for {model}, retrying in {wait}s (attempt {attempt + 1}/{max_retries})",
+                            file=sys.stderr,
+                        )
                         await asyncio.sleep(wait)
                         continue
 
@@ -93,9 +101,15 @@ async def call_llm(
                         f.write(json.dumps(data, indent=2))
                         f.write("\n------------------------\n")
 
+                elapsed = time.monotonic() - t0
+                print(f"[llm] {model} completed in {elapsed:.1f}s", file=sys.stderr)
                 break
         except (httpx.HTTPError, httpx.TimeoutException) as e:
             if attempt < max_retries - 1:
+                print(
+                    f"[llm] {type(e).__name__} for {model}, retrying (attempt {attempt + 1}/{max_retries})",
+                    file=sys.stderr,
+                )
                 await asyncio.sleep(1)
                 continue
             raise e
@@ -172,9 +186,6 @@ async def run_json_agent(
         except (json.JSONDecodeError, ValidationError) as e:
             last_error = e
             if attempt < max_retries - 1:
-                # Log to stderr to avoid cluttering stdout pipeline output
-                import sys
-
                 print(
                     f"Warning: Validation/JSON error in {prompt_slug} (attempt {attempt + 1}/{max_retries}): {e}",
                     file=sys.stderr,

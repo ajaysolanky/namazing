@@ -1,6 +1,7 @@
 """Web search and content extraction tools."""
 
 import os
+import sys
 from dataclasses import dataclass
 
 import httpx
@@ -75,9 +76,8 @@ async def search_web(
                     )
                     for item in organic[:top_k]
                 ]
-        except Exception:
-            # Fall through to stub results
-            pass
+        except Exception as e:
+            print(f"[search] SerpAPI failed for query='{query}': {type(e).__name__}: {e}", file=sys.stderr)
 
     # Default stubbed response when provider unavailable
     return [

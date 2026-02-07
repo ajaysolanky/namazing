@@ -15,6 +15,8 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log(`[api/result] Fetch: userId=${user.id} runId=${params.runId}`);
+
     const response = await fetch(`${BACKEND_URL}/api/result/${params.runId}`, {
       headers: {
         "Cache-Control": "no-store",
@@ -24,7 +26,7 @@ export async function GET(
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error(`[api/result] Proxy error for runId=${params.runId}:`, error);
     return NextResponse.json(
       { error: "Failed to connect to backend" },
       { status: 502 }

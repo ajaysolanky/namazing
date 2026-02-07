@@ -17,6 +17,10 @@ const runRateLimiter = rateLimit({
   message: { error: "Too many run requests, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (_req, res, _next, options) => {
+    console.warn(`[rate-limit] Run creation limit hit from ${_req.ip}`);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 // Rate limiting: more lenient for read operations
@@ -26,6 +30,10 @@ const readRateLimiter = rateLimit({
   message: { error: "Too many requests, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (_req, res, _next, options) => {
+    console.warn(`[rate-limit] Read limit hit from ${_req.ip}`);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 app.get("/healthz", (_req: Request, res: Response) => {
@@ -67,9 +75,13 @@ app.get("/api/events/:runId", readRateLimiter, async (req: Request, res: Respons
   const run = memoryRun || diskRun;
 
   if (!run) {
+    console.warn(`[API] SSE 404: runId=${runId} not found`);
     res.status(404).end();
     return;
   }
+
+  const source = memoryRun ? "memory" : "disk";
+  console.log(`[API] SSE connect: runId=${runId} source=${source}`);
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache, no-transform");
@@ -90,12 +102,14 @@ app.get("/api/events/:runId", readRateLimiter, async (req: Request, res: Respons
     });
 
     req.on("close", () => {
+      console.log(`[API] SSE disconnect: runId=${runId}`);
       unsubscribe();
       res.end();
     });
   } else {
     // Run is from disk (completed), no live updates
     req.on("close", () => {
+      console.log(`[API] SSE disconnect: runId=${runId}`);
       res.end();
     });
   }
@@ -109,6 +123,7 @@ app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Respons
   const run = memoryRun || diskRun;
 
   if (!run) {
+    console.warn(`[API] Result 404: runId=${runId} not found`);
     res.status(404).json({ error: "run not found" });
     return;
   }
@@ -118,14 +133,17 @@ app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Respons
   res.setHeader("Pragma", "no-cache");
 
   if (!run.result) {
+    console.log(`[API] Result pending: runId=${runId} status=${run.status}`);
     res.status(202).json({ status: run.status });
     return;
   }
+  console.log(`[API] Result served: runId=${runId}`);
   res.json(run.result);
 });
 
 app.delete("/api/run/:runId", async (req: Request, res: Response) => {
   const { runId } = req.params;
+  console.log(`[API] Deleting run: runId=${runId}`);
   await deleteRun(runId);
   res.status(204).end();
 });

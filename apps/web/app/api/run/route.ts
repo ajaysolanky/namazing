@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       .gte("created_at", todayUTC.toISOString());
 
     if (countError) {
-      console.error("Failed to check daily run count:", countError);
+      console.error(`[api/run] Failed to check daily run count for userId=${user.id}:`, countError);
       return NextResponse.json(
         { error: "Failed to check usage limits" },
         { status: 500 }
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
 
     const runsToday = count ?? 0;
     if (runsToday >= DAILY_RUN_LIMIT) {
+      console.warn(`[api/run] Daily limit: userId=${user.id} runsToday=${runsToday}`);
       return NextResponse.json(
         { error: "Daily limit reached", dailyLimit: DAILY_RUN_LIMIT, runsToday },
         { status: 429 }
@@ -50,9 +51,10 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
+    console.log(`[api/run] Proxied: userId=${user.id} status=${response.status} runId=${data.runId}`);
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error("[api/run] Proxy error:", error);
     return NextResponse.json(
       { error: "Failed to connect to backend" },
       { status: 502 }

@@ -22,6 +22,9 @@ export async function callLLM({
 
   const provider = process.env.LLM_PROVIDER;
 
+  console.log(`[openrouter] Calling model=${model} json=${json}`);
+  const startTime = Date.now();
+
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -42,8 +45,12 @@ export async function callLLM({
 
   if (!res.ok) {
     const text = await res.text();
+    console.error(`[openrouter] Error: ${res.status} for model=${model}`);
     throw new Error(`OpenRouter error: ${res.status} ${text}`);
   }
+
+  const elapsed = Date.now() - startTime;
+  console.log(`[openrouter] OK model=${model} ${elapsed}ms`);
 
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;

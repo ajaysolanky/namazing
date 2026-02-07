@@ -10,8 +10,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { runId: string } }
 ) {
+  const startTime = Date.now();
   try {
     const { runId } = params;
+    console.log(`[api/pdf] Generating PDF for runId=${runId}`);
 
     // Use static sample data for sample reports, otherwise fetch from backend
     let result;
@@ -44,6 +46,9 @@ export async function GET(
     // Convert Buffer to Uint8Array for NextResponse
     const uint8Array = new Uint8Array(pdfBuffer);
 
+    const elapsed = Date.now() - startTime;
+    console.log(`[api/pdf] OK runId=${runId} size=${uint8Array.byteLength} ${elapsed}ms`);
+
     // Return PDF response
     return new NextResponse(uint8Array, {
       headers: {
@@ -53,11 +58,12 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("PDF generation error:", error);
+    const elapsed = Date.now() - startTime;
+    console.error(`[api/pdf] Error for runId=${params.runId} after ${elapsed}ms:`, error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : "";
-    console.error("Error details:", errorMessage);
-    console.error("Stack:", errorStack);
+    console.error("[api/pdf] Error details:", errorMessage);
+    console.error("[api/pdf] Stack:", errorStack);
     return NextResponse.json(
       { error: "Failed to generate PDF", details: errorMessage },
       { status: 500 }

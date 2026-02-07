@@ -46,8 +46,9 @@ export class PythonOrchestrator {
     }
 
     const emitter = new EventEmitter();
+    const startTime = Date.now();
 
-    console.log(`[PythonOrchestrator] Spawning: ${this.pythonPath} -m namazing.cli.app run ...`);
+    console.log(`[PythonOrchestrator] Spawning run ${id}: ${this.pythonPath} -m namazing.cli.app run ... (mode=${mode})`);
 
     const child = spawn(
       this.pythonPath,
@@ -95,6 +96,8 @@ export class PythonOrchestrator {
           if (event.t === "run-complete") {
              run.result = event.result;
              run.status = "completed";
+             const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+             console.log(`[PythonOrchestrator] Run ${id} completed in ${elapsed}s`);
              // Save to Supabase if available
              if (supabase && userId) {
                saveRunResult(id, event.result).catch((err) => {
@@ -126,7 +129,8 @@ export class PythonOrchestrator {
     });
 
     child.on("close", (code) => {
-      console.log(`[PythonOrchestrator] Process exited with code ${code}`);
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`[PythonOrchestrator] Process for run ${id} exited with code ${code} after ${elapsed}s (${run.events.length} events)`);
 
       if (buffer.trim()) {
         try {
@@ -134,7 +138,7 @@ export class PythonOrchestrator {
           if (event.t === "run-complete") {
             run.result = event.result;
             run.status = "completed";
-            console.log(`[PythonOrchestrator] Captured run-complete from buffer`);
+            console.log(`[PythonOrchestrator] Captured run-complete from buffer for run ${id}`);
           } else {
             run.events.push(event);
             run.emitter.emit("event", event);
@@ -148,7 +152,9 @@ export class PythonOrchestrator {
         run.status = "failed";
         run.emitter.emit("event", { t: "error", msg: `Process exited with code ${code}` });
         if (supabase && userId) {
-          updateRunStatus(id, "failed").catch(() => {});
+          updateRunStatus(id, "failed").catch((err) => {
+            console.error(`[PythonOrchestrator] Failed to update status to failed for run ${id}:`, err);
+          });
         }
       }
 
