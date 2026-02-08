@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    if (!key) return;
+    if (!key || window.location.hostname === "localhost") return;
 
     posthog.init(key, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
@@ -17,6 +17,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       capture_pageview: false,
       persistence: "localStorage",
     });
+
+    // Expose for console access (e.g. posthog.opt_out_capturing())
+    (window as never)["posthog"] = posthog;
   }, []);
 
   return (
