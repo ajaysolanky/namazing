@@ -19,7 +19,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Expose for console access (e.g. posthog.opt_out_capturing())
-    (window as never)["posthog"] = posthog;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).posthog = posthog;
   }, []);
 
   return (
