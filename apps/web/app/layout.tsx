@@ -34,12 +34,24 @@ export const metadata: Metadata = {
     description:
       "Get personalized baby name recommendations powered by AI. Research origins, meanings, and compatibility — all in one beautiful report.",
     url: "https://namazing.co",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Namazing — AI Baby Name Consultation",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Namazing — AI Baby Name Consultation",
     description:
       "Get personalized baby name recommendations powered by AI. Research origins, meanings, and compatibility — all in one beautiful report.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -51,6 +63,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-studio-sand text-studio-ink flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Namazing",
+              url: "https://namazing.co",
+              description:
+                "AI-powered baby name consultation — find the perfect name for your little one.",
+            }),
+          }}
+        />
         <PostHogProvider>
           <GlobalErrorHandler />
           {children}
