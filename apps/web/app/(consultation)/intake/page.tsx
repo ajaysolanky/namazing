@@ -5,6 +5,9 @@ import { Footer } from "@/components/layout/Footer";
 export const metadata = {
   title: "Start Your Consultation | Namazing",
   description: "Tell us about your family and preferences, and we'll find the perfect name for your little one.",
+  alternates: {
+    canonical: "/intake",
+  },
 };
 
 export default function IntakePage() {

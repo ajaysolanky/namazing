@@ -24,6 +24,9 @@ export function generateMetadata({ params }: SamplePageProps): Metadata {
   return {
     title: `${firstName} — Sample Report | Namazing`,
     description: `See a sample Namazing consultation report featuring the name ${firstName}.`,
+    alternates: {
+      canonical: `/sample/${name}`,
+    },
   };
 }
 
@@ -35,8 +38,22 @@ export default function SampleReportPage({ params }: SamplePageProps) {
     notFound();
   }
 
+  const firstName = result.report.finalists[0]?.name ?? name;
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: `${firstName} — Sample Report`,
+            description: `See a sample Namazing consultation report featuring the name ${firstName}.`,
+            url: `https://namazing.co/sample/${name}`,
+          }),
+        }}
+      />
       <Header />
       <main className="flex-1">
         <ReportLayout runId={`sample-${name}`} result={result} />
