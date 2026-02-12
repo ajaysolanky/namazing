@@ -8,7 +8,7 @@ import posthog from "posthog-js";
 
 export function FinalCTA() {
   return (
-    <section className="py-20 sm:py-28">
+    <section className="py-14 sm:py-20">
       <Container size="sm">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -20,14 +20,14 @@ export function FinalCTA() {
             <span className="text-4xl">{"\u2728"}</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl text-studio-ink mb-4">
-            Ready to find <span className="text-gradient-terracotta">the one</span>?
+            Your baby&apos;s perfect name is <span className="text-gradient-terracotta">minutes away</span>
           </h2>
           <p className="text-studio-ink/60 mb-8 max-w-md mx-auto">
-            Your perfect baby name is waiting. Start your personalized consultation today.
+            Tell us your story. Our AI does the research. You get a beautiful report with names your whole family will love.
           </p>
-          <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "final", label: "Begin your journey" })}>
+          <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "final", label: "Get your personalized shortlist" })}>
             <Button variant="terracotta" size="lg">
-              Begin your journey
+              Get your personalized shortlist
             </Button>
           </Link>
         </motion.div>

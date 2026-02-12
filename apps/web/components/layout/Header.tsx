@@ -110,7 +110,7 @@ export function Header() {
                     </Link>
                     <Link href="/sign-up">
                       <Button variant="terracotta" size="sm">
-                        Get started
+                        Get started free
                       </Button>
                     </Link>
                   </>
@@ -179,7 +179,7 @@ export function Header() {
                       <Button variant="ghost" size="sm">Sign in</Button>
                     </Link>
                     <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
-                      <Button variant="terracotta" size="sm">Get started</Button>
+                      <Button variant="terracotta" size="sm">Get started free</Button>
                     </Link>
                   </div>
                 )}

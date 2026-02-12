@@ -26,13 +26,13 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 sm:py-28 bg-gradient-to-b from-white/50 to-studio-cream/30">
+    <section id="how-it-works" className="py-14 sm:py-24 bg-studio-mint">
       <Container size="lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-studio-sage/20 rounded-full text-sm text-studio-ink/60 mb-6">
             How it works
