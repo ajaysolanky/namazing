@@ -4,9 +4,9 @@ import { HeroSection } from './HeroSection'
 
 describe('HeroSection', () => {
   describe('Badge and Hero Text', () => {
-    it('should render the badge with "AI-Powered Baby Name Consultation"', () => {
+    it('should render the badge with "Free During Early Access"', () => {
       render(<HeroSection />)
-      expect(screen.getByText('AI-Powered Baby Name Consultation')).toBeInTheDocument()
+      expect(screen.getByText('Free During Early Access')).toBeInTheDocument()
     })
 
     it('should render the headline text "Find the"', () => {
@@ -27,61 +27,57 @@ describe('HeroSection', () => {
   })
 
   describe('Description', () => {
-    it('should render the description about AI-powered consultation', () => {
+    it('should render the description about family story and heritage', () => {
       render(<HeroSection />)
-      expect(screen.getByText(/Our AI-powered consultation combines deep research, cultural context/)).toBeInTheDocument()
+      expect(screen.getByText(/Tell us your family's story and heritage/)).toBeInTheDocument()
     })
   })
 
   describe('CTA Button', () => {
-    it('should render "Get started free" CTA button', () => {
+    it('should render "Get your free name report" CTA button', () => {
       render(<HeroSection />)
-      const buttons = screen.getAllByRole('link', { name: 'Get started free' })
+      const buttons = screen.getAllByRole('link', { name: 'Get your free name report' })
       expect(buttons.length).toBeGreaterThan(0)
       expect(buttons[0]).toHaveAttribute('href', '/sign-up')
     })
 
-    it('should render subtitle "Free — create your account in seconds"', () => {
+    it('should render subtitle "No credit card needed · Results in minutes"', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Free — create your account in seconds')).toBeInTheDocument()
+      expect(screen.getByText(/No credit card needed/)).toBeInTheDocument()
     })
   })
 
-  describe('Social Proof', () => {
-    it('should render social proof "Trusted by growing families"', () => {
+  describe('Report Preview Card', () => {
+    it('should render "Sample Report Preview" badge', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Trusted by growing families')).toBeInTheDocument()
+      expect(screen.getByText('Sample Report Preview')).toBeInTheDocument()
     })
   })
 
   describe('Sample Name Preview Cards', () => {
-    it('should render "Sample from our curated collections" text', () => {
+    it('should render "Explore sample reports" text', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Sample from our curated collections')).toBeInTheDocument()
+      expect(screen.getByText(/Explore sample reports/)).toBeInTheDocument()
     })
 
     it('should render Amara name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Amara')).toBeInTheDocument()
-      expect(screen.getByText('Grace, eternal')).toBeInTheDocument()
+      expect(screen.getByText(/Grace, mercy; immortal, eternal/)).toBeInTheDocument()
     })
 
     it('should render Rowan name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Rowan')).toBeInTheDocument()
-      expect(screen.getByText('Little red one')).toBeInTheDocument()
+      expect(screen.getByText(/Little red one; rowan tree/)).toBeInTheDocument()
     })
 
     it('should render Kenji name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Kenji')).toBeInTheDocument()
-      expect(screen.getByText('Intelligent second son')).toBeInTheDocument()
+      expect(screen.getByText(/Intelligent second son; strong and vigorous/)).toBeInTheDocument()
     })
 
     it('should render Zara name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText('Zara')).toBeInTheDocument()
-      expect(screen.getByText('Blooming flower')).toBeInTheDocument()
+      expect(screen.getByText(/Blooming flower; princess/)).toBeInTheDocument()
     })
   })
 })

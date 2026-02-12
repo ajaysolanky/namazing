@@ -93,9 +93,9 @@ describe('Pricing', () => {
   })
 
   describe('CTA Button', () => {
-    it('should render "Get started free" CTA button linking to /sign-up', () => {
+    it('should render "Get your free name report" CTA button linking to /sign-up', () => {
       render(<Pricing />)
-      const ctaLink = screen.getByRole('link', { name: 'Get started free' })
+      const ctaLink = screen.getByRole('link', { name: 'Get your free name report' })
       expect(ctaLink).toBeInTheDocument()
       expect(ctaLink).toHaveAttribute('href', '/sign-up')
     })
