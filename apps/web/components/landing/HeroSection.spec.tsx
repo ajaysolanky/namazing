@@ -60,9 +60,9 @@ describe('HeroSection', () => {
       expect(screen.getByText(/Explore sample reports/)).toBeInTheDocument()
     })
 
-    it('should render Amara name card with meaning', () => {
+    it('should render Nia name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText(/Grace, mercy; immortal, eternal/)).toBeInTheDocument()
+      expect(screen.getByText(/Purpose; brightness, radiance/)).toBeInTheDocument()
     })
 
     it('should render Rowan name card with meaning', () => {

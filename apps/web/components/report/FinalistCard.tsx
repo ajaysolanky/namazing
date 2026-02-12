@@ -196,7 +196,7 @@ export function FinalistCard({
             </motion.p>
 
             {/* Nicknames */}
-            {nameCard?.nicknames && (nameCard.nicknames.intended?.length || nameCard.nicknames.likely?.length) && (
+            {nameCard?.nicknames && ((nameCard.nicknames.intended?.length ?? 0) > 0 || (nameCard.nicknames.likely?.length ?? 0) > 0) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -378,7 +378,7 @@ export function FinalistCard({
             )}
 
             {/* Nicknames */}
-            {nameCard?.nicknames && (nameCard.nicknames.intended?.length || nameCard.nicknames.likely?.length) && (
+            {nameCard?.nicknames && ((nameCard.nicknames.intended?.length ?? 0) > 0 || (nameCard.nicknames.likely?.length ?? 0) > 0) && (
               <div className="mt-5">
                 <p className="text-xs text-studio-ink/40 uppercase tracking-wider mb-1.5">Nicknames</p>
                 <div className="flex flex-wrap gap-1.5">

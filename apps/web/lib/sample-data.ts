@@ -225,6 +225,195 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           },
         ],
       },
+      {
+        name: "Chioma",
+        theme: "Graceful & Meaningful",
+        ipa: "/tʃiˈoʊ.mə/",
+        syllables: 3,
+        meaning: "Good God; God is good (Igbo)",
+        origins: ["Igbo"],
+        variants: ["Chidinma", "Chi"],
+        nicknames: {
+          intended: ["Chi"],
+          likely: ["Oma"],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 0,
+          trend_notes:
+            "Not ranked in the U.S. top 1000 but extremely popular in Nigeria. Gaining visibility through the Nigerian diaspora.",
+        },
+        notable_bearers: {
+          positive: [
+            "Chioma Ajunwa, Nigerian Olympic gold medalist",
+          ],
+          fictional: [],
+        },
+        cultural_notes: [
+          "A deeply spiritual Igbo name that expresses gratitude to God -- a cornerstone of Igbo naming philosophy",
+          "The 'Chi' prefix refers to one's personal god or life force in Igbo cosmology",
+          "Widely used across southeastern Nigeria and immediately signals Igbo heritage",
+        ],
+        surname_fit: {
+          surname: "Okafor",
+          notes:
+            "Chioma Okafor is a harmonious all-Igbo name. The three syllables of each create a balanced, flowing rhythm.",
+        },
+        sibset_fit: {
+          siblings: ["Ezra"],
+          notes:
+            "Ezra and Chioma pair a Hebrew classic with a proudly Igbo name, reflecting the family's multicultural roots.",
+        },
+        combo_suggestions: [
+          {
+            first: "Chioma",
+            middle: "Grace",
+            why: "Chioma Grace Okafor bridges Igbo spirituality with an English virtue name, creating a name that translates its own meaning.",
+          },
+        ],
+      },
+      {
+        name: "Ayana",
+        theme: "Cross-Cultural",
+        ipa: "/aɪˈɑː.nə/",
+        syllables: 3,
+        meaning: "Beautiful flower (Amharic); eternal blossom (Japanese reading)",
+        origins: ["Amharic", "Japanese", "Arabic"],
+        variants: ["Ayanna", "Ayan"],
+        nicknames: {
+          intended: ["Aya"],
+          likely: ["Ana"],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 487,
+          trend_notes:
+            "Gently rising in the U.S. Known across Ethiopian, Japanese, and Arabic-speaking communities. A quiet global name.",
+        },
+        notable_bearers: {
+          positive: [
+            "Ayana Elizabeth Johnson, marine biologist and climate policy expert",
+          ],
+          fictional: [],
+        },
+        cultural_notes: [
+          "In Amharic (Ethiopian), Ayana means 'beautiful flower' -- one of Ethiopia's most beloved girls' names",
+          "Can also be read as a Japanese name (彩菜), giving it genuine East Asian resonance",
+          "The nickname Aya is used independently across Arabic, Japanese, and West African cultures",
+        ],
+        surname_fit: {
+          surname: "Okafor",
+          notes:
+            "Ayana Okafor is warm and melodic. The three-syllable rhythm matches beautifully, and the open vowels create a flowing sound.",
+        },
+        sibset_fit: {
+          siblings: ["Ezra"],
+          notes:
+            "Ezra and Ayana share an open, vowel-rich quality. Both feel globally minded and culturally grounded.",
+        },
+        combo_suggestions: [
+          {
+            first: "Ayana",
+            middle: "Chidinma",
+            why: "Ayana Chidinma Okafor layers Ethiopian beauty with Igbo blessing -- a pan-African celebration.",
+          },
+        ],
+      },
+      {
+        name: "Ife",
+        theme: "Graceful & Meaningful",
+        ipa: "/ˈiː.feɪ/",
+        syllables: 2,
+        meaning: "Love (Yoruba)",
+        origins: ["Yoruba"],
+        variants: ["Ifeoma", "Ifeanyi"],
+        nicknames: {
+          intended: [],
+          likely: [],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 0,
+          trend_notes:
+            "Rare in the U.S. but immediately recognized in Nigerian communities. The ancient city of Ife (Ile-Ife) is considered the cradle of Yoruba civilization.",
+        },
+        notable_bearers: {
+          positive: [
+            "Ife is the name of the ancient Yoruba holy city, Ile-Ife, the spiritual heartland of the Yoruba people",
+          ],
+          fictional: [],
+        },
+        cultural_notes: [
+          "Ile-Ife is where Yoruba creation mythology begins -- the spot where the gods descended to earth",
+          "As a name, Ife simply means 'love,' making it one of the most direct and powerful name meanings possible",
+          "Short, elegant, and easy to pronounce in any language while being unmistakably Nigerian",
+        ],
+        surname_fit: {
+          surname: "Okafor",
+          notes:
+            "Ife Okafor is short and striking. The two-syllable first name creates a crisp, confident pairing with the surname.",
+        },
+        sibset_fit: {
+          siblings: ["Ezra"],
+          notes:
+            "Ezra and Ife are both short, ancient, and meaningful. A pair of names rooted in deep tradition.",
+        },
+        combo_suggestions: [
+          {
+            first: "Ife",
+            middle: "Chidinma",
+            why: "Ife Chidinma Okafor means 'Love, God is good' -- a complete Igbo-Yoruba blessing.",
+          },
+        ],
+      },
+      {
+        name: "Asha",
+        theme: "Cross-Cultural",
+        ipa: "/ˈɑː.ʃə/",
+        syllables: 2,
+        meaning: "Hope, life (Swahili); wish, desire (Sanskrit)",
+        origins: ["Swahili", "Sanskrit", "Arabic"],
+        variants: ["Aisha", "Ashanti"],
+        nicknames: {
+          intended: [],
+          likely: ["Ash"],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 641,
+          trend_notes:
+            "Familiar but never overused. Known globally through both East African and South Asian communities.",
+        },
+        notable_bearers: {
+          positive: [
+            "Asha Bhosle, legendary Indian playback singer with a career spanning seven decades",
+          ],
+          fictional: [],
+        },
+        cultural_notes: [
+          "Bridges the family's two cultural interests perfectly: Swahili (Pan-African) and Sanskrit",
+          "In Swahili, Asha means 'hope' or 'life' -- a name of profound optimism",
+          "In Sanskrit, it means 'wish' or 'desire,' connecting to Hindu philosophical traditions",
+          "Simple enough for any context yet rich enough to spark conversation",
+        ],
+        surname_fit: {
+          surname: "Okafor",
+          notes:
+            "Asha Okafor is gentle yet grounded. The soft 'sh' sound gives it a warm, inviting quality against the stronger surname.",
+        },
+        sibset_fit: {
+          siblings: ["Ezra"],
+          notes:
+            "Ezra and Asha both carry meaning across cultures. Short, warm, and complementary without being matchy.",
+        },
+        combo_suggestions: [
+          {
+            first: "Asha",
+            middle: "Chidinma",
+            why: "Asha Chidinma Okafor weaves Swahili hope with Igbo gratitude -- a cross-continental blessing.",
+          },
+        ],
+      },
     ],
     selection: {
       finalists: [
@@ -232,10 +421,15 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
         { name: "Adaeze", why: "The proudest cultural choice -- a royal Igbo name with commanding presence." },
         { name: "Nia", why: "Short, purposeful, and resonant across African and Welsh traditions." },
         { name: "Zuri", why: "Bright and contemporary with Swahili warmth." },
+        { name: "Chioma", why: "Deeply spiritual Igbo name expressing gratitude to God -- as rooted as it gets." },
+        { name: "Ayana", why: "A pan-African flower name with unexpected Japanese resonance." },
+        { name: "Ife", why: "The most direct meaning possible: love. Ancient, Nigerian, and unforgettable." },
+        { name: "Asha", why: "Bridges Swahili and Sanskrit perfectly -- hope in two syllables." },
       ],
       near_misses: [
         { name: "Chiamaka", reason: "Beautiful Igbo name but felt too long alongside Okafor for everyday use." },
         { name: "Imani", reason: "Lovely Swahili name but slightly more common than the family preferred." },
+        { name: "Nneka", reason: "Powerful meaning ('mother is supreme') but the double-N start posed pronunciation challenges outside Nigeria." },
       ],
     },
     report: {
@@ -262,17 +456,41 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           why: "The sunniest option. Zuri is pure joy in two syllables, and the Z-echo with Ezra is delightful.",
           combo: { first: "Zuri", middle: "Chidinma", why: "Zuri Chidinma Okafor is vibrant, beautiful, and rooted." },
         },
+        {
+          name: "Chioma",
+          why: "The most spiritually grounded option. 'God is good' is a name your daughter will grow into with deepening appreciation.",
+          combo: { first: "Chioma", middle: "Grace", why: "Chioma Grace Okafor translates its own meaning -- a name that speaks in two languages at once." },
+        },
+        {
+          name: "Ayana",
+          why: "A beautiful flower that blooms across continents. Ethiopian roots with Japanese possibility make this the quiet cosmopolitan choice.",
+          combo: { first: "Ayana", middle: "Chidinma", why: "Ayana Chidinma Okafor layers Ethiopian beauty with Igbo blessing." },
+        },
+        {
+          name: "Ife",
+          why: "Two syllables, one meaning: love. Connected to the ancient holy city of Ile-Ife, the cradle of Yoruba civilization.",
+          combo: { first: "Ife", middle: "Chidinma", why: "Ife Chidinma Okafor means 'Love, God is good' -- a complete Nigerian blessing." },
+        },
+        {
+          name: "Asha",
+          why: "Hope in Swahili, wish in Sanskrit -- the only name on this list that perfectly bridges both of the family's cultural priorities.",
+          combo: { first: "Asha", middle: "Chidinma", why: "Asha Chidinma Okafor weaves East African hope with Igbo gratitude." },
+        },
       ],
       tradeoffs: [
         "Amara's cross-cultural reach is a strength, but some may prefer a name with a single, unambiguous cultural origin.",
         "Adaeze is the most distinctly Igbo option but will require pronunciation guidance in many American contexts.",
         "Nia is accessible but may feel too simple for parents seeking a name with more cultural weight.",
         "Zuri is trendy and rising quickly -- it may feel less unique in five years.",
+        "Chioma requires a 'ch' as in 'church' pronunciation that English speakers may default to -- but it's an easy correction.",
+        "Ayana's multiple cultural origins mean no single community will claim it fully, which is either a feature or a limitation.",
+        "Ife is strikingly short and may feel incomplete to those unfamiliar with Yoruba naming. The city association adds weight once explained.",
+        "Asha's similarity to Aisha may cause occasional mix-ups, though the names have different origins and meanings.",
       ],
       tie_break_tips: [
         "Say 'Ezra and ___' at a family gathering. The name that gets the warmest smiles is the one.",
         "Consider which name your daughter would most enjoy explaining the meaning of when she's older.",
-        "If bilingual use between the U.S. and Nigeria matters most, Amara and Adaeze are the strongest choices.",
+        "If bilingual use between the U.S. and Nigeria matters most, Amara, Adaeze, and Chioma are the strongest choices.",
         "Write each full name on a card and leave them on your nightstand for a week. The one you keep picking up first is your answer.",
       ],
     },

@@ -77,6 +77,7 @@ function NamePreviewCard({
   ipa,
   syllables,
   delay,
+  href,
 }: {
   name: string;
   meaning: string;
@@ -84,6 +85,7 @@ function NamePreviewCard({
   ipa: string;
   syllables: number;
   delay: number;
+  href?: string;
 }) {
   return (
     <motion.div
@@ -94,7 +96,7 @@ function NamePreviewCard({
       whileHover={{ scale: 1.04, y: -2 }}
       className="h-full"
     >
-      <Link href={`/sample/${name.toLowerCase()}` as any} className="h-full block">
+      <Link href={(href || `/sample/${name.toLowerCase()}`) as any} className="h-full block">
         <div className="relative bg-white rounded-2xl p-4 shadow-soft border border-studio-ink/5 cursor-pointer group h-full">
           <div className="font-display text-2xl sm:text-3xl text-studio-ink">{name}</div>
           <div className="text-xs text-studio-ink/40 mt-1">
@@ -305,12 +307,13 @@ export function HeroSection() {
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
             <NamePreviewCard
-              name="Amara"
-              meaning="Grace, mercy; immortal, eternal"
-              origins={["Igbo", "Sanskrit"]}
-              ipa="/uh-MAH-ruh/"
-              syllables={3}
+              name="Nia"
+              meaning="Purpose; brightness, radiance"
+              origins={["Swahili", "Welsh"]}
+              ipa="/NEE-uh/"
+              syllables={2}
               delay={0}
+              href="/sample/amara"
             />
             <NamePreviewCard
               name="Rowan"
