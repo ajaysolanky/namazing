@@ -18,14 +18,14 @@ describe('Testimonials', () => {
   describe('Testimonial Cards', () => {
     it('should render 3 testimonial cards', () => {
       const { container } = render(<Testimonials />)
-      const testimonialCards = container.querySelectorAll('.bg-white\\/80')
+      const testimonialCards = container.querySelectorAll('.bg-studio-cream\\/50')
       expect(testimonialCards.length).toBe(3)
     })
 
     it('should render first testimonial from "Sarah & James"', () => {
       render(<Testimonials />)
       expect(screen.getByText('Sarah & James')).toBeInTheDocument()
-      expect(screen.getByText(/We were completely stuck on names/)).toBeInTheDocument()
+      expect(screen.getByText(/We were completely stuck/)).toBeInTheDocument()
     })
 
     it('should render avatar initials "SJ"', () => {

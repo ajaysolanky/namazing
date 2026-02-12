@@ -87,7 +87,7 @@ describe('Header', () => {
     it('should render sign in and get started buttons when logged out', () => {
       render(<Header />)
       expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: 'Get started' })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Get started free' })).toBeInTheDocument()
     })
   })
 
@@ -168,7 +168,7 @@ describe('Header', () => {
     it('should NOT show Sign in or Get started buttons when authenticated', () => {
       render(<Header />)
       expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('link', { name: 'Get started' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Get started free' })).not.toBeInTheDocument()
     })
 
     it('should display email when display_name is missing in dropdown', () => {
@@ -226,7 +226,7 @@ describe('Header', () => {
       const signInLinks = screen.getAllByText('Sign in')
       expect(signInLinks.length).toBeGreaterThanOrEqual(2)
 
-      const getStartedLinks = screen.getAllByText('Get started')
+      const getStartedLinks = screen.getAllByText('Get started free')
       expect(getStartedLinks.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -271,7 +271,7 @@ describe('Header', () => {
     it('should not show Sign in or Get started while loading', () => {
       render(<Header />)
       expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('link', { name: 'Get started' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Get started free' })).not.toBeInTheDocument()
     })
 
     it('should not show Dashboard while loading', () => {
