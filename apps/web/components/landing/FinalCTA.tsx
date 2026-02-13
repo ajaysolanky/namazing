@@ -25,9 +25,9 @@ export function FinalCTA() {
           <p className="text-studio-ink/60 mb-8 max-w-md mx-auto">
             Tell us your story. Our AI does the research. You get a beautiful report with names your whole family will love.
           </p>
-          <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "final", label: "Get your personalized shortlist" })}>
+          <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "final", label: "Start your interview" })}>
             <Button variant="terracotta" size="lg">
-              Get your personalized shortlist
+              Start your interview
             </Button>
           </Link>
         </motion.div>

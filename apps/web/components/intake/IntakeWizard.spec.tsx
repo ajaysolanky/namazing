@@ -59,6 +59,10 @@ vi.mock('@/lib/api', () => ({
   startRun: () => mockStartRun(),
 }))
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: { id: 'test-user' }, loading: false, signOut: vi.fn() }),
+}))
+
 // Mock step components
 vi.mock('./steps/WelcomeStep', () => ({
   WelcomeStep: () => <div data-testid="welcome-step">Welcome Step</div>,

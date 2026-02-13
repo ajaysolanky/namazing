@@ -137,7 +137,7 @@ function SignInForm() {
 
       <p className="text-center text-sm text-studio-ink/50 mt-6">
         Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="text-studio-terracotta hover:underline font-medium">
+        <Link href={next !== "/dashboard" ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up"} className="text-studio-terracotta hover:underline font-medium">
           Sign up
         </Link>
       </p>

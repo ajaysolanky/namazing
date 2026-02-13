@@ -15,6 +15,7 @@ import { ReviewStep } from "./steps/ReviewStep";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { startRun } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import posthog from "posthog-js";
 
 const slideVariants = {
@@ -34,6 +35,7 @@ const slideVariants = {
 
 export function IntakeWizard() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const {
     formData,
     currentStep,
@@ -75,6 +77,14 @@ export function IntakeWizard() {
 
   const handleSubmit = async () => {
     if (!validateStep(6)) return;
+
+    // Gate: require authentication before starting a run
+    if (authLoading) return; // Wait for auth to resolve
+    if (!user) {
+      posthog.capture("auth_gate_shown", { source: "intake_submit" });
+      router.push("/sign-up?next=/intake" as any);
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -200,12 +210,12 @@ export function IntakeWizard() {
             {isLastStep ? (
               <Button
                 onClick={handleSubmit}
-                disabled={!canProceed || isSubmitting}
+                disabled={!canProceed || isSubmitting || authLoading}
               >
-                {isSubmitting ? (
+                {isSubmitting || authLoading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                    Starting...
+                    {isSubmitting ? "Starting..." : "Loading..."}
                   </>
                 ) : (
                   "Start consultation"

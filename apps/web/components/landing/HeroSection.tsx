@@ -261,9 +261,9 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="mt-10 flex flex-col items-center gap-4"
           >
-            <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "hero", label: "Get your free name report" })}>
+            <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "hero", label: "Start your interview" })}>
               <Button variant="terracotta" size="xl" className="animate-gentle-bounce w-full sm:w-auto">
-                Get your free name report
+                Start your interview
               </Button>
             </Link>
             <div className="flex items-center gap-2">
@@ -307,13 +307,12 @@ export function HeroSection() {
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
             <NamePreviewCard
-              name="Nia"
-              meaning="Purpose; brightness, radiance"
-              origins={["Swahili", "Welsh"]}
-              ipa="/NEE-uh/"
-              syllables={2}
+              name="Amara"
+              meaning="Grace, mercy; immortal, eternal"
+              origins={["Igbo", "Sanskrit"]}
+              ipa="/uh-MAH-ruh/"
+              syllables={3}
               delay={0}
-              href="/sample/amara"
             />
             <NamePreviewCard
               name="Rowan"

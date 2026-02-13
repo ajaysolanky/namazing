@@ -34,11 +34,11 @@ describe('HeroSection', () => {
   })
 
   describe('CTA Button', () => {
-    it('should render "Get your free name report" CTA button', () => {
+    it('should render "Start your interview" CTA button', () => {
       render(<HeroSection />)
-      const buttons = screen.getAllByRole('link', { name: 'Get your free name report' })
+      const buttons = screen.getAllByRole('link', { name: 'Start your interview' })
       expect(buttons.length).toBeGreaterThan(0)
-      expect(buttons[0]).toHaveAttribute('href', '/sign-up')
+      expect(buttons[0]).toHaveAttribute('href', '/intake')
     })
 
     it('should render subtitle "No credit card needed · Results in minutes"', () => {
@@ -60,9 +60,9 @@ describe('HeroSection', () => {
       expect(screen.getByText(/Explore sample reports/)).toBeInTheDocument()
     })
 
-    it('should render Nia name card with meaning', () => {
+    it('should render Amara name card with meaning', () => {
       render(<HeroSection />)
-      expect(screen.getByText(/Purpose; brightness, radiance/)).toBeInTheDocument()
+      expect(screen.getByText(/Grace, mercy; immortal, eternal/)).toBeInTheDocument()
     })
 
     it('should render Rowan name card with meaning', () => {

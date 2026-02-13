@@ -75,7 +75,7 @@ describe("updateSession", () => {
     expect(mockGetUser).toHaveBeenCalled();
   });
 
-  it.each(["/intake", "/dashboard", "/report/some-id"])(
+  it.each(["/dashboard", "/report/some-id"])(
     "should allow authenticated user to access protected path %s",
     async (pathname) => {
       mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
@@ -88,16 +88,14 @@ describe("updateSession", () => {
     }
   );
 
-  it("should redirect unauthenticated user from /intake to /sign-in?next=/intake", async () => {
+  it("should allow unauthenticated user to access /intake", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
     const req = mockRequest("/intake");
 
-    await updateSession(req);
+    const res = await updateSession(req);
 
-    expect(mockNextResponseRedirect).toHaveBeenCalledTimes(1);
-    const redirectUrl = mockNextResponseRedirect.mock.calls[0][0];
-    expect(redirectUrl.pathname).toBe("/sign-in");
-    expect(redirectUrl.searchParams.get("next")).toBe("/intake");
+    expect(mockNextResponseRedirect).not.toHaveBeenCalled();
+    expect(res).toEqual(expect.objectContaining({ cookies: expect.anything() }));
   });
 
   it("should redirect unauthenticated user from /dashboard to /sign-in?next=/dashboard", async () => {

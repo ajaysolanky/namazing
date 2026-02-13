@@ -29,7 +29,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPaths = ["/intake", "/processing", "/report", "/dashboard"];
+  const protectedPaths = ["/processing", "/report", "/dashboard"];
   const { pathname } = request.nextUrl;
   const isProtected = protectedPaths.some(
     (p) => pathname === p || pathname.startsWith(p + "/")
@@ -45,8 +45,9 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from landing/auth pages to dashboard
   const authPages = ["/", "/sign-in", "/sign-up"];
   if (user && authPages.includes(pathname)) {
+    const next = request.nextUrl.searchParams.get("next");
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = next || "/dashboard";
     url.search = "";
     return NextResponse.redirect(url);
   }

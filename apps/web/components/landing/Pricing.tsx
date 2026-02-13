@@ -68,9 +68,9 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Link href="/sign-up" onClick={() => posthog.capture("cta_clicked", { cta: "pricing", label: "Get your free name report" })}>
+            <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "pricing", label: "Start your interview" })}>
               <Button variant="terracotta" size="lg" className="w-full">
-                Get your free name report
+                Start your interview
               </Button>
             </Link>
           </div>

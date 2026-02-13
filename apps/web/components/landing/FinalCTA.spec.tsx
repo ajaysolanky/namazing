@@ -23,16 +23,16 @@ describe('FinalCTA', () => {
   })
 
   describe('CTA Button', () => {
-    it('should render "Get your personalized shortlist" button', () => {
+    it('should render "Start your interview" button', () => {
       render(<FinalCTA />)
-      const button = screen.getByRole('link', { name: 'Get your personalized shortlist' })
+      const button = screen.getByRole('link', { name: 'Start your interview' })
       expect(button).toBeInTheDocument()
     })
 
-    it('should link to /sign-up', () => {
+    it('should link to /intake', () => {
       render(<FinalCTA />)
-      const button = screen.getByRole('link', { name: 'Get your personalized shortlist' })
-      expect(button).toHaveAttribute('href', '/sign-up')
+      const button = screen.getByRole('link', { name: 'Start your interview' })
+      expect(button).toHaveAttribute('href', '/intake')
     })
   })
 })

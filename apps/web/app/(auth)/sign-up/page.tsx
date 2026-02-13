@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import posthog from "posthog-js";
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-soft border border-studio-ink/5 animate-pulse h-96" />}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+
+function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/dashboard";
 
   useEffect(() => {
     posthog.capture("signup_started", { method: "page_view" });
@@ -40,7 +50,7 @@ export default function SignUpPage() {
     }
 
     posthog.capture("signup_completed", { method: "email" });
-    router.push("/dashboard");
+    router.push(next as any);
     router.refresh();
   }
 
@@ -50,11 +60,13 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     if (error) setError(error.message);
   }
+
+  const signInHref = (next !== "/dashboard" ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in") as any;
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-soft border border-studio-ink/5">
@@ -152,7 +164,7 @@ export default function SignUpPage() {
 
       <p className="text-center text-sm text-studio-ink/50 mt-6">
         Already have an account?{" "}
-        <Link href="/sign-in" className="text-studio-terracotta hover:underline font-medium">
+        <Link href={signInHref} className="text-studio-terracotta hover:underline font-medium">
           Sign in
         </Link>
       </p>
