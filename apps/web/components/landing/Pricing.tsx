@@ -68,7 +68,10 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "pricing", label: "Start your interview" })}>
+            <Link href="/intake" onClick={() => {
+              posthog.capture("cta_clicked", { cta: "pricing", label: "Start your interview" });
+              window.gtag?.("event", "cta_clicked", { cta: "pricing", label: "Start your interview" });
+            }}>
               <Button variant="terracotta" size="lg" className="w-full">
                 Start your interview
               </Button>

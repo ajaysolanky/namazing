@@ -97,6 +97,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
       if (!completionTracked.current) {
         completionTracked.current = true;
         posthog.capture("consultation_completed", { run_id: runId });
+        window.gtag?.("event", "consultation_completed", { run_id: runId });
       }
     }
 

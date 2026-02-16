@@ -261,7 +261,10 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="mt-10 flex flex-col items-center gap-4"
           >
-            <Link href="/intake" onClick={() => posthog.capture("cta_clicked", { cta: "hero", label: "Start your interview" })}>
+            <Link href="/intake" onClick={() => {
+              posthog.capture("cta_clicked", { cta: "hero", label: "Start your interview" });
+              window.gtag?.("event", "cta_clicked", { cta: "hero", label: "Start your interview" });
+            }}>
               <Button variant="terracotta" size="xl" className="animate-gentle-bounce w-full sm:w-auto">
                 Start your interview
               </Button>

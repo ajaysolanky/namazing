@@ -27,6 +27,7 @@ function SignUpForm() {
 
   useEffect(() => {
     posthog.capture("signup_started", { method: "page_view" });
+    window.gtag?.("event", "signup_started", { method: "page_view" });
   }, []);
 
   async function handleEmailSignUp(e: React.FormEvent) {
@@ -56,6 +57,7 @@ function SignUpForm() {
 
   async function handleGoogleSignUp() {
     posthog.capture("signup_started", { method: "google" });
+    window.gtag?.("event", "signup_started", { method: "google" });
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
