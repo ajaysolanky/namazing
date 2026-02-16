@@ -1,6 +1,5 @@
-import { IntakeWizard } from "@/components/intake";
+import ChatIntakeClient from "./ChatIntakeClient";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 
 export const metadata = {
   title: "Start Your Consultation | Namazing",
@@ -15,9 +14,8 @@ export default function IntakePage() {
     <>
       <Header />
       <main className="flex-1 flex flex-col">
-        <IntakeWizard />
+        <ChatIntakeClient />
       </main>
-      <Footer />
     </>
   );
 }

@@ -92,11 +92,8 @@ export function IntakeWizard() {
     try {
       const profile = transformToSessionProfile(formData);
       const { runId } = await startRun(profile.raw_brief, "parallel");
-      posthog.capture("consultation_started", { run_id: runId });
-      // Navigate first, then reset form in the background
-      // This prevents the form from flashing back to step 0
+      posthog.capture("consultation_started", { run_id: runId, source: "wizard" });
       router.push(`/processing/${runId}`);
-      // Reset form after a delay to ensure navigation has started
       setTimeout(() => resetForm(), 500);
     } catch (err: any) {
       console.error("[intake] Failed to start run:", err);

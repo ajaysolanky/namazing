@@ -3,6 +3,7 @@ import express, { type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 import { pythonOrchestrator } from "./python-orchestrator.js";
 import { saveRun, getRun, deleteRun } from "./storage.js";
+import { handleChat } from "./chat.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
@@ -44,9 +45,24 @@ const readRateLimiter = rateLimit({
   },
 });
 
+// Rate limiting: chat messages
+const chatRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max: 30, // max 30 messages per minute per IP
+  message: { error: "Too many messages, please slow down" },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res, _next, options) => {
+    console.warn(`[rate-limit] Chat limit hit from ${_req.ip}`);
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
 app.get("/healthz", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
+
+app.post("/api/chat", chatRateLimiter, handleChat);
 
 app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {
   const { brief, mode, userId } = req.body || {};

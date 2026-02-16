@@ -40,7 +40,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
+    if (!body.brief || typeof body.brief !== "string") {
+      return NextResponse.json({ error: "Brief is required" }, { status: 400 });
+    }
 
     const response = await fetch(`${BACKEND_URL}/api/run`, {
       method: "POST",

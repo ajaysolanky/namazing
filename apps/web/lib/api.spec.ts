@@ -50,7 +50,7 @@ describe('api', () => {
         json: () => Promise.resolve({ error: 'Internal error' }),
       })
 
-      await expect(startRun('test', 'full')).rejects.toThrow('Failed to start run: 500')
+      await expect(startRun('test', 'full')).rejects.toThrow('Internal error')
     })
 
     it('should throw daily limit error on 429', async () => {

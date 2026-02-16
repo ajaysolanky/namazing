@@ -2,7 +2,8 @@ const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
   experimental: {
-    typedRoutes: true,
+    // typedRoutes is unsupported by Turbopack; disable when using --turbo
+    typedRoutes: !process.env.TURBOPACK,
   },
   transpilePackages: ["@namazing/schemas"],
   async headers() {

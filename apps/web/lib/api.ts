@@ -28,7 +28,9 @@ export async function startRun(brief: string, mode: RunMode) {
       (err as any).code = "DAILY_LIMIT";
       throw err;
     }
-    throw new Error(`Failed to start run: ${res.status}`);
+    const err = new Error(body?.error || `Failed to start run: ${res.status}`);
+    (err as any).status = res.status;
+    throw err;
   }
   return (await res.json()) as { runId: string; mode: RunMode };
 }
