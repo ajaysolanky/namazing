@@ -48,3 +48,13 @@ kimi-k2-*.json
 namazing-py/MODEL_CONFIGURATION.md
 temp/
 .playwright-mcp/
+
+# Screenshots from debugging/testing
+*.png
+
+# Documentation drafts & promo
+docs/
+promo-video/
+
+# Python venv (already ignored via namazing-py/.gitignore but belt-and-suspenders)
+namazing-py/.venv/
