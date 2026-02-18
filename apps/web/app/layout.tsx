@@ -35,21 +35,12 @@ export const metadata: Metadata = {
     description:
       "Get personalized baby name recommendations powered by AI. Research origins, meanings, and compatibility — all in one beautiful report.",
     url: "https://namazing.co",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Namazing — AI Baby Name Consultation",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Namazing — AI Baby Name Consultation",
     description:
       "Get personalized baby name recommendations powered by AI. Research origins, meanings, and compatibility — all in one beautiful report.",
-    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "/",
