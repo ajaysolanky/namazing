@@ -21,8 +21,19 @@ function loadState(): ChatState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      let messages: ChatMessage[] = parsed.messages || [];
+
+      // Strip orphaned user message from a previous session that never
+      // received an assistant reply — roll back to last clean state.
+      if (messages.length > 0 && messages[messages.length - 1].role === "user") {
+        messages = messages.slice(0, -1);
+        // Persist the cleanup so it doesn't reappear on next load
+        const cleaned = { ...parsed, messages };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+      }
+
       return {
-        messages: parsed.messages || [],
+        messages,
         profile: parsed.profile || {},
         summary: parsed.summary || null,
       };
@@ -72,23 +83,11 @@ export function useChat() {
     }
   }, [messages, profile, summary, isLoaded]);
 
-  const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || isStreaming) return;
-
-      setError(null);
-      // Clear summary so user can continue chatting
-      setSummary(null);
-
-      const userMessage: ChatMessage = {
-        id: generateId(),
-        role: "user",
-        content: content.trim(),
-      };
-
-      const updatedMessages = [...messages, userMessage];
-      setMessages(updatedMessages);
+  // Core API call — fetches a response for the given messages + profile
+  const fetchReply = useCallback(
+    async (allMessages: ChatMessage[], currentProfile: ChatProfile) => {
       setIsStreaming(true);
+      setError(null);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -98,11 +97,11 @@ export function useChat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: updatedMessages.map((m) => ({
+            messages: allMessages.map((m) => ({
               role: m.role,
               content: m.content,
             })),
-            profile,
+            profile: currentProfile,
           }),
           signal: controller.signal,
         });
@@ -164,7 +163,27 @@ export function useChat() {
         abortRef.current = null;
       }
     },
-    [messages, profile, summary, isStreaming]
+    []
+  );
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || isStreaming) return;
+
+      // Clear summary so user can continue chatting
+      setSummary(null);
+
+      const userMessage: ChatMessage = {
+        id: generateId(),
+        role: "user",
+        content: content.trim(),
+      };
+
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+      fetchReply(updatedMessages, profile);
+    },
+    [messages, profile, isStreaming, fetchReply]
   );
 
   const resetChat = useCallback(() => {
