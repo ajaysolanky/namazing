@@ -3,36 +3,14 @@ import { describe, it, expect } from 'vitest'
 import { FinalCTA } from './FinalCTA'
 
 describe('FinalCTA', () => {
-  describe('Heading', () => {
-    it('should render heading with "perfect name"', () => {
-      render(<FinalCTA />)
-      expect(screen.getByText(/perfect name/)).toBeInTheDocument()
-    })
-
-    it('should render heading with "minutes away"', () => {
-      render(<FinalCTA />)
-      expect(screen.getByText(/minutes away/)).toBeInTheDocument()
-    })
+  it('renders heading and description', () => {
+    render(<FinalCTA />)
+    expect(screen.getByText('Ready to meet your baby\'s name?')).toBeInTheDocument()
+    expect(screen.getByText(/No commitment required/)).toBeInTheDocument()
   })
 
-  describe('Description', () => {
-    it('should render description text', () => {
-      render(<FinalCTA />)
-      expect(screen.getByText(/Tell us your story/)).toBeInTheDocument()
-    })
-  })
-
-  describe('CTA Button', () => {
-    it('should render "Start your interview" button', () => {
-      render(<FinalCTA />)
-      const button = screen.getByRole('link', { name: 'Start your interview' })
-      expect(button).toBeInTheDocument()
-    })
-
-    it('should link to /intake', () => {
-      render(<FinalCTA />)
-      const button = screen.getByRole('link', { name: 'Start your interview' })
-      expect(button).toHaveAttribute('href', '/intake')
-    })
+  it('renders make appointment button', () => {
+    render(<FinalCTA />)
+    expect(screen.getByRole('link', { name: 'Make an Appointment' })).toHaveAttribute('href', '/intake')
   })
 })

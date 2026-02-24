@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Fraunces, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { Agentation } from "agentation";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
+import { DevAgentation } from "@/components/DevAgentation";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -72,7 +72,7 @@ export default function RootLayout({
           <GlobalErrorHandler />
           {children}
         </PostHogProvider>
-        {process.env.NODE_ENV === "development" && <Agentation />}
+        {process.env.NODE_ENV === "development" && <DevAgentation />}
         <GoogleAnalytics gaId="G-9SMBL0CT1F" />
       </body>
     </html>

@@ -1,84 +1,48 @@
-"use client";
-
 import Link from "next/link";
 import { Container } from "./Container";
 
 const currentYear = new Date().getFullYear();
 
+function LeafIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 20c7.732 0 14-6.268 14-14v-.5A13.5 13.5 0 006.5 19H6v1z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16c2.5-2 4.5-4.5 6-7.5" />
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
-    <footer className="border-t border-studio-ink/5 py-12 mt-auto">
-      <Container size="xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <span className="font-display text-lg text-studio-ink/60">namazing</span>
-            <p className="text-sm text-studio-ink/40 mt-2 max-w-xs">
-              AI-powered baby name consultation — find the perfect name for your little one.
-            </p>
-          </div>
-
-          {/* Product */}
-          <div>
-            <h4 className="text-sm font-medium text-studio-ink mb-3">Product</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/#how-it-works" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  How it Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/#pricing" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link href="/#faq" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  FAQ
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="text-sm font-medium text-studio-ink mb-3">Legal</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/privacy" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="text-sm font-medium text-studio-ink mb-3">Company</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/sign-up" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  Get Started
-                </Link>
-              </li>
-              <li>
-                <Link href="/sign-in" className="text-sm text-studio-ink/50 hover:text-studio-ink transition-colors">
-                  Sign In
-                </Link>
-              </li>
-            </ul>
-          </div>
+    <footer className="border-t border-studio-border bg-studio-sand mt-auto" id="footer">
+      <Container size="xl" className="px-6">
+        <div className="py-24 md:py-32 text-center">
+          <h2 className="font-display text-5xl md:text-6xl font-semibold tracking-tight text-studio-ink mb-8">
+            Ready to meet your baby&apos;s name?
+          </h2>
+          <p className="text-xl text-studio-muted max-w-xl mx-auto mb-12">
+            Start your conversational intake now. No commitment required to begin exploring.
+          </p>
+          <Link href="/intake">
+            <button className="bg-studio-forest text-white px-9 py-4 rounded-xl text-base font-medium hover:bg-studio-forest-dark transition-colors inline-flex items-center gap-2">
+              Make an Appointment
+            </button>
+          </Link>
         </div>
 
-        <div className="border-t border-studio-ink/5 pt-6">
-          <p className="text-sm text-studio-ink/40 text-center">
-            &copy; {currentYear} Namazing. All rights reserved.
-          </p>
+        <div className="py-10 border-t border-studio-border flex flex-col md:flex-row items-center justify-between gap-6 text-base text-studio-muted font-medium">
+          <div className="flex items-center gap-2 text-studio-forest">
+            <LeafIcon className="w-5 h-5" />
+            <span className="font-display text-lg tracking-tight">Namazing</span>
+          </div>
+
+          <div className="flex items-center gap-10">
+            <Link href="/privacy" className="hover:text-studio-forest transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-studio-forest transition-colors">Terms</Link>
+            <Link href="/sign-in" className="hover:text-studio-forest transition-colors">Contact</Link>
+          </div>
+
+          <p className="text-sm">&copy; <span suppressHydrationWarning>{currentYear}</span> Namazing. All rights reserved.</p>
         </div>
       </Container>
     </footer>

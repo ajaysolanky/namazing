@@ -1,74 +1,75 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
+import { landingDesign } from "@/design-system/landing";
 
-const steps = [
+const items = [
   {
-    number: 1,
-    title: "Tell your story",
+    title: "The Intake Chat",
     description:
-      "Share your family background, style preferences, heritage, and any names you love (or want to avoid).",
+      "Have a natural conversation with our AI. Share your vibes, family traditions, and what you want to avoid.",
+    icon: (
+      <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
   },
   {
-    number: 2,
-    title: "AI researches",
+    title: "Intelligent Curation",
     description:
-      "Our pipeline generates candidates, researches meanings, origins, popularity trends, and cultural context for each.",
+      "Our system analyzes thousands of options, cross-referencing meanings, cultural origins, and phonetic flow.",
+    icon: (
+      <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <rect x="4" y="4" width="16" height="16" rx="2" />
+        <rect x="9" y="9" width="6" height="6" rx="1" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 2v2M15 20v2M9 2v2M9 20v2M20 9h2M20 14h2M2 9h2M2 14h2" />
+      </svg>
+    ),
   },
   {
-    number: 3,
-    title: "Get your shortlist",
+    title: "Vetted & Checked",
     description:
-      "Receive a curated shortlist of 8-12 finalists with middle name pairings and a warm consultation report.",
+      "We act as your personal consultant, vetting names for negative connotations and perfect sibling flow.",
+    icon: (
+      <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
+    title: "Your Dossier",
+    description:
+      "Unlock a beautifully formatted, comprehensive report detailing your personalized recommendations.",
+    icon: (
+      <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+      </svg>
+    ),
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-14 sm:py-24 bg-studio-mint">
-      <Container size="lg">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 sm:mb-16"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-studio-sage/20 rounded-full text-sm text-studio-ink/60 mb-6">
-            How it works
-          </span>
-          <h2 className="font-display text-4xl sm:text-5xl text-studio-ink mb-4">
-            A thoughtful naming journey
-          </h2>
-          <p className="text-studio-ink/60 max-w-lg mx-auto">
-            We don&apos;t just suggest names. We understand your story and find names that fit perfectly.
-          </p>
-        </motion.div>
+    <section id="how-it-works" className={landingDesign.section}>
+      <Container size="xl" className="px-6">
+        <div className="flex flex-col md:flex-row gap-16 lg:gap-32">
+          <div className="w-full md:w-1/3 shrink-0">
+            <h2 className={`${landingDesign.headingDisplay} md:sticky md:top-32`}>
+              What<br />We Do
+            </h2>
+          </div>
 
-        <div className="relative max-w-3xl mx-auto">
-          {/* Connecting line */}
-          <div className="absolute left-8 top-8 bottom-8 w-px bg-gradient-to-b from-studio-terracotta/30 via-studio-sage/30 to-studio-rose/30 hidden md:block" />
-
-          <div className="space-y-12">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                className="flex items-start gap-6"
-              >
-                <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-full bg-white shadow-soft border border-studio-ink/5 flex items-center justify-center">
-                  <span className="font-display text-2xl text-studio-terracotta font-semibold">
-                    {step.number}
-                  </span>
+          <div className="w-full md:w-2/3 grid sm:grid-cols-2 gap-x-12 gap-y-16">
+            {items.map((item) => (
+              <div key={item.title}>
+                <div className="flex gap-5">
+                  <div className="shrink-0">{item.icon}</div>
+                  <div>
+                    <h3 className="text-xl font-medium tracking-tight text-studio-ink mb-3">{item.title}</h3>
+                    <p className={landingDesign.body}>{item.description}</p>
+                  </div>
                 </div>
-                <div className="pt-2">
-                  <h3 className="font-display text-xl text-studio-ink mb-2">{step.title}</h3>
-                  <p className="text-studio-ink/60 leading-relaxed">{step.description}</p>
-                </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

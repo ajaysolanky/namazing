@@ -8,17 +8,17 @@ vi.mock('@/components/landing/HeroSection', () => ({
 vi.mock('@/components/landing/HowItWorks', () => ({
   HowItWorks: () => <div data-testid="how-it-works">HowItWorks</div>,
 }))
-vi.mock('@/components/landing/Testimonials', () => ({
-  Testimonials: () => <div data-testid="testimonials">Testimonials</div>,
+vi.mock('@/components/landing/ValueProposition', () => ({
+  ValueProposition: () => <div data-testid="value-proposition">ValueProposition</div>,
+}))
+vi.mock('@/components/landing/DarkTestimonial', () => ({
+  DarkTestimonial: () => <div data-testid="testimonials">DarkTestimonial</div>,
 }))
 vi.mock('@/components/landing/FAQ', () => ({
   FAQ: () => <div data-testid="faq">FAQ</div>,
 }))
 vi.mock('@/components/landing/Pricing', () => ({
   Pricing: () => <div data-testid="pricing">Pricing</div>,
-}))
-vi.mock('@/components/landing/FinalCTA', () => ({
-  FinalCTA: () => <div data-testid="final-cta">FinalCTA</div>,
 }))
 
 import Page from './page'
@@ -28,10 +28,10 @@ describe('Landing Page', () => {
     render(<Page />)
     expect(screen.getByTestId('hero-section')).toBeInTheDocument()
     expect(screen.getByTestId('how-it-works')).toBeInTheDocument()
+    expect(screen.getByTestId('value-proposition')).toBeInTheDocument()
     expect(screen.getByTestId('testimonials')).toBeInTheDocument()
     expect(screen.getByTestId('pricing')).toBeInTheDocument()
     expect(screen.getByTestId('faq')).toBeInTheDocument()
-    expect(screen.getByTestId('final-cta')).toBeInTheDocument()
   })
 
   it('should render header and footer', () => {

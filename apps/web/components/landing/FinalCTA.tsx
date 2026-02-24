@@ -1,39 +1,23 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
-import posthog from "posthog-js";
+import { landingDesign } from "@/design-system/landing";
 
 export function FinalCTA() {
   return (
-    <section className="py-14 sm:py-20">
-      <Container size="sm">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center bg-gradient-to-br from-white via-studio-cream to-white rounded-3xl p-12 shadow-soft border border-studio-ink/5"
-        >
-          <div className="mb-6">
-            <span className="text-4xl">{"\u2728"}</span>
-          </div>
-          <h2 className="font-display text-3xl sm:text-4xl text-studio-ink mb-4">
-            Your baby&apos;s perfect name is <span className="text-gradient-terracotta">minutes away</span>
+    <section className={landingDesign.section}>
+      <Container size="md" className="px-6">
+        <div className="text-center">
+          <h2 className="font-display text-5xl md:text-6xl font-semibold tracking-tight text-studio-ink mb-8">
+            Ready to meet your baby&apos;s name?
           </h2>
-          <p className="text-studio-ink/60 mb-8 max-w-md mx-auto">
-            Tell us your story. Our AI does the research. You get a beautiful report with names your whole family will love.
+          <p className={`${landingDesign.bodyLarge} mb-12 max-w-xl mx-auto`}>
+            Start your consultation now. No commitment required to begin exploring.
           </p>
-          <Link href="/intake" onClick={() => {
-            posthog.capture("cta_clicked", { cta: "final", label: "Start your interview" });
-            window.gtag?.("event", "cta_clicked", { cta: "final", label: "Start your interview" });
-          }}>
-            <Button variant="terracotta" size="lg">
-              Start your interview
-            </Button>
+          <Link href="/intake">
+            <Button variant="forest" size="lg">Make an Appointment</Button>
           </Link>
-        </motion.div>
+        </div>
       </Container>
     </section>
   );

@@ -7,7 +7,7 @@ const nextConfig = {
   },
   transpilePackages: ["@namazing/schemas"],
   async headers() {
-    return [
+    const headers = [
       {
         source: "/(.*)",
         headers: [
@@ -20,7 +20,12 @@ const nextConfig = {
           },
         ],
       },
-      {
+    ];
+
+    // Avoid stale CSS/JS during local development. Long-term immutable caching
+    // on /_next/static is only appropriate for production builds.
+    if (process.env.NODE_ENV === "production") {
+      headers.push({
         source: "/_next/static/(.*)",
         headers: [
           {
@@ -28,8 +33,10 @@ const nextConfig = {
             value: "public, max-age=31536000, immutable",
           },
         ],
-      },
-    ];
+      });
+    }
+
+    return headers;
   },
 };
 

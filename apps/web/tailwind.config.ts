@@ -4,6 +4,26 @@ const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
+    "./design-system/**/*.{ts,tsx}",
+  ],
+  safelist: [
+    "bg-studio-forest",
+    "bg-studio-forest-dark",
+    "hover:bg-studio-forest-dark",
+    "text-studio-forest",
+    "bg-studio-peach",
+    "text-studio-peach",
+    "bg-studio-forest/10",
+    "text-studio-muted",
+    "border-studio-border",
+    "shadow-card-green",
+    "hover:shadow-card-green",
+    "ring-studio-forest/30",
+    "focus:ring-studio-forest/30",
+    "ring-offset-studio-sand",
+    "focus:ring-offset-studio-sand",
+    "bg-studio-forest/5",
+    "shadow-studio-forest/5",
   ],
   theme: {
     extend: {
@@ -12,8 +32,8 @@ const config: Config = {
         body: ["var(--font-body)", "Inter", "sans-serif"],
       },
       colors: {
-        "studio-sand": "#f5efe6",
-        "studio-ink": "#1f2933",
+        "studio-sand": "#f6efe6",
+        "studio-ink": "#2c2b29",
         "studio-rose": "#f8d4d8",
         "studio-rose-deep": "#e8a5ad",
         "studio-sage": "#d7e3d4",
@@ -24,6 +44,11 @@ const config: Config = {
         "studio-terracotta": "#c4704b",
         "studio-terracotta-light": "#d4896a",
         "studio-gold": "#d4a574",
+        "studio-forest": "#455A44",
+        "studio-forest-dark": "#324231",
+        "studio-peach": "#F4AC74",
+        "studio-border": "#EADCC8",
+        "studio-muted": "#5C5A56",
       },
       boxShadow: {
         soft: "0 2px 8px -2px rgba(31,41,51,0.08)",
@@ -34,6 +59,7 @@ const config: Config = {
         "glow-terracotta": "0 0 40px -10px rgba(196,112,75,0.4)",
         inner: "inset 0 2px 4px 0 rgba(31,41,51,0.04)",
         celebration: "0 8px 40px -8px rgba(248,212,216,0.6), 0 4px 20px -4px rgba(215,227,212,0.4)",
+        "card-green": "0 16px 48px -12px rgba(69,90,68,0.08)",
       },
       ringColor: {
         terracotta: "#c4704b",
