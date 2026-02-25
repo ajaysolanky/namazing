@@ -9,27 +9,26 @@ const ENV_OVERRIDE = process.env.NEXT_PUBLIC_INTAKE_MODE; // "chat" | "control" 
 
 export default function ChatIntakeClient() {
   const flagVariant = useFeatureFlagVariantKey("intake-mode");
-  const [timedOut, setTimedOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // If PostHog flags don't resolve within 1.5s (e.g. localhost, ad blocker),
-    // fall through to the default variant
-    const timer = setTimeout(() => setTimedOut(true), 1500);
-    return () => clearTimeout(timer);
+    setMounted(true);
   }, []);
 
-  // 1. Env var override (local dev)
-  // 2. PostHog feature flag (production A/B test)
-  // 3. Timeout fallback → default to "chat"
-  const variant = ENV_OVERRIDE || flagVariant || (timedOut ? "chat" : null);
-
-  if (!variant) {
+  // Don't render anything until after mount to avoid hydration mismatch
+  // (PostHog feature flags resolve differently on server vs client)
+  if (!mounted) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-studio-ink/20 border-t-studio-ink rounded-full animate-spin" />
       </div>
     );
   }
+
+  // 1. Env var override (local dev)
+  // 2. PostHog feature flag (production A/B test)
+  // 3. Default to "chat"
+  const variant = ENV_OVERRIDE || flagVariant || "chat";
 
   return variant === "control" ? <IntakeWizard /> : <ChatIntake />;
 }

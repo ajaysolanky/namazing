@@ -5,10 +5,10 @@ interface SuggestedPromptsProps {
 }
 
 const PROMPTS = [
-  "We're expecting a girl",
-  "Help us name our first baby",
-  "We want a name that works in two cultures",
-  "We love classic, timeless names",
+  "We just found out we're having a baby!",
+  "We've been going back and forth on names for weeks",
+  "There's a family naming tradition we're navigating",
+  "We want a name that tells a story",
 ];
 
 export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {

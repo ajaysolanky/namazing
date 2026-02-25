@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { NameCard } from "@/lib/types";
+import { reportThemePalette } from "@/design-system/report";
 
 // Map of theme string -> style, passed from parent for max color separation
-export type ThemeColorMap = Record<string, typeof THEME_STYLES[number]>;
+export type ThemeColorMap = Record<string, typeof reportThemePalette[number]>;
 
 interface FinalistCardProps {
   name: string;
@@ -16,17 +17,6 @@ interface FinalistCardProps {
   index?: number;
   themeColorMap?: ThemeColorMap;
 }
-
-// Theme color palette — matches the processing page's THEME_COLORS
-const THEME_STYLES = [
-  { bg: "bg-sky-50", text: "text-sky-700", dot: "bg-sky-400", accent: "#38bdf8" },
-  { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400", accent: "#fbbf24" },
-  { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400", accent: "#34d399" },
-  { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-400", accent: "#a78bfa" },
-  { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-400", accent: "#fb7185" },
-  { bg: "bg-teal-50", text: "text-teal-700", dot: "bg-teal-400", accent: "#2dd4bf" },
-  { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400", accent: "#fb923c" },
-] as const;
 
 // Stable hash so the same theme always gets the same color
 function hashTheme(theme: string): number {
@@ -39,7 +29,7 @@ function hashTheme(theme: string): number {
 
 function getThemeStyle(theme: string | undefined | null) {
   if (!theme || theme === "user-favorite") return null;
-  return THEME_STYLES[hashTheme(theme) % THEME_STYLES.length];
+  return reportThemePalette[hashTheme(theme) % reportThemePalette.length];
 }
 
 export function FinalistCard({

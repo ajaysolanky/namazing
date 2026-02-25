@@ -1,53 +1,17 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-import type { ChatProfile } from "@/lib/chat-utils";
 
 interface ProfileSummaryCardProps {
   summary: string;
-  profile: ChatProfile;
   onConfirm: () => void;
   isSubmitting: boolean;
 }
 
 export function ProfileSummaryCard({
   summary,
-  profile,
   onConfirm,
   isSubmitting,
 }: ProfileSummaryCardProps) {
-  const fields: Array<{ label: string; value: string }> = [];
-
-  if (profile.surname) fields.push({ label: "Surname", value: profile.surname });
-
-  if (profile.babyGender) {
-    const genderLabel = { boy: "Boy", girl: "Girl", unknown: "Not sure yet" }[profile.babyGender] || profile.babyGender;
-    fields.push({ label: "Gender", value: genderLabel });
-  }
-
-  if (profile.siblings?.length) {
-    fields.push({ label: "Siblings", value: profile.siblings.join(", ") });
-  }
-
-  if (profile.stylePreferences?.length) {
-    fields.push({ label: "Style", value: profile.stylePreferences.join(", ") });
-  }
-
-  if (profile.namesConsidering?.length) {
-    fields.push({ label: "Considering", value: profile.namesConsidering.join(", ") });
-  }
-
-  if (profile.namesToAvoid?.length) {
-    fields.push({ label: "Avoiding", value: profile.namesToAvoid.join(", ") });
-  }
-
-  if (profile.culturalConsiderations?.length) {
-    fields.push({ label: "Heritage", value: profile.culturalConsiderations.join(", ") });
-  }
-
-  if (profile.honorNames?.length) {
-    fields.push({ label: "Honor names", value: profile.honorNames.join(", ") });
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 16, scale: 0.97 }}
@@ -70,23 +34,6 @@ export function ProfileSummaryCard({
         <div className="px-6 pt-5 pb-4">
           <p className="text-[15px] leading-relaxed text-studio-ink/80">{summary}</p>
         </div>
-
-        {/* Profile fields */}
-        {fields.length > 0 && (
-          <div className="px-6 pb-5">
-            <div className="flex flex-wrap gap-2">
-              {fields.map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-studio-ink/[0.04] text-sm"
-                >
-                  <span className="text-studio-ink/50">{label}:</span>
-                  <span className="text-studio-ink/80 font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* CTA */}
         <div className="px-6 pb-6 space-y-3">

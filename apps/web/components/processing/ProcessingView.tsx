@@ -16,13 +16,13 @@ import posthog from "posthog-js";
 
 // Soft color palette for naming themes — cycled by index
 const THEME_COLORS = [
-  { bg: "bg-sky-50", border: "border-sky-200", dot: "bg-sky-400" },
-  { bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-400" },
-  { bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-400" },
-  { bg: "bg-violet-50", border: "border-violet-200", dot: "bg-violet-400" },
-  { bg: "bg-rose-50", border: "border-rose-200", dot: "bg-rose-400" },
-  { bg: "bg-teal-50", border: "border-teal-200", dot: "bg-teal-400" },
-  { bg: "bg-orange-50", border: "border-orange-200", dot: "bg-orange-400" },
+  { bg: "bg-studio-sage/20", border: "border-studio-sage/40", dot: "bg-studio-sage" },
+  { bg: "bg-studio-rose/20", border: "border-studio-rose/40", dot: "bg-studio-rose" },
+  { bg: "bg-studio-gold/20", border: "border-studio-gold/40", dot: "bg-studio-gold" },
+  { bg: "bg-studio-mint/80", border: "border-studio-forest/20", dot: "bg-studio-forest" },
+  { bg: "bg-studio-cream", border: "border-studio-border", dot: "bg-studio-ink/50" },
+  { bg: "bg-studio-sand", border: "border-studio-border", dot: "bg-studio-muted" },
+  { bg: "bg-studio-terracotta/10", border: "border-studio-terracotta/30", dot: "bg-studio-terracotta" },
 ] as const;
 
 function getThemeColor(theme: string, allThemes: string[]) {
@@ -106,7 +106,7 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
       setError(event.msg);
       posthog.capture("consultation_failed", { run_id: runId, error: event.msg, stage: event.agent });
     }
-  }, []);
+  }, [runId]);
 
   useEffect(() => {
     const unsubscribe = subscribeToRun(runId, handleEvent, () => {
@@ -147,7 +147,12 @@ export function ProcessingView({ runId }: ProcessingViewProps) {
                         style={{
                           left: `${50 + (Math.random() - 0.5) * 60}%`,
                           top: "50%",
-                          background: i % 3 === 0 ? "#f8d4d8" : i % 3 === 1 ? "#d7e3d4" : "#c4704b",
+                          background:
+                            i % 3 === 0
+                              ? "var(--studio-rose)"
+                              : i % 3 === 1
+                                ? "var(--studio-sage)"
+                                : "var(--studio-terracotta)",
                         }}
                         initial={{ y: 0, scale: 0, opacity: 1 }}
                         animate={{

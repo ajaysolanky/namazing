@@ -138,9 +138,9 @@ export function ProgressIndicator({ currentStep, onStepClick }: ProgressIndicato
             />
             <defs>
               <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#d7e3d4" />
-                <stop offset="50%" stopColor="#f8d4d8" />
-                <stop offset="100%" stopColor="#c4704b" />
+                <stop offset="0%" stopColor="var(--studio-sage)" />
+                <stop offset="50%" stopColor="var(--studio-rose)" />
+                <stop offset="100%" stopColor="var(--studio-terracotta)" />
               </linearGradient>
             </defs>
           </svg>

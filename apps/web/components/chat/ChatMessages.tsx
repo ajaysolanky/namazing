@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import type { ChatMessage, ChatProfile } from "@/lib/chat-utils";
+import type { ChatMessage } from "@/lib/chat-utils";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { SuggestedPrompts } from "./SuggestedPrompts";
@@ -8,7 +8,6 @@ import { ProfileSummaryCard } from "./ProfileSummaryCard";
 
 interface ChatMessagesProps {
   messages: ChatMessage[];
-  profile: ChatProfile;
   summary: string | null;
   isStreaming: boolean;
   isSubmitting: boolean;
@@ -18,7 +17,6 @@ interface ChatMessagesProps {
 
 export function ChatMessages({
   messages,
-  profile,
   summary,
   isStreaming,
   isSubmitting,
@@ -76,7 +74,6 @@ export function ChatMessages({
         {summary && !isStreaming && (
           <ProfileSummaryCard
             summary={summary}
-            profile={profile}
             onConfirm={onConfirm}
             isSubmitting={isSubmitting}
           />

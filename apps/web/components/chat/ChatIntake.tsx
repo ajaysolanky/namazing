@@ -112,7 +112,6 @@ export function ChatIntake() {
       {/* Messages area */}
       <ChatMessages
         messages={messages}
-        profile={profile}
         summary={summary}
         isStreaming={isStreaming}
         isSubmitting={isSubmitting}
