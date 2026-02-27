@@ -18,6 +18,13 @@
   --studio-border: #EADCC8;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   @apply bg-studio-sand text-studio-ink font-body antialiased;
 }

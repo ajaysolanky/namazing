@@ -107,6 +107,7 @@ function SignInForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            suppressHydrationWarning
             className="w-full h-12 px-4 rounded-xl border border-studio-ink/10 bg-white text-studio-ink placeholder:text-studio-ink/30 focus:outline-none focus:ring-2 focus:ring-studio-terracotta/30 focus:border-studio-terracotta/30"
             placeholder="you@example.com"
           />
@@ -121,6 +122,7 @@ function SignInForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            suppressHydrationWarning
             className="w-full h-12 px-4 rounded-xl border border-studio-ink/10 bg-white text-studio-ink placeholder:text-studio-ink/30 focus:outline-none focus:ring-2 focus:ring-studio-terracotta/30 focus:border-studio-terracotta/30"
             placeholder="Your password"
           />

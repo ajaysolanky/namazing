@@ -3,9 +3,10 @@ import type { ChatMessage } from "@/lib/chat-utils";
 
 interface MessageBubbleProps {
   message: ChatMessage;
+  emphasize?: boolean;
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, emphasize = false }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
   return (
@@ -17,7 +18,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     >
       {/* Assistant avatar */}
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-studio-rose to-studio-sage flex items-center justify-center flex-shrink-0">
+        <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-studio-rose to-studio-sage flex items-center justify-center flex-shrink-0 ${emphasize ? "animate-pulse" : ""}`}>
           <span className="text-xs font-display font-semibold text-studio-ink/70">N</span>
         </div>
       )}
@@ -27,7 +28,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         className={`max-w-[85%] md:max-w-[75%] px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap ${
           isUser
             ? "bg-studio-ink text-white rounded-2xl rounded-br-md shadow-soft"
-            : "bg-white text-studio-ink rounded-2xl rounded-bl-md shadow-soft"
+            : `bg-white text-studio-ink rounded-2xl rounded-bl-md shadow-soft ${emphasize ? "ring-1 ring-studio-rose/60" : ""}`
         }`}
       >
         {message.content}

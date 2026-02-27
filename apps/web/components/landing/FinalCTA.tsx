@@ -15,7 +15,7 @@ export function FinalCTA() {
             Start your consultation now. No commitment required to begin exploring.
           </p>
           <Link href="/intake">
-            <Button variant="forest" size="lg">Make an Appointment</Button>
+            <Button variant="forest" size="lg">Start Consultation</Button>
           </Link>
         </div>
       </Container>

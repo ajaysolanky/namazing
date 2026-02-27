@@ -9,8 +9,8 @@ describe('FinalCTA', () => {
     expect(screen.getByText(/No commitment required/)).toBeInTheDocument()
   })
 
-  it('renders make appointment button', () => {
+  it('renders start consultation button', () => {
     render(<FinalCTA />)
-    expect(screen.getByRole('link', { name: 'Make an Appointment' })).toHaveAttribute('href', '/intake')
+    expect(screen.getByRole('link', { name: 'Start Consultation' })).toHaveAttribute('href', '/intake')
   })
 })

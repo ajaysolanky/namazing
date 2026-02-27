@@ -9,9 +9,9 @@ describe('HeroSection', () => {
     expect(screen.getByText(/Skip the overwhelming lists/)).toBeInTheDocument()
   })
 
-  it('renders make appointment CTA', () => {
+  it('renders start consultation CTA', () => {
     render(<HeroSection />)
-    const cta = screen.getByRole('link', { name: 'Make an Appointment' })
+    const cta = screen.getByRole('link', { name: 'Start Consultation' })
     expect(cta).toHaveAttribute('href', '/intake')
   })
 

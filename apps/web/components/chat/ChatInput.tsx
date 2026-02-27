@@ -1,12 +1,13 @@
-import { useState, useRef, useCallback, type KeyboardEvent, type ChangeEvent } from "react";
+import { useRef, useEffect, useCallback, type KeyboardEvent, type ChangeEvent } from "react";
 
 interface ChatInputProps {
+  value: string;
+  onChange: (value: string) => void;
   onSend: (message: string) => void;
   disabled?: boolean;
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
-  const [value, setValue] = useState("");
+export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = useCallback(() => {
@@ -16,8 +17,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   }, []);
 
+  useEffect(() => {
+    adjustHeight();
+  }, [value, adjustHeight]);
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(e.target.value);
+    onChange(e.target.value);
     adjustHeight();
   };
 
@@ -25,11 +30,11 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
     onSend(trimmed);
-    setValue("");
+    onChange("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [value, disabled, onSend]);
+  }, [value, disabled, onSend, onChange]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -41,8 +46,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const hasText = value.trim().length > 0;
 
   return (
-    <div className="border-t border-studio-ink/8 bg-white/80 backdrop-blur-sm px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="max-w-2xl mx-auto flex items-end gap-3">
+    <div className="shrink-0 border-t border-studio-ink/8 bg-white/80 backdrop-blur-sm py-3 pb-[max(0.375rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] overflow-x-hidden">
+      <div className="max-w-2xl mx-auto w-full relative">
         <textarea
           ref={textareaRef}
           value={value}
@@ -51,13 +56,13 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           placeholder="Tell us about your family..."
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none rounded-2xl border border-studio-ink/10 bg-studio-cream/50 px-4 py-3 text-[15px] text-studio-ink placeholder:text-studio-ink/35 focus:outline-none focus:ring-2 focus:ring-studio-terracotta/20 focus:border-studio-terracotta/30 transition-all duration-200 disabled:opacity-50"
+          className="w-full min-w-0 resize-none rounded-2xl border border-studio-ink/10 bg-studio-cream/50 pl-4 pr-16 py-3 text-base text-studio-ink placeholder:text-studio-ink/35 focus:outline-none focus:ring-2 focus:ring-studio-terracotta/20 focus:border-studio-terracotta/30 transition-all duration-200 disabled:opacity-50"
         />
 
         <button
           onClick={handleSend}
           disabled={!hasText || disabled}
-          className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ${
+          className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 ${
             hasText && !disabled
               ? "bg-studio-ink text-white shadow-soft hover:shadow-card active:scale-95"
               : "bg-studio-ink/10 text-studio-ink/30"

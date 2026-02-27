@@ -52,14 +52,15 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className={landingDesign.section}>
       <Container size="xl" className="px-6">
-        <div className="flex flex-col md:flex-row gap-16 lg:gap-32">
+        <div className="flex flex-col md:flex-row gap-12 md:gap-16 lg:gap-32">
           <div className="w-full md:w-1/3 shrink-0">
             <h2 className={`${landingDesign.headingDisplay} md:sticky md:top-32`}>
-              What<br />We Do
+              <span className="md:hidden">What We Do</span>
+              <span className="hidden md:inline">What<br />We Do</span>
             </h2>
           </div>
 
-          <div className="w-full md:w-2/3 grid sm:grid-cols-2 gap-x-12 gap-y-16">
+          <div className="w-full md:w-2/3 grid sm:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-16">
             {items.map((item) => (
               <div key={item.title}>
                 <div className="flex gap-5">

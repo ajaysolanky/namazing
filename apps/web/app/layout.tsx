@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Fraunces, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -47,6 +47,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -72,7 +78,10 @@ export default function RootLayout({
           <GlobalErrorHandler />
           {children}
         </PostHogProvider>
-        {process.env.NODE_ENV === "development" && <DevAgentation />}
+        {process.env.NODE_ENV === "development" &&
+          process.env.NEXT_PUBLIC_ENABLE_AGENTATION === "true" && (
+            <DevAgentation />
+          )}
         <GoogleAnalytics gaId="G-9SMBL0CT1F" />
       </body>
     </html>

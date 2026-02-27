@@ -5,8 +5,8 @@ import { landingDesign } from "@/design-system/landing";
 
 function DossierCard() {
   return (
-    <div className="relative z-10 w-full max-w-sm">
-      <div className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl shadow-studio-forest/5 text-left">
+    <div className="relative z-10 w-full max-w-sm scale-[0.94] sm:scale-100 origin-top">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl shadow-studio-forest/5 text-left">
         <div className="flex items-start justify-between mb-8 pb-6 border-b border-studio-border">
           <div>
             <div className="text-sm font-medium text-studio-peach uppercase tracking-widest mb-2.5 inline-flex items-center gap-1.5">
@@ -53,22 +53,24 @@ export function HeroSection() {
   return (
     <section className={landingDesign.sectionWide}>
       <Container size="xl" className="px-6">
-        <div className="flex flex-col md:flex-row items-center gap-16">
-          <div className="w-full md:w-1/2">
-            <h1 className={landingDesign.heroHeading}>
-              Find the perfect<br />name, beautifully<br />curated for you.
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-16">
+          <div className="w-full md:w-1/2 pb-2 md:pb-0">
+            <h1 className={`${landingDesign.heroHeading} max-w-[9ch] sm:max-w-none`}>
+              <span className="md:hidden">Find the perfect name, beautifully curated for you.</span>
+              <span className="hidden md:inline">Find the perfect<br />name, beautifully<br />curated for you.</span>
             </h1>
-            <p className={`${landingDesign.bodyLarge} max-w-md mt-8`}>
+            <p className={`${landingDesign.bodyLarge} max-w-[28ch] sm:max-w-md mt-6 sm:mt-8`}>
               Skip the overwhelming lists. Have a quick chat about your preferences, heritage, and style, and receive a personalized dossier.
             </p>
             <Link href="/intake">
-              <Button variant="forest" size="lg" className="mt-10 h-auto px-9 py-4 text-base font-medium">Make an Appointment</Button>
+              <Button variant="forest" size="lg" className="mt-7 sm:mt-8 md:mt-10 h-auto px-8 sm:px-9 py-3.5 sm:py-4 text-base font-medium">Start Consultation</Button>
             </Link>
           </div>
 
-          <div className="w-full md:w-1/2 relative flex justify-center items-center h-[500px] mt-12 md:mt-0">
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[350px] h-[350px] md:w-[480px] md:h-[480px] bg-studio-peach rounded-full -z-10 translate-x-4 md:translate-x-12" />
+          <div className="w-full md:w-1/2 relative flex justify-center items-start md:items-center h-[260px] sm:h-[500px] mt-1 sm:mt-6 md:mt-0 overflow-hidden">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[480px] md:h-[480px] bg-studio-peach rounded-full -z-10 translate-x-6 sm:translate-x-4 md:translate-x-12" />
             <DossierCard />
+            <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-studio-sand to-transparent sm:hidden pointer-events-none" />
           </div>
         </div>
       </Container>

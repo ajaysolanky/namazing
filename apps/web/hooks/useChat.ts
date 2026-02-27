@@ -3,6 +3,7 @@ import {
   type ChatMessage,
   type ChatProfile,
   mergeProfile,
+  createOpeningAssistantMessage,
 } from "@/lib/chat-utils";
 
 const STORAGE_KEY = "namazing-chat";
@@ -13,9 +14,15 @@ interface ChatState {
   summary: string | null;
 }
 
+const createInitialState = (): ChatState => ({
+  messages: [createOpeningAssistantMessage()],
+  profile: {},
+  summary: null,
+});
+
 function loadState(): ChatState {
   if (typeof window === "undefined") {
-    return { messages: [], profile: {}, summary: null };
+    return createInitialState();
   }
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -33,7 +40,7 @@ function loadState(): ChatState {
       }
 
       return {
-        messages,
+        messages: messages.length > 0 ? messages : [createOpeningAssistantMessage()],
         profile: parsed.profile || {},
         summary: parsed.summary || null,
       };
@@ -41,7 +48,7 @@ function loadState(): ChatState {
   } catch (e) {
     console.error("[chat] Failed to load saved state:", e);
   }
-  return { messages: [], profile: {}, summary: null };
+  return createInitialState();
 }
 
 function saveState(state: ChatState) {
@@ -186,11 +193,15 @@ export function useChat() {
     [messages, profile, isStreaming, fetchReply]
   );
 
+  const setLocalSummary = useCallback((text: string | null) => {
+    setSummary(text);
+  }, []);
+
   const resetChat = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
     }
-    setMessages([]);
+    setMessages([createOpeningAssistantMessage()]);
     setProfile({});
     setSummary(null);
     setError(null);
@@ -208,6 +219,7 @@ export function useChat() {
     isLoaded,
     error,
     sendMessage,
+    setLocalSummary,
     resetChat,
   };
 }

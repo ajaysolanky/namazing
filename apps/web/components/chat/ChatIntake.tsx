@@ -1,9 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
-import { buildBriefFromProfile } from "@/lib/chat-utils";
+import {
+  buildBriefFromProfile,
+  buildReadySummaryFromProfile,
+  computeConsultationReadiness,
+  getConsultationGaps,
+} from "@/lib/chat-utils";
 import { startRun } from "@/lib/api";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
@@ -20,11 +25,35 @@ export function ChatIntake() {
     isLoaded,
     error,
     sendMessage,
+    setLocalSummary,
     resetChat,
   } = useChat();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const readiness = computeConsultationReadiness(messages, profile, summary);
+  const consultationGaps = getConsultationGaps(messages, profile);
+  const userMessageCount = messages.filter((message) => message.role === "user").length;
+
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverscroll = document.body.style.overscrollBehavior;
+    const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    document.documentElement.style.overscrollBehavior = "none";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overscrollBehavior = previousBodyOverscroll;
+      document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+    };
+  }, []);
 
   const handleSend = useCallback(
     (content: string) => {
@@ -35,6 +64,24 @@ export function ChatIntake() {
     },
     [sendMessage, messages.length]
   );
+
+  useEffect(() => {
+    if (summary || isStreaming || isSubmitting) {
+      return;
+    }
+
+    if (userMessageCount >= 6 && consultationGaps.length === 0 && profile.narrative) {
+      setLocalSummary(buildReadySummaryFromProfile(profile));
+    }
+  }, [
+    consultationGaps.length,
+    isStreaming,
+    isSubmitting,
+    profile,
+    setLocalSummary,
+    summary,
+    userMessageCount,
+  ]);
 
   const handleConfirm = useCallback(async () => {
     // Auth gate
@@ -69,6 +116,21 @@ export function ChatIntake() {
       setIsSubmitting(false);
     }
   }, [authLoading, user, profile, router, resetChat]);
+
+  const handleResetConversation = useCallback(() => {
+    if (!window.confirm("Reset this conversation? This will clear all chat history and progress.")) {
+      return;
+    }
+    resetChat();
+    setDraft("");
+    setSubmitError(null);
+  }, [resetChat]);
+
+  const handleInsertPrompt = useCallback((prompt: string) => {
+    setDraft(prompt);
+    const textarea = document.querySelector("textarea[placeholder='Tell us about your family...']") as HTMLTextAreaElement | null;
+    if (textarea) textarea.focus();
+  }, []);
 
   // Loading state
   if (!isLoaded) {
@@ -108,14 +170,16 @@ export function ChatIntake() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100dvh-64px)]">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Messages area */}
       <ChatMessages
         messages={messages}
+        readiness={readiness}
         summary={summary}
         isStreaming={isStreaming}
         isSubmitting={isSubmitting}
-        onSendPrompt={handleSend}
+        consultationGaps={consultationGaps}
+        onInsertPrompt={handleInsertPrompt}
         onConfirm={handleConfirm}
       />
 
@@ -129,7 +193,22 @@ export function ChatIntake() {
       )}
 
       {/* Input bar */}
+      <div className="px-4 pb-2 shrink-0">
+        <div className="max-w-2xl mx-auto flex justify-end">
+          <button
+            type="button"
+            onClick={handleResetConversation}
+            disabled={isStreaming || isSubmitting}
+            className="text-xs sm:text-sm text-studio-ink/55 hover:text-studio-ink underline underline-offset-2 disabled:opacity-40"
+          >
+            Reset conversation
+          </button>
+        </div>
+      </div>
+
       <ChatInput
+        value={draft}
+        onChange={setDraft}
         onSend={handleSend}
         disabled={isStreaming}
       />

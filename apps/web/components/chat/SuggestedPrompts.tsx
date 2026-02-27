@@ -5,10 +5,10 @@ interface SuggestedPromptsProps {
 }
 
 const PROMPTS = [
-  "We just found out we're having a baby!",
-  "We've been going back and forth on names for weeks",
-  "There's a family naming tradition we're navigating",
-  "We want a name that tells a story",
+  "Our last name is Romano and we want a classic vibe.",
+  "Last name Patel, looking for something literary and timeless.",
+  "Surname Kim; we'd like modern but warm.",
+  "Last name Garcia and we want a heritage-rich name.",
 ];
 
 export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {

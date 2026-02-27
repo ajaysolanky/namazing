@@ -11,11 +11,11 @@ export const metadata = {
 
 export default function IntakePage() {
   return (
-    <>
-      <Header />
-      <main className="flex-1 flex flex-col">
+    <div className="h-[100svh] min-h-[100svh] max-h-[100svh] overflow-hidden overscroll-none flex flex-col">
+      <Header ctaMode="none" />
+      <main className="flex-1 min-h-0 overflow-hidden overscroll-none flex flex-col">
         <ChatIntakeClient />
       </main>
-    </>
+    </div>
   );
 }

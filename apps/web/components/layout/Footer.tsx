@@ -16,27 +16,27 @@ export function Footer() {
   return (
     <footer className="border-t border-studio-border bg-studio-sand mt-auto" id="footer">
       <Container size="xl" className="px-6">
-        <div className="py-24 md:py-32 text-center">
-          <h2 className="font-display text-5xl md:text-6xl font-semibold tracking-tight text-studio-ink mb-8">
+        <div className="py-16 sm:py-20 md:py-32 text-center">
+          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-studio-ink mb-6 sm:mb-8">
             Ready to meet your baby&apos;s name?
           </h2>
-          <p className="text-xl text-studio-muted max-w-xl mx-auto mb-12">
+          <p className="text-lg sm:text-xl text-studio-muted max-w-xl mx-auto mb-10 sm:mb-12">
             Start your conversational intake now. No commitment required to begin exploring.
           </p>
           <Link href="/intake">
-            <button className="bg-studio-forest text-white px-9 py-4 rounded-xl text-base font-medium hover:bg-studio-forest-dark transition-colors inline-flex items-center gap-2">
-              Make an Appointment
+            <button className="bg-studio-forest text-white px-7 py-3.5 sm:px-9 sm:py-4 rounded-xl text-sm sm:text-base font-medium hover:bg-studio-forest-dark transition-colors inline-flex items-center gap-2">
+              Start Consultation
             </button>
           </Link>
         </div>
 
-        <div className="py-10 border-t border-studio-border flex flex-col md:flex-row items-center justify-between gap-6 text-base text-studio-muted font-medium">
+        <div className="py-8 sm:py-10 border-t border-studio-border flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 text-sm sm:text-base text-studio-muted font-medium">
           <div className="flex items-center gap-2 text-studio-forest">
             <LeafIcon className="w-5 h-5" />
             <span className="font-display text-lg tracking-tight">Namazing</span>
           </div>
 
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-6 sm:gap-10">
             <Link href="/privacy" className="hover:text-studio-forest transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-studio-forest transition-colors">Terms</Link>
             <Link href="/sign-in" className="hover:text-studio-forest transition-colors">Contact</Link>
