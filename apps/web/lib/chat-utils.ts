@@ -38,6 +38,17 @@ export type ConversationTopic =
   | "portrait"
   | "summary";
 
+export type QuestionFamily =
+  | "childGender"
+  | "surname"
+  | "desiredFeel"
+  | "nameExamples"
+  | "context"
+  | "practicalConstraints"
+  | "hopes"
+  | "portrait"
+  | "summary";
+
 const PHASES: ChatPhase[] = [
   "opening",
   "collecting_core",
@@ -65,6 +76,7 @@ export interface ChatProfile {
   childGender?: string;
   surname?: string;
   desiredFeel?: string;
+  nameExamplesStatus?: string;
   likedNames?: string[];
   dislikedNames?: string[];
   familyContext?: string;
@@ -97,6 +109,10 @@ export interface ConversationState {
   portraitSummary: string | null;
   briefSummary: string | null;
   guidance: string;
+  catchAllAsked: boolean;
+  catchAllAnswered: boolean;
+  recentQuestionFamilies: QuestionFamily[];
+  topicAttemptCounts: Array<{ family: QuestionFamily; count: number }>;
 }
 
 type ConversationSlotLike = ConsultationSlot | ConsultationSlotId;
@@ -143,6 +159,18 @@ const CONVERSATION_TOPICS: ConversationTopic[] = [
   "summary",
 ];
 
+const QUESTION_FAMILIES: QuestionFamily[] = [
+  "childGender",
+  "surname",
+  "desiredFeel",
+  "nameExamples",
+  "context",
+  "practicalConstraints",
+  "hopes",
+  "portrait",
+  "summary",
+];
+
 const SLOT_METADATA: Record<ConsultationSlotId, { label: string; fallbackQuestion: string }> = {
   childGender: {
     label: "whether you're naming for a boy, a girl, or keeping it open-ended",
@@ -157,8 +185,8 @@ const SLOT_METADATA: Record<ConsultationSlotId, { label: string; fallbackQuestio
     fallbackQuestion: "What feeling do you want the name to carry when people hear it for the first time?",
   },
   nameExamples: {
-    label: "a few names you love, dislike, or keep circling around",
-    fallbackQuestion: "What names have come close so far, even if they are not quite right?",
+    label: "whether you already have any names in orbit",
+    fallbackQuestion: "Are there any names already in orbit for you, or are you starting from a blank page?",
   },
   familyContext: {
     label: "family context like siblings, honor names, or traditions",
@@ -230,6 +258,47 @@ function normalizeSlotArray(value: ConversationSlotLike[] | undefined): Consulta
   });
 }
 
+function normalizeQuestionFamilies(value: unknown): QuestionFamily[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (typeof item === "string" && QUESTION_FAMILIES.includes(item as QuestionFamily)) {
+      return [item as QuestionFamily];
+    }
+    return [];
+  });
+}
+
+function normalizeTopicAttemptCounts(
+  value: unknown
+): Array<{ family: QuestionFamily; count: number }> {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (
+      item &&
+      typeof item === "object" &&
+      "family" in item &&
+      typeof (item as { family?: unknown }).family === "string" &&
+      QUESTION_FAMILIES.includes((item as { family: QuestionFamily }).family)
+    ) {
+      const count = Math.max(
+        0,
+        Math.min(
+          9,
+          Math.round(
+            typeof (item as { count?: unknown }).count === "number"
+              ? (item as { count: number }).count
+              : 0
+          )
+        )
+      );
+      return [{ family: (item as { family: QuestionFamily }).family, count }];
+    }
+    return [];
+  });
+}
+
 function hasNames(profile: ChatProfile): boolean {
   return (profile.likedNames?.length ?? 0) + (profile.dislikedNames?.length ?? 0) > 0;
 }
@@ -246,6 +315,7 @@ export function normalizeProfile(profile?: Partial<ChatProfile> | null): ChatPro
     childGender: normalizeText(profile?.childGender),
     surname: normalizeText(profile?.surname),
     desiredFeel: normalizeText(profile?.desiredFeel),
+    nameExamplesStatus: normalizeText(profile?.nameExamplesStatus),
     likedNames: normalizeList(profile?.likedNames),
     dislikedNames: normalizeList(profile?.dislikedNames),
     familyContext: normalizeText(profile?.familyContext),
@@ -277,8 +347,9 @@ export function createOpeningConversationState(): ConversationState {
     pendingTopic: "childGender",
     lastTopic: null,
     misunderstandingsInRow: 0,
-    missingRequired: [createSlot("childGender"), createSlot("surname"), createSlot("desiredFeel"), createSlot("nameExamples")],
+    missingRequired: [createSlot("childGender"), createSlot("surname"), createSlot("desiredFeel")],
     missingOptional: [
+      createSlot("nameExamples"),
       createSlot("familyContext"),
       createSlot("culturalContext"),
       createSlot("practicalConstraints"),
@@ -287,6 +358,10 @@ export function createOpeningConversationState(): ConversationState {
     portraitSummary: null,
     briefSummary: null,
     guidance: "I’m opening the conversation and listening for the essentials.",
+    catchAllAsked: false,
+    catchAllAnswered: false,
+    recentQuestionFamilies: [],
+    topicAttemptCounts: [],
   };
 }
 
@@ -346,6 +421,16 @@ export function normalizeConversationState(
         ? null
         : normalizeText(input.briefSummary) ?? null,
     guidance: normalizeText(input.guidance) ?? opening.guidance,
+    catchAllAsked:
+      typeof input.catchAllAsked === "boolean" ? input.catchAllAsked : opening.catchAllAsked,
+    catchAllAnswered:
+      typeof input.catchAllAnswered === "boolean"
+        ? input.catchAllAnswered
+        : opening.catchAllAnswered,
+    recentQuestionFamilies:
+      normalizeQuestionFamilies(input.recentQuestionFamilies) ?? opening.recentQuestionFamilies,
+    topicAttemptCounts:
+      normalizeTopicAttemptCounts(input.topicAttemptCounts) ?? opening.topicAttemptCounts,
   };
 }
 
@@ -357,6 +442,7 @@ export function mergeProfile(existing: ChatProfile, update: Partial<ChatProfile>
     childGender: incoming.childGender ?? current.childGender,
     surname: incoming.surname ?? current.surname,
     desiredFeel: incoming.desiredFeel ?? current.desiredFeel,
+    nameExamplesStatus: incoming.nameExamplesStatus ?? current.nameExamplesStatus,
     likedNames: [...new Set([...(current.likedNames ?? []), ...(incoming.likedNames ?? [])])],
     dislikedNames: [...new Set([...(current.dislikedNames ?? []), ...(incoming.dislikedNames ?? [])])],
     familyContext: incoming.familyContext ?? current.familyContext,
@@ -423,6 +509,8 @@ export function buildBriefSummary(profile: ChatProfile): string {
   if (hasNames(profile)) {
     const liked = [...(profile.likedNames ?? []), ...(profile.dislikedNames ?? []).map((name) => `not ${name}`)];
     clauses.push(`Your examples point toward ${listToPhrase(liked.slice(0, 4))}.`);
+  } else if (profile.nameExamplesStatus) {
+    clauses.push(`You are ${profile.nameExamplesStatus}.`);
   }
   if (profile.familyContext) clauses.push(`Family context to respect: ${profile.familyContext}.`);
   if (profile.culturalContext) clauses.push(`It should work naturally in ${profile.culturalContext}.`);
@@ -463,6 +551,9 @@ export function buildBriefFromProfile(profileInput: ChatProfile): string {
   }
   if ((profile.dislikedNames?.length ?? 0) > 0) {
     lines.push(`Names to avoid or move away from: ${listToPhrase(profile.dislikedNames ?? [])}`);
+  }
+  if (profile.nameExamplesStatus) {
+    lines.push(`Names-in-orbit status: ${profile.nameExamplesStatus}`);
   }
   if (profile.familyContext) lines.push(`Family context: ${profile.familyContext}`);
   if (profile.culturalContext) lines.push(`Cultural / language context: ${profile.culturalContext}`);

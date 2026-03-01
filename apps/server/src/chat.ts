@@ -57,11 +57,24 @@ const TOPICS = [
   "summary",
 ] as const;
 
+const QUESTION_FAMILIES = [
+  "childGender",
+  "surname",
+  "desiredFeel",
+  "nameExamples",
+  "context",
+  "practicalConstraints",
+  "hopes",
+  "portrait",
+  "summary",
+] as const;
+
 type ConsultationSlotId = (typeof SLOT_IDS)[number];
 type ChatPhase = (typeof PHASES)[number];
 type UserAct = (typeof USER_ACTS)[number];
 type AssistantAct = (typeof ASSISTANT_ACTS)[number];
 type ConversationTopic = (typeof TOPICS)[number];
+type QuestionFamily = (typeof QUESTION_FAMILIES)[number];
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -72,6 +85,7 @@ interface ChatProfile {
   childGender?: string;
   surname?: string;
   desiredFeel?: string;
+  nameExamplesStatus?: string;
   likedNames?: string[];
   dislikedNames?: string[];
   familyContext?: string;
@@ -82,6 +96,26 @@ interface ChatProfile {
   portraitSummary?: string;
   briefSummary?: string;
   narrative?: string;
+}
+
+interface NormalizedConversationState {
+  phase: ChatPhase;
+  readiness: number;
+  nextQuestion: string | null;
+  userAct: UserAct;
+  assistantAct: AssistantAct;
+  pendingTopic: ConversationTopic | null;
+  lastTopic: ConversationTopic | null;
+  misunderstandingsInRow: number;
+  missingRequired: Array<{ id: ConsultationSlotId; label: string }>;
+  missingOptional: Array<{ id: ConsultationSlotId; label: string }>;
+  portraitSummary: string | null;
+  briefSummary: string | null;
+  guidance: string;
+  catchAllAsked: boolean;
+  catchAllAnswered: boolean;
+  recentQuestionFamilies: QuestionFamily[];
+  topicAttemptCounts: Array<{ family: QuestionFamily; count: number }>;
 }
 
 interface ConversationStateInput {
@@ -98,6 +132,10 @@ interface ConversationStateInput {
   portraitSummary?: string | null;
   briefSummary?: string | null;
   guidance?: string;
+  catchAllAsked?: boolean;
+  catchAllAnswered?: boolean;
+  recentQuestionFamilies?: QuestionFamily[];
+  topicAttemptCounts?: Array<{ family: QuestionFamily; count: number }>;
 }
 
 function isPortraitTopic(topic?: ConversationTopic | null): boolean {
@@ -108,6 +146,54 @@ function isPortraitTopic(topic?: ConversationTopic | null): boolean {
     topic === "portrait" ||
     topic === "summary"
   );
+}
+
+function questionFamilyForTopic(topic?: ConversationTopic | null): QuestionFamily | null {
+  if (!topic) return null;
+  if (topic === "familyContext" || topic === "culturalContext") return "context";
+  return topic;
+}
+
+function normalizeQuestionFamilies(value: unknown): QuestionFamily[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (typeof item === "string" && QUESTION_FAMILIES.includes(item as QuestionFamily)) {
+      return [item as QuestionFamily];
+    }
+    return [];
+  });
+}
+
+function normalizeTopicAttemptCounts(
+  value: unknown
+): Array<{ family: QuestionFamily; count: number }> {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (
+      item &&
+      typeof item === "object" &&
+      "family" in item &&
+      typeof (item as { family?: unknown }).family === "string" &&
+      QUESTION_FAMILIES.includes((item as { family: QuestionFamily }).family)
+    ) {
+      const count = Math.max(
+        0,
+        Math.min(
+          9,
+          Math.round(
+            typeof (item as { count?: unknown }).count === "number"
+              ? (item as { count: number }).count
+              : 0
+          )
+        )
+      );
+      return [{ family: (item as { family: QuestionFamily }).family, count }];
+    }
+
+    return [];
+  });
 }
 
 function sanitizeIncomingConversation(
@@ -130,6 +216,8 @@ function sanitizeIncomingConversation(
     next.nextQuestion = null;
     next.assistantAct = "summarize_ready";
     next.pendingTopic = "summary";
+    next.catchAllAsked = true;
+    next.catchAllAnswered = true;
     return next;
   }
 
@@ -183,6 +271,15 @@ function sanitizeIncomingConversation(
     next.briefSummary = null;
   }
 
+  next.catchAllAsked = typeof conversation.catchAllAsked === "boolean"
+    ? conversation.catchAllAsked
+    : false;
+  next.catchAllAnswered = typeof conversation.catchAllAnswered === "boolean"
+    ? conversation.catchAllAnswered
+    : false;
+  next.recentQuestionFamilies = normalizeQuestionFamilies(conversation.recentQuestionFamilies);
+  next.topicAttemptCounts = normalizeTopicAttemptCounts(conversation.topicAttemptCounts);
+
   return next;
 }
 
@@ -206,7 +303,7 @@ const SLOT_LABELS: Record<ConsultationSlotId, string> = {
   childGender: "whether you're naming for a boy, a girl, or keeping it open-ended",
   surname: "your family surname",
   desiredFeel: "the feeling or personality you want the name to carry",
-  nameExamples: "a few names you love, dislike, or keep circling around",
+  nameExamples: "whether you already have any names in orbit",
   familyContext: "family context like siblings, honor names, or traditions",
   culturalContext: "heritage, languages, or communities the name should work in",
   practicalConstraints: "practical constraints like pronunciation, initials, or popularity",
@@ -217,19 +314,20 @@ const TOPIC_FALLBACK_QUESTIONS: Record<ConversationTopic, string> = {
   childGender: "Are you naming for a boy, a girl, or are you keeping the brief open-ended for now?",
   surname: "What surname should I be listening against as I shape this brief?",
   desiredFeel: "What feeling matters most when someone hears the name for the first time?",
-  nameExamples: "What names have come close so far, even if they are not quite right?",
+  nameExamples: "Are there any names already in orbit for you, or are you starting from a blank page?",
   familyContext: "Is there any family context I should keep in mind, like siblings, honor names, or traditions?",
   culturalContext: "Are there languages, cultures, or communities the name should feel natural in?",
   practicalConstraints: "Are there any practical watch-outs I should keep in mind, like initials, pronunciation, or popularity?",
   hopes: "What do you most want the name to communicate about your child or your family?",
   portrait: "What feels most important to get emotionally right about this name?",
-  summary: "I have most of the shape now. What feels most important to get exactly right before I lock in the brief?",
+  summary: "Is there anything else we should know before I lock the brief?",
 };
 
 const PROFILE_SCHEMA = z.object({
   childGender: z.string().nullable(),
   surname: z.string().nullable(),
   desiredFeel: z.string().nullable(),
+  nameExamplesStatus: z.string().nullable(),
   likedNames: z.array(z.string()),
   dislikedNames: z.array(z.string()),
   familyContext: z.string().nullable(),
@@ -320,6 +418,7 @@ function normalizeProfile(profile?: Partial<ChatProfile> | null): ChatProfile {
     childGender: normalizeText(profile?.childGender),
     surname: normalizeText(profile?.surname),
     desiredFeel: normalizeText(profile?.desiredFeel),
+    nameExamplesStatus: normalizeText(profile?.nameExamplesStatus),
     likedNames: normalizeList(profile?.likedNames),
     dislikedNames: normalizeList(profile?.dislikedNames),
     familyContext: normalizeText(profile?.familyContext),
@@ -333,7 +432,7 @@ function normalizeProfile(profile?: Partial<ChatProfile> | null): ChatProfile {
   };
 }
 
-function normalizeConversation(input: ModelResponse["conversation"]) {
+function normalizeConversation(input: ModelResponse["conversation"]): NormalizedConversationState {
   const toSlot = (value: z.infer<typeof SLOT_REFERENCE_SCHEMA>) => {
     const id = typeof value === "string" ? value : value.id;
     return { id, label: SLOT_LABELS[id] };
@@ -364,6 +463,10 @@ function normalizeConversation(input: ModelResponse["conversation"]) {
         ? normalizeText(input.briefSummary) ?? null
         : null,
     guidance: normalizeText(input.guidance) ?? "",
+    catchAllAsked: input.phase === "ready" ? true : false,
+    catchAllAnswered: input.phase === "ready" ? true : false,
+    recentQuestionFamilies: [],
+    topicAttemptCounts: [],
   };
 }
 
@@ -373,6 +476,7 @@ function buildProfileContext(profile: ChatProfile): string {
       childGender: profile.childGender ?? null,
       surname: profile.surname ?? null,
       desiredFeel: profile.desiredFeel ?? null,
+      nameExamplesStatus: profile.nameExamplesStatus ?? null,
       likedNames: profile.likedNames ?? [],
       dislikedNames: profile.dislikedNames ?? [],
       familyContext: profile.familyContext ?? null,
@@ -407,6 +511,10 @@ function buildConversationContext(conversation?: ConversationStateInput | null):
       portraitSummary: conversation.portraitSummary ?? null,
       briefSummary: conversation.briefSummary ?? null,
       guidance: conversation.guidance ?? null,
+      catchAllAsked: conversation.catchAllAsked ?? false,
+      catchAllAnswered: conversation.catchAllAnswered ?? false,
+      recentQuestionFamilies: conversation.recentQuestionFamilies ?? [],
+      topicAttemptCounts: conversation.topicAttemptCounts ?? [],
     },
     null,
     2
@@ -414,7 +522,14 @@ function buildConversationContext(conversation?: ConversationStateInput | null):
 }
 
 function buildTranscript(messages: ChatMessage[]): string {
-  return messages
+  const MAX_MESSAGES = 12;
+  const windowed = messages.length > MAX_MESSAGES ? messages.slice(-MAX_MESSAGES) : messages;
+  const prefix =
+    messages.length > MAX_MESSAGES
+      ? `[Transcript truncated to last ${MAX_MESSAGES} messages out of ${messages.length} total]\n`
+      : "";
+
+  return prefix + windowed
     .map((message) => `${message.role.toUpperCase()}: ${message.content}`)
     .join("\n");
 }
@@ -456,6 +571,7 @@ function buildSummaryAnchors(profile: ChatProfile): string {
   if (profile.childGender) anchors.push(`child gender or stance: ${profile.childGender}`);
   if (profile.surname) anchors.push(`surname: ${profile.surname}`);
   if (profile.desiredFeel) anchors.push(`desired feel: ${profile.desiredFeel}`);
+  if (profile.nameExamplesStatus) anchors.push(`names-in-orbit status: ${profile.nameExamplesStatus}`);
   if ((profile.likedNames?.length ?? 0) > 0) {
     anchors.push(`liked names: ${profile.likedNames?.join(", ")}`);
   }
@@ -477,14 +593,66 @@ function buildReadyChecklist(profile: ChatProfile): string {
     `child gender / stance known: ${profile.childGender ? "yes" : "no"}`,
     `surname known: ${profile.surname ? "yes" : "no"}`,
     `desired feel known: ${profile.desiredFeel ? "yes" : "no"}`,
-    `has preference anchors: ${(profile.likedNames?.length ?? 0) > 0 || (profile.dislikedNames?.length ?? 0) > 0 ? "yes" : "no"}`,
+    `has preference anchors: ${hasPreferenceAnchors(profile) ? "yes" : "no"}`,
+    `names-in-orbit status known: ${profile.nameExamplesStatus ? "yes" : "no"}`,
     `family context known: ${profile.familyContext ? "yes" : "no"}`,
     `cultural context known: ${profile.culturalContext ? "yes" : "no"}`,
     `practical constraints known: ${(profile.practicalConstraints?.length ?? 0) > 0 ? "yes" : "no"}`,
     `hopes known: ${profile.hopes ? "yes" : "no"}`,
+    `has essential anchor: ${hasEssentialAnchor(profile) ? "yes" : "no"}`,
+    `has contextual anchor: ${hasContextAnchor(profile) ? "yes" : "no"}`,
+    `has portrait anchor: ${hasPortraitAnchor(profile) ? "yes" : "no"}`,
   ];
 
   return checklist.map((item) => `- ${item}`).join("\n");
+}
+
+function listToPhrase(items: string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+function buildFallbackPortraitSummary(profile: ChatProfile): string {
+  const anchors: string[] = [];
+  if (profile.familyContext) anchors.push(profile.familyContext);
+  if (profile.culturalContext) anchors.push(profile.culturalContext);
+  if (profile.hopes) anchors.push(profile.hopes);
+  if ((profile.likedNames?.length ?? 0) > 0) anchors.push(`the pull toward ${listToPhrase(profile.likedNames ?? [])}`);
+
+  const opening = profile.surname
+    ? `You're shaping a ${profile.surname} brief that wants to feel ${profile.desiredFeel ?? "clear and grounded"}.`
+    : `You're shaping a brief that wants to feel ${profile.desiredFeel ?? "clear and grounded"}.`;
+
+  const detail = anchors.length > 0
+    ? `What stands out is ${listToPhrase(anchors.slice(0, 3))}.`
+    : "You want something that feels specific to your family rather than generic.";
+
+  return `${opening} ${detail}`.trim();
+}
+
+function buildFallbackBriefSummary(profile: ChatProfile): string {
+  const clauses: string[] = [];
+  if (profile.surname) clauses.push(`Prioritize names that sound convincing with ${profile.surname}.`);
+  else clauses.push("Prioritize names that hold together in everyday use.");
+  if (profile.desiredFeel) clauses.push(`Keep the overall feel ${profile.desiredFeel}.`);
+  if (profile.culturalContext) clauses.push(`Keep ${profile.culturalContext} in play.`);
+  if (profile.familyContext) clauses.push(`Respect ${profile.familyContext}.`);
+  if ((profile.practicalConstraints?.length ?? 0) > 0) {
+    clauses.push(`Watch for ${listToPhrase(profile.practicalConstraints ?? [])}.`);
+  }
+  if ((profile.likedNames?.length ?? 0) > 0 || (profile.dislikedNames?.length ?? 0) > 0) {
+    const parts = [
+      (profile.likedNames?.length ?? 0) > 0 ? `build around ${listToPhrase(profile.likedNames ?? [])}` : "",
+      (profile.dislikedNames?.length ?? 0) > 0 ? `avoid the feel of ${listToPhrase(profile.dislikedNames ?? [])}` : "",
+    ].filter(Boolean);
+    if (parts.length > 0) clauses.push(`${parts.join(" while also ")}.`);
+  } else if (profile.nameExamplesStatus) {
+    clauses.push(`Treat the brief as ${profile.nameExamplesStatus}.`);
+  }
+
+  return clauses.join(" ").trim();
 }
 
 function normalizeForMatch(value: string): string {
@@ -497,6 +665,16 @@ function extractLastQuestion(text?: string | null): string | undefined {
   const matches = normalized.match(/[^?]*\?/g);
   if (!matches || matches.length === 0) return undefined;
   return matches[matches.length - 1]?.trim();
+}
+
+function normalizeQuestionForComparison(value?: string | null): string | undefined {
+  const normalized = normalizeText(value);
+  if (!normalized) return undefined;
+  return normalized
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function uniqueNonTrivialTokens(value: string): string[] {
@@ -582,16 +760,147 @@ function hasPreferenceAnchors(profile: ChatProfile): boolean {
   return (profile.likedNames?.length ?? 0) > 0 || (profile.dislikedNames?.length ?? 0) > 0;
 }
 
-function qualifiesForReady(profile: ChatProfile): boolean {
+function hasEssentialAnchor(profile: ChatProfile): boolean {
+  return hasPreferenceAnchors(profile) ||
+    Boolean(profile.nameExamplesStatus) ||
+    (profile.practicalConstraints?.length ?? 0) > 0 ||
+    Boolean(profile.hopes);
+}
+
+function hasContextAnchor(profile: ChatProfile): boolean {
+  return Boolean(profile.familyContext) ||
+    Boolean(profile.culturalContext) ||
+    (profile.practicalConstraints?.length ?? 0) > 0;
+}
+
+function hasPortraitAnchor(profile: ChatProfile): boolean {
+  return Boolean(profile.hopes) ||
+    Boolean(profile.familyContext) ||
+    Boolean(profile.culturalContext);
+}
+
+function qualifiesForSynthesisCheck(profile: ChatProfile): boolean {
   return Boolean(profile.childGender) &&
     Boolean(profile.surname) &&
     Boolean(profile.desiredFeel) &&
-    hasPreferenceAnchors(profile) &&
-    countContextSignals(profile) >= 2;
+    hasEssentialAnchor(profile) &&
+    hasContextAnchor(profile) &&
+    hasPortraitAnchor(profile);
+}
+
+function qualifiesForReady(
+  profile: ChatProfile,
+  conversation?: { catchAllAsked?: boolean; catchAllAnswered?: boolean } | null
+): boolean {
+  return qualifiesForSynthesisCheck(profile) &&
+    hasPortraitAnchor(profile) &&
+    Boolean(conversation?.catchAllAsked) &&
+    Boolean(conversation?.catchAllAnswered);
+}
+
+function isCatchAllQuestion(text?: string | null): boolean {
+  const normalized = normalizeText(text)?.toLowerCase() ?? "";
+  return normalized.includes("anything else we should know") ||
+    normalized.includes("before i lock the brief") ||
+    normalized.includes("before i lock this brief");
+}
+
+function inferQuestionFamily(
+  text?: string | null,
+  pendingTopic?: ConversationTopic | null
+): QuestionFamily | null {
+  const topicFamily = questionFamilyForTopic(pendingTopic);
+  if (topicFamily) return topicFamily;
+
+  const normalized = normalizeText(text)?.toLowerCase() ?? "";
+  if (!normalized) return null;
+  if (isCatchAllQuestion(normalized)) return "summary";
+  if (normalized.includes("boy") || normalized.includes("girl") || normalized.includes("open-ended")) return "childGender";
+  if (normalized.includes("surname") || normalized.includes("last name")) return "surname";
+  if (normalized.includes("vibe") || normalized.includes("feeling") || normalized.includes("personality")) return "desiredFeel";
+  if (normalized.includes("names in orbit") || normalized.includes("starting from a blank page") || normalized.includes("examples")) return "nameExamples";
+  if (normalized.includes("siblings") || normalized.includes("traditions") || normalized.includes("heritage") || normalized.includes("languages") || normalized.includes("communities")) return "context";
+  if (normalized.includes("pronunciation") || normalized.includes("initials") || normalized.includes("popularity") || normalized.includes("practical")) return "practicalConstraints";
+  if (normalized.includes("hope") || normalized.includes("express")) return "hopes";
+  if (normalized.includes("brief")) return "summary";
+  return null;
+}
+
+function incrementTopicAttemptCounts(
+  priorCounts: Array<{ family: QuestionFamily; count: number }> | undefined,
+  family: QuestionFamily | null
+): Array<{ family: QuestionFamily; count: number }> {
+  const counts = new Map<string, number>();
+  for (const item of priorCounts ?? []) {
+    counts.set(item.family, item.count);
+  }
+  if (family) {
+    counts.set(family, (counts.get(family) ?? 0) + 1);
+  }
+  return [...counts.entries()].map(([family, count]) => ({ family: family as QuestionFamily, count }));
+}
+
+function getTopicAttemptCount(
+  counts: Array<{ family: QuestionFamily; count: number }> | undefined,
+  family: QuestionFamily | null
+): number {
+  if (!family) return 0;
+  return counts?.find((item) => item.family === family)?.count ?? 0;
+}
+
+function updateConversationMemory(
+  priorConversation: ConversationStateInput | null | undefined,
+  nextConversation: NormalizedConversationState,
+  assistantText: string
+) {
+  const family = inferQuestionFamily(nextConversation.nextQuestion ?? assistantText, nextConversation.pendingTopic);
+  const priorFamilies = normalizeQuestionFamilies(priorConversation?.recentQuestionFamilies);
+  const recentQuestionFamilies = family
+    ? [...priorFamilies.slice(-2), family]
+    : priorFamilies.slice(-3);
+  const catchAllAsked = Boolean(priorConversation?.catchAllAsked) || family === "summary" || isCatchAllQuestion(assistantText);
+  const catchAllAnswered =
+    Boolean(priorConversation?.catchAllAnswered) ||
+    (Boolean(priorConversation?.catchAllAsked) &&
+      nextConversation.userAct !== "clarification_request" &&
+      nextConversation.userAct !== "correction" &&
+      nextConversation.userAct !== "off_topic");
+
+  nextConversation.recentQuestionFamilies = recentQuestionFamilies;
+  nextConversation.topicAttemptCounts = incrementTopicAttemptCounts(
+    priorConversation?.topicAttemptCounts,
+    family
+  );
+  nextConversation.catchAllAsked = catchAllAsked || nextConversation.phase === "ready";
+  nextConversation.catchAllAnswered = catchAllAnswered || nextConversation.phase === "ready";
 }
 
 function buildFallbackQuestion(topic: ConversationTopic | null | undefined): string {
   return TOPIC_FALLBACK_QUESTIONS[topic ?? "summary"] ?? TOPIC_FALLBACK_QUESTIONS.summary;
+}
+
+function pickNextHighValueTopic(
+  profile: ChatProfile,
+  conversation?: ConversationStateInput | null
+): ConversationTopic {
+  const recentFamilies = normalizeQuestionFamilies(conversation?.recentQuestionFamilies);
+  const lastFamily = recentFamilies[recentFamilies.length - 1] ?? null;
+
+  if (!profile.childGender) return "childGender";
+  if (!profile.surname) return "surname";
+  if (!profile.desiredFeel) return "desiredFeel";
+  if (!hasEssentialAnchor(profile)) {
+    if (!profile.nameExamplesStatus && !hasPreferenceAnchors(profile)) return "nameExamples";
+    if ((profile.practicalConstraints?.length ?? 0) === 0) return "practicalConstraints";
+    if (!profile.hopes) return "hopes";
+  }
+  if (!hasContextAnchor(profile)) {
+    return lastFamily === "context" ? "hopes" : "familyContext";
+  }
+  if (!hasPortraitAnchor(profile)) {
+    return "hopes";
+  }
+  return "summary";
 }
 
 function salvageStructuredResponse(
@@ -608,18 +917,30 @@ function salvageStructuredResponse(
   const userAct = base.conversation.userAct;
   const needsClarification =
     userAct === "clarification_request" || userAct === "correction";
+  const hasMissingRequired =
+    Array.isArray(base.conversation.missingRequired) && base.conversation.missingRequired.length > 0;
+  const canClose =
+    qualifiesForSynthesisCheck(normalizedProfile) &&
+    Boolean(priorConversation?.catchAllAsked) &&
+    !needsClarification &&
+    userAct !== "off_topic";
   const priorPhase = priorConversation?.phase ?? "deepening_portrait";
+  const fallbackTopic = canClose ? "summary" : pickNextHighValueTopic(normalizedProfile, priorConversation);
   const assistantAct: AssistantAct = needsClarification
     ? "clarify_previous_question"
     : userAct === "factual_question"
       ? "answer_then_continue"
-      : "reflect_and_confirm";
+      : hasMissingRequired
+        ? isPortraitTopic(pendingTopic) ? "ask_portrait_question" : "ask_core_question"
+        : "reflect_and_confirm";
 
   const assistantText = needsClarification
     ? "Let me make that more concrete. I mean things like sibling names, relatives you may want to honor, or traditions you want to ignore. What applies here, if anything?"
     : userAct === "factual_question"
       ? "That can matter, but your taste still matters more than a popularity chart. Before I lock in the brief, what should I keep in mind here?"
-      : "I have most of the shape of the brief now. What feels most important to get exactly right before I lock it in?";
+      : canClose
+        ? "Your brief is ready."
+        : buildFallbackQuestion(fallbackTopic);
 
   return {
     assistantText,
@@ -627,6 +948,7 @@ function salvageStructuredResponse(
       childGender: normalizedProfile.childGender ?? null,
       surname: normalizedProfile.surname ?? null,
       desiredFeel: normalizedProfile.desiredFeel ?? null,
+      nameExamplesStatus: normalizedProfile.nameExamplesStatus ?? null,
       likedNames: normalizedProfile.likedNames ?? [],
       dislikedNames: normalizedProfile.dislikedNames ?? [],
       familyContext: normalizedProfile.familyContext ?? null,
@@ -634,21 +956,33 @@ function salvageStructuredResponse(
       practicalConstraints: normalizedProfile.practicalConstraints ?? [],
       hopes: normalizedProfile.hopes ?? null,
       portraitHighlights: normalizedProfile.portraitHighlights ?? [],
-      portraitSummary: null,
-      briefSummary: null,
+      portraitSummary: canClose
+        ? normalizedProfile.portraitSummary ?? buildFallbackPortraitSummary(normalizedProfile)
+        : null,
+      briefSummary: canClose
+        ? normalizedProfile.briefSummary ?? buildFallbackBriefSummary(normalizedProfile)
+        : null,
       narrative: normalizedProfile.narrative ?? null,
     },
     conversation: {
-      phase: needsClarification || userAct === "factual_question"
-        ? (priorPhase === "ready" ? "synthesis_check" : priorPhase)
-        : "synthesis_check",
-      readiness: needsClarification
+      phase: canClose
+        ? "ready"
+        : needsClarification || userAct === "factual_question"
+        ? (priorPhase === "ready" ? "deepening_portrait" : priorPhase)
+        : hasMissingRequired
+          ? isPortraitTopic(pendingTopic) ? "deepening_portrait" : "collecting_core"
+          : "synthesis_check",
+      readiness: canClose
+        ? 100
+        : needsClarification
         ? Math.min(88, Math.max(priorConversation?.readiness ?? base.conversation.readiness, 30))
-        : Math.min(92, Math.max(base.conversation.readiness, 84)),
-      nextQuestion: buildFallbackQuestion(pendingTopic),
+        : hasMissingRequired
+          ? Math.min(80, Math.max(base.conversation.readiness, 35))
+          : Math.min(92, Math.max(base.conversation.readiness, 84)),
+      nextQuestion: canClose ? null : buildFallbackQuestion(fallbackTopic),
       userAct,
-      assistantAct,
-      pendingTopic,
+      assistantAct: canClose ? "summarize_ready" : assistantAct,
+      pendingTopic: canClose ? "summary" : fallbackTopic,
       lastTopic: base.conversation.lastTopic ?? priorConversation?.lastTopic ?? pendingTopic,
       misunderstandingsInRow:
         needsClarification
@@ -658,7 +992,104 @@ function salvageStructuredResponse(
       missingOptional: base.conversation.missingOptional,
       portraitSummary: null,
       briefSummary: null,
-      guidance: "I have the brief mostly shaped, but I want one final clarification before I lock it in.",
+      guidance: hasMissingRequired
+        ? "I still need one practical anchor before I can lock the brief."
+        : "I have the brief mostly shaped, but I want one final clarification before I lock it in.",
+    },
+  };
+}
+
+function buildDeterministicRecoveryResponse(params: {
+  profile: ChatProfile;
+  conversation?: ConversationStateInput | null;
+  messages: ChatMessage[];
+}): ModelResponse {
+  const profile = normalizeProfile(params.profile);
+  const priorConversation = params.conversation ?? null;
+  const latestUser = normalizeText(getLatestUserMessage(params.messages));
+  const userAct: UserAct =
+    latestUser && /\b(not sure|what do you mean|i don't follow|confused)\b/i.test(latestUser)
+      ? "clarification_request"
+      : "answer";
+  const canClose =
+    qualifiesForSynthesisCheck(profile) &&
+    Boolean(priorConversation?.catchAllAsked) &&
+    userAct !== "clarification_request";
+
+  if (canClose) {
+    return {
+      assistantText: "Your brief is ready.",
+      profile: {
+        childGender: profile.childGender ?? null,
+        surname: profile.surname ?? null,
+        desiredFeel: profile.desiredFeel ?? null,
+        nameExamplesStatus: profile.nameExamplesStatus ?? null,
+        likedNames: profile.likedNames ?? [],
+        dislikedNames: profile.dislikedNames ?? [],
+        familyContext: profile.familyContext ?? null,
+        culturalContext: profile.culturalContext ?? null,
+        practicalConstraints: profile.practicalConstraints ?? [],
+        hopes: profile.hopes ?? null,
+        portraitHighlights: profile.portraitHighlights ?? [],
+        portraitSummary: profile.portraitSummary ?? buildFallbackPortraitSummary(profile),
+        briefSummary: profile.briefSummary ?? buildFallbackBriefSummary(profile),
+        narrative: profile.narrative ?? null,
+      },
+      conversation: {
+        phase: "ready",
+        readiness: 100,
+        nextQuestion: null,
+        userAct,
+        assistantAct: "summarize_ready",
+        pendingTopic: "summary",
+        lastTopic: priorConversation?.pendingTopic ?? "summary",
+        misunderstandingsInRow: 0,
+        missingRequired: [],
+        missingOptional: [],
+        portraitSummary: profile.portraitSummary ?? buildFallbackPortraitSummary(profile),
+        briefSummary: profile.briefSummary ?? buildFallbackBriefSummary(profile),
+        guidance: "I have enough to lock the brief and move into the report stage.",
+      },
+    };
+  }
+
+  const fallbackTopic = pickNextHighValueTopic(profile, priorConversation);
+  const fallbackQuestion = userAct === "clarification_request"
+    ? "Let me make that more concrete. I mean things like sibling names, relatives you may want to honor, or traditions you may want to ignore. What applies here, if anything?"
+    : buildFallbackQuestion(fallbackTopic);
+
+  return {
+    assistantText: fallbackQuestion,
+    profile: {
+      childGender: profile.childGender ?? null,
+      surname: profile.surname ?? null,
+      desiredFeel: profile.desiredFeel ?? null,
+      nameExamplesStatus: profile.nameExamplesStatus ?? null,
+      likedNames: profile.likedNames ?? [],
+      dislikedNames: profile.dislikedNames ?? [],
+      familyContext: profile.familyContext ?? null,
+      culturalContext: profile.culturalContext ?? null,
+      practicalConstraints: profile.practicalConstraints ?? [],
+      hopes: profile.hopes ?? null,
+      portraitHighlights: profile.portraitHighlights ?? [],
+      portraitSummary: null,
+      briefSummary: null,
+      narrative: profile.narrative ?? null,
+    },
+    conversation: {
+      phase: qualifiesForSynthesisCheck(profile) ? "synthesis_check" : isPortraitTopic(fallbackTopic) ? "deepening_portrait" : "collecting_core",
+      readiness: qualifiesForSynthesisCheck(profile) ? 90 : isPortraitTopic(fallbackTopic) ? 76 : 48,
+      nextQuestion: userAct === "clarification_request" ? "What applies here, if anything?" : fallbackQuestion,
+      userAct,
+      assistantAct: userAct === "clarification_request" ? "clarify_previous_question" : isPortraitTopic(fallbackTopic) ? "ask_portrait_question" : "ask_core_question",
+      pendingTopic: fallbackTopic,
+      lastTopic: priorConversation?.pendingTopic ?? null,
+      misunderstandingsInRow: userAct === "clarification_request" ? Math.max(1, priorConversation?.misunderstandingsInRow ?? 0) : 0,
+      missingRequired: [],
+      missingOptional: [],
+      portraitSummary: null,
+      briefSummary: null,
+      guidance: "I fell back to a deterministic next question to keep the intake moving cleanly.",
     },
   };
 }
@@ -707,6 +1138,7 @@ Rules:
 - Explicit example names should populate likedNames or dislikedNames when the user names them.
 - Statements like "it's a boy", "we're naming a girl", "we don't know yet", or "keep it open-ended / gender-neutral" should populate childGender.
 - Statements like "we like Julian and Theo" should become likedNames.
+- Statements like "we haven't considered any names yet", "we're starting from scratch", or "nothing in orbit yet" should populate nameExamplesStatus.
 - Statements like "not too trendy", "avoid awkward initials", or "easy in English" should become practicalConstraints.
 - Statements like "older sister Clara" or "no honor names" should become familyContext.
 - Language and heritage statements like "works in Korean and English" or "Spanish and Irish roots" should populate culturalContext.
@@ -717,10 +1149,16 @@ Rules:
 - Only use these slot IDs in missingRequired and missingOptional: ${SLOT_IDS.join(", ")}.
 - If missingRequired is empty, do not stay in collecting_core.
 - If both missingRequired and missingOptional are empty, phase must be synthesis_check or ready.
+- Treat required inputs as: childGender, surname, desiredFeel, and at least one strong anchor from names-in-orbit stance, practical constraints, or hopes.
+- Treat familyContext and culturalContext as strongly preferred, not absolute blockers if the brief is otherwise rich.
 - If missingRequired is empty and only one optional dimension remains, prefer ready unless that missing detail is truly essential to writing a good report.
-- Once you know childGender, surname, overall feel, at least one preference anchor, and at least two of the following: family context, cultural context, practical constraints, hopes, you usually have enough to move to ready.
-- Do not move to ready from a thin opening message that only gives childGender, surname, vibe, and one loose constraint. If there is no real preference anchor yet, keep interviewing.
-- Use synthesis_check only if you genuinely need a final correction from the user. Do not linger there.
+- Once you know childGender, surname, overall feel, at least one strong anchor, and at least one contextual anchor, you usually have enough to move to a final catch-all check.
+- A real liked/disliked name anchor helps, but it is not mandatory if the user has explicitly said there are no names in orbit yet.
+- Do not move to ready from a thin opening message that only gives childGender, surname, vibe, and one loose constraint.
+- Before phase becomes ready, ask one final open-ended catch-all question in synthesis_check, such as "Is there anything else we should know before I lock the brief?".
+- After the user answers that catch-all question, move to ready unless the answer reveals a meaningful new required gap.
+- Use synthesis_check for that final catch-all check or one last material correction. Do not linger there.
+- Never ask the final catch-all question twice unless the user explicitly asked for clarification about that question.
 - Do not ask "would you like me to suggest names" unless phase is ready.
 - Never provide actual name suggestions during intake. Do not output candidate names or lists of names in assistantText. Use assistantText only to ask the next question or briefly acknowledge that the brief is ready.
 - If phase is not ready, assistantText must end with one clear direct question and nextQuestion must match that question exactly.
@@ -738,6 +1176,9 @@ Rules:
 - If userAct is correction, assistantAct must be clarify_previous_question, repair_misunderstanding, or reflect_and_confirm.
 - If userAct is factual_question, assistantAct must be answer_then_continue unless phase is ready.
 - If userAct is ready_signal and the brief is already rich enough, prefer synthesis_check or ready rather than asking another exploratory question.
+- Before writing the next question, choose the single highest-value unresolved topic that has not already been pushed on repeatedly.
+- Use recentQuestionFamilies and topicAttemptCounts from the conversation state to avoid harassing the user about the same kind of information.
+- Do not ask more than two questions from the same semantic family unless the user is actively clarifying it.
 - Treat negative constraints as real information:
   - "no honor names" counts as family context
   - "easy in English" counts as a practical constraint
@@ -751,6 +1192,8 @@ Conversation style:
 - Most non-ready assistantText should be 1-2 sentences and under 45 words.
 - Usually sentence 1 should briefly reflect one concrete detail you just learned.
 - Sentence 2 should ask one high-leverage question that moves the brief forward.
+- If the user directly answers the current question, do not repeat that same question back to them. Move forward or ask a narrower clarification only if their answer is genuinely ambiguous.
+- Do not ask semantically duplicate questions across family, heritage, language, or community context. Treat those as one broader context family unless a specific sub-question is genuinely necessary.
 - Treat confusion as a first-class conversational event, not as a failure to fill another slot.
 - If the user says they are confused or asks what you mean, explain the previous question plainly, give 2-3 examples of acceptable answers, and then re-ask that same topic in simpler language.
 - If the user pushes back or corrects your framing, acknowledge the correction and update your understanding before asking anything else.
@@ -795,10 +1238,12 @@ Bad portraitSummary example:
 - "The family wants a meaningful name that reflects their culture and values. They care about heritage, sibling fit, and ease of use."
 
 When deciding whether phase should be ready:
-- If childGender, surname, overall feel, and at least one real preference anchor are known, plus at least two of family context, cultural context, practical constraints, or hopes, you usually have enough.
+- If childGender, surname, overall feel, one strong anchor, and one contextual anchor are known, you usually have enough to ask the final catch-all question.
+- You do not need an actual liked/disliked list if the user has explicitly said there are no names in orbit yet.
+- You should still gather at least one portrait or emotional anchor before ready, such as hopes, a family dynamic, or a clear emotional tradeoff.
 - Do not keep interviewing just because one optional detail is still blank.
-- Move to synthesis_check only when one final correction would materially improve the report.
-- Move to ready once the summaries can be specific and grounded.
+- Move to synthesis_check for that final catch-all question or when one final correction would materially improve the report.
+- Move to ready once that catch-all question has been asked and answered and the summaries can be specific and grounded.
 
 Use exactly this JSON shape:
 {
@@ -807,6 +1252,7 @@ Use exactly this JSON shape:
     "childGender": "string or null",
     "surname": "string or null",
     "desiredFeel": "string or null",
+    "nameExamplesStatus": "string or null",
     "likedNames": ["string"],
     "dislikedNames": ["string"],
     "familyContext": "string or null",
@@ -946,35 +1392,6 @@ function parseStructuredResponse(raw: string): ModelResponse | null {
     if (
       parsed &&
       typeof parsed === "object" &&
-      "profile" in parsed &&
-      parsed.profile &&
-      typeof parsed.profile === "object" &&
-      "conversation" in parsed &&
-      parsed.conversation &&
-      typeof parsed.conversation === "object"
-    ) {
-      const normalizedProfile = normalizeProfile(parsed.profile as Partial<ChatProfile>);
-      const hasSummaries =
-        Boolean(normalizeText(parsed.conversation.portraitSummary)) ||
-        Boolean(normalizeText(parsed.conversation.briefSummary)) ||
-        Boolean(normalizedProfile.portraitSummary) ||
-        Boolean(normalizedProfile.briefSummary);
-
-      if (parsed.conversation.phase !== "ready" && hasSummaries && qualifiesForReady(normalizedProfile)) {
-        parsed.conversation.phase = "ready";
-        parsed.conversation.readiness = 100;
-        parsed.conversation.nextQuestion = null;
-        parsed.conversation.assistantAct = "summarize_ready";
-        parsed.conversation.pendingTopic = "summary";
-        parsed.conversation.portraitSummary =
-          normalizeText(parsed.conversation.portraitSummary) ?? normalizedProfile.portraitSummary ?? null;
-        parsed.conversation.briefSummary =
-          normalizeText(parsed.conversation.briefSummary) ?? normalizedProfile.briefSummary ?? null;
-      }
-    }
-    if (
-      parsed &&
-      typeof parsed === "object" &&
       "assistantText" in parsed &&
       typeof parsed.assistantText === "string" &&
       "conversation" in parsed &&
@@ -1012,11 +1429,7 @@ function getStructuredResponseIssue(
   const briefSummary = normalizeText(result.conversation.briefSummary);
   const hasMissingRequired = result.conversation.missingRequired.length > 0;
   const hasMissingOptional = result.conversation.missingOptional.length > 0;
-  const missingOptionalCount = result.conversation.missingOptional.length;
   const missingRequiredIds = new Set(result.conversation.missingRequired.map((slot) => typeof slot === "string" ? slot : slot.id));
-  const hasLikedNames =
-    (normalizedProfile.likedNames?.length ?? 0) > 0 ||
-    (normalizedProfile.dislikedNames?.length ?? 0) > 0;
   const suggestionQuestion = /would you like me to (?:suggest|share|provide)/i.test(
     assistantText ?? ""
   );
@@ -1040,13 +1453,33 @@ function getStructuredResponseIssue(
     (normalizedProfile.practicalConstraints?.length ?? 0) > 0 ||
     Boolean(normalizedProfile.hopes);
   const hasPreferenceAnchor = hasPreferenceAnchors(normalizedProfile);
-  const contextSignalCount = countContextSignals(normalizedProfile);
+  const hasRequiredAnchor = hasEssentialAnchor(normalizedProfile);
+  const hasContextualAnchor = hasContextAnchor(normalizedProfile);
+  const hasEmotionalAnchor = hasPortraitAnchor(normalizedProfile);
   const allowedAssistantActs = getAllowedAssistantActs(
     result.conversation.userAct,
     result.conversation.phase
   );
   const priorPendingTopic = priorConversation?.pendingTopic ?? null;
   const priorLastTopic = priorConversation?.lastTopic ?? null;
+  const priorCatchAllAsked = Boolean(priorConversation?.catchAllAsked);
+  const richOpeningAnchor =
+    hasPreferenceAnchor ||
+    Boolean(normalizedProfile.familyContext) ||
+    Boolean(normalizedProfile.hopes);
+  const catchAllAnsweredThisTurn =
+    priorCatchAllAsked &&
+    result.conversation.userAct !== "clarification_request" &&
+    result.conversation.userAct !== "correction" &&
+    result.conversation.userAct !== "off_topic";
+  const priorQuestion = normalizeQuestionForComparison(priorConversation?.nextQuestion ?? null);
+  const currentQuestion =
+    normalizeQuestionForComparison(nextQuestion) ??
+    normalizeQuestionForComparison(extractLastQuestion(assistantText));
+  const priorQuestionFamily = inferQuestionFamily(priorConversation?.nextQuestion ?? null, priorPendingTopic);
+  const currentQuestionFamily = inferQuestionFamily(nextQuestion ?? assistantText, result.conversation.pendingTopic);
+  const priorRecentFamilies = normalizeQuestionFamilies(priorConversation?.recentQuestionFamilies);
+  const priorTopicAttemptCounts = normalizeTopicAttemptCounts(priorConversation?.topicAttemptCounts);
   const directiveBriefOpening = /^(?:prioritize|look for|build around|favor|compose)\b/i.test(
     briefSummary ?? ""
   );
@@ -1071,8 +1504,13 @@ function getStructuredResponseIssue(
   if (!normalizedProfile.desiredFeel && !missingRequiredIds.has("desiredFeel")) {
     return "desiredFeel must remain in missingRequired until it is known";
   }
-  if (!hasPreferenceAnchor && !missingRequiredIds.has("nameExamples")) {
-    return "nameExamples must remain in missingRequired until there is a real preference anchor";
+  if (
+    !hasRequiredAnchor &&
+    !["nameExamples", "practicalConstraints", "hopes"].some((slotId) =>
+      missingRequiredIds.has(slotId as ConsultationSlotId)
+    )
+  ) {
+    return "one of nameExamples, practicalConstraints, or hopes must remain unresolved until a strong anchor is known";
   }
 
   if (result.conversation.phase === "ready") {
@@ -1085,11 +1523,22 @@ function getStructuredResponseIssue(
     if (!portraitSummary || !briefSummary) {
       return "ready responses must include both summaries";
     }
-    if (!normalizedProfile.childGender || !normalizedProfile.surname || !normalizedProfile.desiredFeel || !hasPreferenceAnchor) {
-      return "ready responses require child gender or an explicit open-ended stance, surname, desired feel, and at least one real preference anchor";
+    if (
+      !normalizedProfile.childGender ||
+      !normalizedProfile.surname ||
+      !normalizedProfile.desiredFeel ||
+      !hasRequiredAnchor
+    ) {
+      return "ready responses require child gender or an explicit open-ended stance, surname, desired feel, and at least one strong anchor";
     }
-    if (contextSignalCount < 2) {
-      return "ready responses require at least two context signals such as family, culture, constraints, or hopes";
+    if (!hasContextualAnchor) {
+      return "ready responses require at least one contextual anchor";
+    }
+    if (!hasEmotionalAnchor) {
+      return "ready responses require at least one portrait or emotional anchor";
+    }
+    if (!priorCatchAllAsked || !(priorConversation?.catchAllAnswered || catchAllAnsweredThisTurn)) {
+      return "ready responses must come after the final catch-all has been asked and answered";
     }
     if (genericPortraitOpening) {
       return "portraitSummary starts with a generic opening";
@@ -1112,6 +1561,13 @@ function getStructuredResponseIssue(
     if (result.conversation.assistantAct !== "summarize_ready") {
       return "ready responses must use summarize_ready";
     }
+    if (
+      priorConversation &&
+      priorConversation.phase !== "synthesis_check" &&
+      priorConversation.pendingTopic !== "summary"
+    ) {
+      return "ready responses must come after the final catch-all synthesis check";
+    }
     return null;
   }
 
@@ -1131,6 +1587,22 @@ function getStructuredResponseIssue(
     return "collecting_core cannot be used when required slots are complete";
   }
 
+  if (result.conversation.phase === "synthesis_check" && hasMissingRequired) {
+    return "synthesis_check cannot be used while required slots are still missing";
+  }
+
+  if (result.conversation.phase === "synthesis_check" && !qualifiesForSynthesisCheck(normalizedProfile)) {
+    return "synthesis_check requires the brief to be substantively complete first";
+  }
+
+  if (
+    priorConversation?.phase === "opening" &&
+    result.conversation.phase === "synthesis_check" &&
+    !richOpeningAnchor
+  ) {
+    return "the conversation should not jump from opening to closing without richer context";
+  }
+
   if (!hasMissingRequired && !hasMissingOptional && result.conversation.phase === "deepening_portrait") {
     return "deepening_portrait should advance once no slots are missing";
   }
@@ -1144,6 +1616,70 @@ function getStructuredResponseIssue(
     result.conversation.pendingTopic !== priorLastTopic
   ) {
     return "clarification and correction turns should stay on the same topic";
+  }
+
+  if (
+    priorPendingTopic &&
+    result.conversation.pendingTopic === priorPendingTopic &&
+    priorQuestion &&
+    currentQuestion &&
+    priorQuestion === currentQuestion &&
+    (result.conversation.userAct === "answer" ||
+      result.conversation.userAct === "partial_answer" ||
+      result.conversation.userAct === "preference_signal")
+  ) {
+    return "the assistant repeated the same question after the user answered it";
+  }
+
+  if (
+    currentQuestionFamily &&
+    currentQuestionFamily !== "summary" &&
+    result.conversation.userAct !== "clarification_request" &&
+    result.conversation.userAct !== "correction" &&
+    priorRecentFamilies.at(-1) === currentQuestionFamily &&
+    (result.conversation.userAct === "answer" ||
+      result.conversation.userAct === "partial_answer" ||
+      result.conversation.userAct === "preference_signal")
+  ) {
+    return "the assistant repeated the same semantic question family after the user answered it";
+  }
+
+  if (
+    currentQuestionFamily &&
+    currentQuestionFamily !== "summary" &&
+    result.conversation.userAct !== "clarification_request" &&
+    result.conversation.userAct !== "correction" &&
+    getTopicAttemptCount(priorTopicAttemptCounts, currentQuestionFamily) >= 2
+  ) {
+    return "the assistant is pushing the same topic family too many times";
+  }
+
+  if (
+    priorCatchAllAsked &&
+    (priorConversation?.catchAllAnswered || catchAllAnsweredThisTurn) &&
+    currentQuestionFamily === "summary" &&
+    result.conversation.userAct !== "clarification_request"
+  ) {
+    return "the final catch-all cannot be asked twice after the user already answered it";
+  }
+
+  if (currentQuestionFamily === "summary" && result.conversation.phase !== "synthesis_check") {
+    return "the final catch-all question should only be asked during synthesis_check";
+  }
+
+  if (
+    priorCatchAllAsked &&
+    (priorConversation?.catchAllAnswered || catchAllAnsweredThisTurn) &&
+    !hasMissingRequired &&
+    currentQuestionFamily !== null &&
+    currentQuestionFamily !== "summary" &&
+    currentQuestionFamily !== priorQuestionFamily &&
+    !result.conversation.missingOptional.some((slot) => {
+      const id = typeof slot === "string" ? slot : slot.id;
+      return questionFamilyForTopic(id) === currentQuestionFamily;
+    })
+  ) {
+    return "after the catch-all is answered, the assistant must either go ready or name a real remaining gap";
   }
 
   if (
@@ -1252,49 +1788,44 @@ async function getStructuredResponse(params: {
     console.warn(`[chat] Structured response issue: ${firstIssue}`);
   }
 
-  const repairedRaw = await repairStructuredChat({
-    apiKey: params.apiKey,
-    model: params.model,
-    provider: params.provider,
-    profile: params.profile,
-    conversation: params.conversation,
-    messages: params.messages,
-    invalidOutput: firstRaw,
-    issue: firstIssue,
-  });
-
-  const repairedParsed = parseStructuredResponse(repairedRaw);
-  const repairedIssue = repairedParsed ? getStructuredResponseIssue(repairedParsed, params.conversation) : "repaired response was not valid JSON";
-  if (repairedParsed && !repairedIssue) {
-    return repairedParsed;
-  }
-  if (repairedIssue) {
-    console.warn(`[chat] Repaired structured response issue: ${repairedIssue}`);
-  }
-
-  const strictPrompt = buildSystemPrompt(true);
-  const secondRaw = await requestStructuredChat({
-    apiKey: params.apiKey,
-    model: params.model,
-    provider: params.provider,
-    systemPrompt: strictPrompt,
-    userPrompt: buildAnalysisPrompt(params.profile, params.conversation, params.messages),
-  });
+  const secondRaw = firstParsed
+    ? await requestStructuredChat({
+        apiKey: params.apiKey,
+        model: params.model,
+        provider: params.provider,
+        systemPrompt: buildSystemPrompt(true),
+        userPrompt: buildAnalysisPrompt(params.profile, params.conversation, params.messages),
+      })
+    : await repairStructuredChat({
+        apiKey: params.apiKey,
+        model: params.model,
+        provider: params.provider,
+        profile: params.profile,
+        conversation: params.conversation,
+        messages: params.messages,
+        invalidOutput: firstRaw,
+        issue: firstIssue,
+      });
 
   const secondParsed = parseStructuredResponse(secondRaw);
-  const secondIssue = secondParsed ? getStructuredResponseIssue(secondParsed, params.conversation) : "strict response was not valid JSON";
+  const secondIssue = secondParsed ? getStructuredResponseIssue(secondParsed, params.conversation) : "second response was not valid JSON";
   if (secondParsed && !secondIssue) return secondParsed;
   if (secondIssue) {
-    console.warn(`[chat] Strict structured response issue: ${secondIssue}`);
+    console.warn(`[chat] Second structured response issue: ${secondIssue}`);
   }
 
-  const salvageCandidate = secondParsed ?? repairedParsed ?? firstParsed;
+  const salvageCandidate = secondParsed ?? firstParsed;
   if (salvageCandidate) {
     console.warn("[chat] Falling back to synthesis_check recovery response");
     return salvageStructuredResponse(salvageCandidate, params.conversation);
   }
 
-  throw new Error("LLM returned invalid structured output twice");
+  console.warn("[chat] Falling back to deterministic recovery response");
+  return buildDeterministicRecoveryResponse({
+    profile: params.profile,
+    conversation: params.conversation,
+    messages: params.messages,
+  });
 }
 
 export async function handleChat(req: Request, res: Response) {
@@ -1335,7 +1866,7 @@ export async function handleChat(req: Request, res: Response) {
 
     const profileUpdate = normalizeProfile(structured.profile as Partial<ChatProfile>);
     const conversationState = normalizeConversation(structured.conversation);
-    const assistantText = normalizeText(structured.assistantText) ?? "Could you tell me a little more?";
+    let assistantText = normalizeText(structured.assistantText) ?? "Could you tell me a little more?";
     const priorMisunderstandings = typeof sanitizedConversation?.misunderstandingsInRow === "number"
       ? sanitizedConversation.misunderstandingsInRow
       : 0;
@@ -1356,6 +1887,61 @@ export async function handleChat(req: Request, res: Response) {
       if (extractedQuestion) {
         conversationState.nextQuestion = extractedQuestion;
       }
+    }
+
+    if (
+      sanitizedConversation?.phase === "opening" &&
+      (conversationState.phase === "synthesis_check" || conversationState.phase === "ready") &&
+      !(
+        hasPreferenceAnchors(profileUpdate) ||
+        Boolean(profileUpdate.familyContext) ||
+        Boolean(profileUpdate.hopes)
+      )
+    ) {
+      const fallbackTopic = pickNextHighValueTopic(profileUpdate, sanitizedConversation);
+      conversationState.phase = isPortraitTopic(fallbackTopic) ? "deepening_portrait" : "collecting_core";
+      conversationState.readiness = Math.min(78, conversationState.readiness);
+      conversationState.pendingTopic = fallbackTopic;
+      conversationState.nextQuestion = buildFallbackQuestion(fallbackTopic);
+      conversationState.assistantAct = isPortraitTopic(fallbackTopic) ? "ask_portrait_question" : "ask_core_question";
+      assistantText = buildFallbackQuestion(fallbackTopic);
+      conversationState.portraitSummary = null;
+      conversationState.briefSummary = null;
+    }
+
+    updateConversationMemory(sanitizedConversation, conversationState, assistantText);
+
+    if (
+      conversationState.phase !== "ready" &&
+      qualifiesForReady(profileUpdate, conversationState)
+    ) {
+      assistantText = "Your brief is ready.";
+      conversationState.phase = "ready";
+      conversationState.readiness = 100;
+      conversationState.nextQuestion = null;
+      conversationState.assistantAct = "summarize_ready";
+      conversationState.pendingTopic = "summary";
+      conversationState.catchAllAsked = true;
+      conversationState.catchAllAnswered = true;
+      conversationState.portraitSummary =
+        normalizeText(structured.conversation.portraitSummary) ??
+        profileUpdate.portraitSummary ??
+        buildFallbackPortraitSummary(profileUpdate);
+      conversationState.briefSummary =
+        normalizeText(structured.conversation.briefSummary) ??
+        profileUpdate.briefSummary ??
+        buildFallbackBriefSummary(profileUpdate);
+    }
+
+    if (conversationState.phase === "ready") {
+      conversationState.portraitSummary =
+        conversationState.portraitSummary ??
+        profileUpdate.portraitSummary ??
+        buildFallbackPortraitSummary(profileUpdate);
+      conversationState.briefSummary =
+        conversationState.briefSummary ??
+        profileUpdate.briefSummary ??
+        buildFallbackBriefSummary(profileUpdate);
     }
 
     const elapsed = Date.now() - startTime;
