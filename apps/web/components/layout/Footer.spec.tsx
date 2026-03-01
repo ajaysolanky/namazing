@@ -13,7 +13,7 @@ describe('Footer', () => {
     render(<Footer />)
     expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
     expect(screen.getByRole('link', { name: 'Terms' })).toHaveAttribute('href', '/terms')
-    expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/sign-in')
+    expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', 'mailto:hello@namazing.co')
   })
 
   it('renders current year copyright', () => {

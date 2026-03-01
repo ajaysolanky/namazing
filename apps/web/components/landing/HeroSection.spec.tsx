@@ -6,7 +6,7 @@ describe('HeroSection', () => {
   it('renders headline and description', () => {
     render(<HeroSection />)
     expect(screen.getByRole('heading', { name: /Find the perfect/ })).toBeInTheDocument()
-    expect(screen.getByText(/Skip the overwhelming lists/)).toBeInTheDocument()
+    expect(screen.getByText(/Answer a short intake/)).toBeInTheDocument()
   })
 
   it('renders start consultation CTA', () => {
@@ -15,10 +15,10 @@ describe('HeroSection', () => {
     expect(cta).toHaveAttribute('href', '/intake')
   })
 
-  it('renders top match dossier card content', () => {
+  it('renders top match preview content', () => {
     render(<HeroSection />)
-    expect(screen.getByText('Top Match')).toBeInTheDocument()
-    expect(screen.getByText('Elara')).toBeInTheDocument()
-    expect(screen.getByText('Why it fits')).toBeInTheDocument()
+    expect(screen.getByText(/Top match preview/i)).toBeInTheDocument()
+    expect(screen.getAllByText('Amara').length).toBeGreaterThan(0)
+    expect(screen.getByText(/Graceful, cross-cultural/)).toBeInTheDocument()
   })
 })

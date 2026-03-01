@@ -8,6 +8,9 @@ vi.mock('@/components/landing/HeroSection', () => ({
 vi.mock('@/components/landing/HowItWorks', () => ({
   HowItWorks: () => <div data-testid="how-it-works">HowItWorks</div>,
 }))
+vi.mock('@/components/landing/SampleReportPreview', () => ({
+  SampleReportPreview: () => <div data-testid="sample-report-preview">SampleReportPreview</div>,
+}))
 vi.mock('@/components/landing/ValueProposition', () => ({
   ValueProposition: () => <div data-testid="value-proposition">ValueProposition</div>,
 }))
@@ -17,9 +20,6 @@ vi.mock('@/components/landing/DarkTestimonial', () => ({
 vi.mock('@/components/landing/FAQ', () => ({
   FAQ: () => <div data-testid="faq">FAQ</div>,
 }))
-vi.mock('@/components/landing/Pricing', () => ({
-  Pricing: () => <div data-testid="pricing">Pricing</div>,
-}))
 
 import Page from './page'
 
@@ -27,10 +27,10 @@ describe('Landing Page', () => {
   it('should render all landing sections', () => {
     render(<Page />)
     expect(screen.getByTestId('hero-section')).toBeInTheDocument()
+    expect(screen.getByTestId('sample-report-preview')).toBeInTheDocument()
     expect(screen.getByTestId('how-it-works')).toBeInTheDocument()
     expect(screen.getByTestId('value-proposition')).toBeInTheDocument()
     expect(screen.getByTestId('testimonials')).toBeInTheDocument()
-    expect(screen.getByTestId('pricing')).toBeInTheDocument()
     expect(screen.getByTestId('faq')).toBeInTheDocument()
   })
 

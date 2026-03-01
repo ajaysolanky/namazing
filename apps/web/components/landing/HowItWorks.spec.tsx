@@ -9,11 +9,10 @@ describe('HowItWorks', () => {
     expect(screen.getByRole('heading', { name: /What/ })).toBeInTheDocument()
   })
 
-  it('renders all four service items', () => {
+  it('renders all three process steps', () => {
     render(<HowItWorks />)
-    expect(screen.getByText('The Intake Chat')).toBeInTheDocument()
-    expect(screen.getByText('Intelligent Curation')).toBeInTheDocument()
-    expect(screen.getByText('Vetted & Checked')).toBeInTheDocument()
-    expect(screen.getByText('Your Dossier')).toBeInTheDocument()
+    expect(screen.getByText('Tell us your taste')).toBeInTheDocument()
+    expect(screen.getByText('We research the shortlist')).toBeInTheDocument()
+    expect(screen.getByText('Get a naming report')).toBeInTheDocument()
   })
 })

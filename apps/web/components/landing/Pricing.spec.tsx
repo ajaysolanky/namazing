@@ -6,21 +6,21 @@ describe('Pricing', () => {
   it('renders pricing section and core copy', () => {
     const { container } = render(<Pricing />)
     expect(container.querySelector('section#pricing')).toBeInTheDocument()
-    expect(screen.getByText('Simple pricing')).toBeInTheDocument()
-    expect(screen.getByText(/Get started for free/)).toBeInTheDocument()
+    expect(screen.getByText("Start free while we're in early access.")).toBeInTheDocument()
+    expect(screen.getByText(/No credit card required/)).toBeInTheDocument()
   })
 
   it('renders early access pricing details', () => {
     render(<Pricing />)
-    expect(screen.getByText('Early Access')).toBeInTheDocument()
-    expect(screen.getByText('$49')).toBeInTheDocument()
-    expect(screen.getByText('$0')).toBeInTheDocument()
+    expect(screen.getByText('Early access')).toBeInTheDocument()
+    expect(screen.getByText('Full 5-stage AI consultation pipeline')).toBeInTheDocument()
+    expect(screen.getByText('Curated shortlist of 8-12 finalists')).toBeInTheDocument()
   })
 
   it('renders feature list and CTA', () => {
     render(<Pricing />)
     expect(screen.getByText('Full 5-stage AI consultation pipeline')).toBeInTheDocument()
-    expect(screen.getByText('Dashboard with run history')).toBeInTheDocument()
+    expect(screen.getByText('Middle name pairing suggestions')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Start Consultation' })).toHaveAttribute('href', '/intake')
   })
 })

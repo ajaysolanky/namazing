@@ -41,10 +41,9 @@ export function SampleReportPreview() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
     function updateActiveIndex() {
+      const track = trackRef.current;
+      if (!track) return;
       const cards = Array.from(track.children) as HTMLElement[];
       const trackLeft = track.getBoundingClientRect().left;
       let closestIndex = 0;
@@ -60,6 +59,9 @@ export function SampleReportPreview() {
 
       setActiveIndex(closestIndex);
     }
+
+    const track = trackRef.current;
+    if (!track) return;
 
     updateActiveIndex();
     track.addEventListener("scroll", updateActiveIndex, { passive: true });

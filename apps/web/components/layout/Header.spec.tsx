@@ -39,7 +39,7 @@ describe("Header", () => {
   it("renders main nav links", () => {
     render(<Header />);
     expect(screen.getByText("Services")).toBeInTheDocument();
-    expect(screen.getByText("The Dossier")).toBeInTheDocument();
+    expect(screen.getByText("Sample Report")).toBeInTheDocument();
     expect(screen.getByText("Testimonials")).toBeInTheDocument();
   });
 
