@@ -6,7 +6,7 @@ describe('HeroSection', () => {
   it('renders headline and description', () => {
     render(<HeroSection />)
     expect(screen.getByRole('heading', { name: /Find the perfect/ })).toBeInTheDocument()
-    expect(screen.getByText(/Answer a short intake/)).toBeInTheDocument()
+    expect(screen.getByText(/Answer a short baby-name intake/)).toBeInTheDocument()
   })
 
   it('renders start consultation CTA', () => {
