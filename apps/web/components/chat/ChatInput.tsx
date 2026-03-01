@@ -37,7 +37,7 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
   }, [value, disabled, onSend, onChange]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSend();
     }

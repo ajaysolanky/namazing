@@ -3,12 +3,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  buildBriefFromProfile,
-  buildReadySummaryFromProfile,
-  computeConsultationReadiness,
-  getConsultationGaps,
-} from "@/lib/chat-utils";
+import { buildBriefFromProfile } from "@/lib/chat-utils";
 import { startRun } from "@/lib/api";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
@@ -20,21 +15,17 @@ export function ChatIntake() {
   const {
     messages,
     profile,
-    summary,
+    conversation,
     isStreaming,
     isLoaded,
     error,
     sendMessage,
-    setLocalSummary,
     resetChat,
   } = useChat();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
-  const readiness = computeConsultationReadiness(messages, profile, summary);
-  const consultationGaps = getConsultationGaps(messages, profile);
-  const userMessageCount = messages.filter((message) => message.role === "user").length;
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -59,32 +50,14 @@ export function ChatIntake() {
     (content: string) => {
       posthog.capture("chat_message_sent", {
         message_number: messages.length + 1,
+        phase: conversation.phase,
       });
       sendMessage(content);
     },
-    [sendMessage, messages.length]
+    [conversation.phase, messages.length, sendMessage]
   );
 
-  useEffect(() => {
-    if (summary || isStreaming || isSubmitting) {
-      return;
-    }
-
-    if (userMessageCount >= 6 && consultationGaps.length === 0 && profile.narrative) {
-      setLocalSummary(buildReadySummaryFromProfile(profile));
-    }
-  }, [
-    consultationGaps.length,
-    isStreaming,
-    isSubmitting,
-    profile,
-    setLocalSummary,
-    summary,
-    userMessageCount,
-  ]);
-
   const handleConfirm = useCallback(async () => {
-    // Auth gate
     if (authLoading) return;
     if (!user) {
       posthog.capture("auth_gate_shown", { source: "chat_confirm" });
@@ -98,7 +71,11 @@ export function ChatIntake() {
     try {
       const brief = buildBriefFromProfile(profile);
       const { runId } = await startRun(brief, "parallel");
-      posthog.capture("consultation_started", { run_id: runId, source: "chat" });
+      posthog.capture("consultation_started", {
+        run_id: runId,
+        source: "chat",
+        phase: conversation.phase,
+      });
       router.push(`/processing/${runId}`);
       setTimeout(() => resetChat(), 500);
     } catch (err: any) {
@@ -115,7 +92,7 @@ export function ChatIntake() {
       }
       setIsSubmitting(false);
     }
-  }, [authLoading, user, profile, router, resetChat]);
+  }, [authLoading, user, profile, conversation.phase, router, resetChat]);
 
   const handleResetConversation = useCallback(() => {
     if (!window.confirm("Reset this conversation? This will clear all chat history and progress.")) {
@@ -128,11 +105,12 @@ export function ChatIntake() {
 
   const handleInsertPrompt = useCallback((prompt: string) => {
     setDraft(prompt);
-    const textarea = document.querySelector("textarea[placeholder='Tell us about your family...']") as HTMLTextAreaElement | null;
+    const textarea = document.querySelector(
+      "textarea[placeholder='Tell us about your family...']"
+    ) as HTMLTextAreaElement | null;
     if (textarea) textarea.focus();
   }, []);
 
-  // Loading state
   if (!isLoaded) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -141,7 +119,6 @@ export function ChatIntake() {
     );
   }
 
-  // Submitting full-screen transition
   if (isSubmitting && !submitError) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center">
@@ -157,12 +134,8 @@ export function ChatIntake() {
             </div>
           </div>
           <div className="space-y-2">
-            <h2 className="font-display text-2xl text-studio-ink">
-              Starting your consultation
-            </h2>
-            <p className="text-studio-ink/60">
-              We&apos;re assembling your expert naming team...
-            </p>
+            <h2 className="font-display text-2xl text-studio-ink">Starting your consultation</h2>
+            <p className="text-studio-ink/60">We&apos;re assembling your expert naming team...</p>
           </div>
         </motion.div>
       </div>
@@ -171,19 +144,15 @@ export function ChatIntake() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-      {/* Messages area */}
       <ChatMessages
         messages={messages}
-        readiness={readiness}
-        summary={summary}
+        conversation={conversation}
         isStreaming={isStreaming}
         isSubmitting={isSubmitting}
-        consultationGaps={consultationGaps}
         onInsertPrompt={handleInsertPrompt}
         onConfirm={handleConfirm}
       />
 
-      {/* Errors */}
       {(error || submitError) && (
         <div className="px-4 pb-2">
           <div className="max-w-2xl mx-auto p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
@@ -192,7 +161,6 @@ export function ChatIntake() {
         </div>
       )}
 
-      {/* Input bar */}
       <div className="px-4 pb-2 shrink-0">
         <div className="max-w-2xl mx-auto flex justify-end">
           <button
@@ -206,12 +174,7 @@ export function ChatIntake() {
         </div>
       </div>
 
-      <ChatInput
-        value={draft}
-        onChange={setDraft}
-        onSend={handleSend}
-        disabled={isStreaming}
-      />
+      <ChatInput value={draft} onChange={setDraft} onSend={handleSend} disabled={isStreaming} />
     </div>
   );
 }

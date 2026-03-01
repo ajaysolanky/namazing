@@ -5,10 +5,10 @@ interface SuggestedPromptsProps {
 }
 
 const PROMPTS = [
-  "Our last name is Romano and we want a classic vibe.",
-  "Last name Patel, looking for something literary and timeless.",
-  "Surname Kim; we'd like modern but warm.",
-  "Last name Garcia and we want a heritage-rich name.",
+  "Our last name is [surname], we're naming a boy, and we want something classic but not stuffy.",
+  "We're naming a girl and keep gravitating toward literary names with a quiet warmth.",
+  "We don't know the sex yet and want to keep the brief open-ended while honoring a family tradition.",
+  "We're keeping it open-ended and want a name that can travel across two cultures and still feel effortless in English.",
 ];
 
 export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
@@ -19,12 +19,12 @@ export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
       transition={{ delay: 0.3, duration: 0.3 }}
       className="flex flex-wrap justify-center gap-2 px-4"
     >
-      {PROMPTS.map((prompt, i) => (
+      {PROMPTS.map((prompt, index) => (
         <motion.button
           key={prompt}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 + i * 0.08, duration: 0.2 }}
+          transition={{ delay: 0.4 + index * 0.08, duration: 0.2 }}
           onClick={() => onSelect(prompt)}
           className="px-4 py-2.5 rounded-full bg-white border border-studio-ink/8 text-sm text-studio-ink/70 shadow-soft hover:shadow-card hover:border-studio-ink/15 hover:text-studio-ink transition-all duration-200 active:scale-[0.97]"
         >

@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import { pythonOrchestrator } from "./python-orchestrator.js";
 import { saveRun, getRun, deleteRun } from "./storage.js";
 import { handleChat } from "./chat.js";
+import { handleInternalLlmChat } from "./internal-llm.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
@@ -62,6 +63,7 @@ app.get("/healthz", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
+app.post("/api/internal/llm/chat", handleInternalLlmChat);
 app.post("/api/chat", chatRateLimiter, handleChat);
 
 app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {

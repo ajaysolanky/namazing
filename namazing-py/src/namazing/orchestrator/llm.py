@@ -42,7 +42,10 @@ async def call_llm(
         The assistant's response text.
     """
     api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
+    proxy_url = os.environ.get("NAMAZING_LLM_PROXY_URL")
+    proxy_token = os.environ.get("NAMAZING_LLM_PROXY_TOKEN")
+
+    if not proxy_url and not api_key:
         raise ValueError("OPENROUTER_API_KEY missing. Set it to enable live agent runs.")
 
     model = model or os.environ.get("LLM_MODEL", DEFAULT_MODEL)
@@ -53,57 +56,126 @@ async def call_llm(
         all_messages.append({"role": "system", "content": system})
     all_messages.extend(messages)
 
-    payload: dict[str, Any] = {
-        "model": model,
-        "messages": all_messages,
-        "temperature": temperature,
-    }
-    if provider:
-        payload["provider"] = {"order": [provider], "allow_fallbacks": False}
-
     if json_mode:
-        payload["response_format"] = {"type": "json_object"}
+        response_format: dict[str, Any] | None = {"type": "json_object"}
+    else:
+        response_format = None
 
     t0 = time.monotonic()
 
+    async def make_proxy_request() -> httpx.Response:
+        payload: dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+            "json": json_mode,
+        }
+        if system:
+            payload["system"] = system
+
+        async with httpx.AsyncClient() as client:
+            return await client.post(
+                proxy_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-namazing-internal-token": proxy_token or "",
+                },
+                json=payload,
+                timeout=60.0,
+            )
+
+    async def make_request(provider_override: str | None) -> httpx.Response:
+        payload: dict[str, Any] = {
+            "model": model,
+            "messages": all_messages,
+            "temperature": temperature,
+        }
+        if provider_override:
+            payload["provider"] = {"order": [provider_override], "allow_fallbacks": False}
+        if response_format:
+            payload["response_format"] = response_format
+
+        async with httpx.AsyncClient() as client:
+            return await client.post(
+                OPENROUTER_URL,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+                timeout=60.0,
+            )
+
+    active_provider = provider
+
     for attempt in range(max_retries):
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    OPENROUTER_URL,
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json=payload,
-                    timeout=60.0,
+            if proxy_url:
+                response = await make_proxy_request()
+            else:
+                response = await make_request(active_provider)
+
+            if not proxy_url and response.status_code == 429 and active_provider:
+                print(
+                    f"[llm] Rate limited (429) for {model} via provider={active_provider}, retrying without pinned provider",
+                    file=sys.stderr,
                 )
+                active_provider = None
+                continue
 
-                if response.status_code == 429:
-                    if attempt < max_retries - 1:
-                        wait = (attempt + 1) * 2
-                        print(
-                            f"[llm] Rate limited (429) for {model}, retrying in {wait}s (attempt {attempt + 1}/{max_retries})",
-                            file=sys.stderr,
-                        )
-                        await asyncio.sleep(wait)
-                        continue
+            if not proxy_url and response.status_code == 429:
+                if attempt < max_retries - 1:
+                    wait = (attempt + 1) * 2
+                    print(
+                        f"[llm] Rate limited (429) for {model}, retrying in {wait}s (attempt {attempt + 1}/{max_retries})",
+                        file=sys.stderr,
+                    )
+                    await asyncio.sleep(wait)
+                    continue
 
-                response.raise_for_status()
-                data = response.json()
+            response.raise_for_status()
+            data = response.json()
 
-                # Log raw interaction if DEBUG_LLM is set
-                if os.environ.get("DEBUG_LLM"):
-                    with open("llm_debug.log", "a") as f:
-                        f.write(f"\n--- REQUEST ({model}) ---\n")
-                        f.write(json.dumps(payload, indent=2))
-                        f.write("\n--- RESPONSE ---\n")
-                        f.write(json.dumps(data, indent=2))
-                        f.write("\n------------------------\n")
+            # Log raw interaction if DEBUG_LLM is set
+            if os.environ.get("DEBUG_LLM"):
+                with open("llm_debug.log", "a") as f:
+                    f.write(f"\n--- REQUEST ({model}) ---\n")
+                    if proxy_url:
+                        debug_payload = {
+                            "proxy_url": proxy_url,
+                            "model": model,
+                            "messages": messages,
+                            "temperature": temperature,
+                            "json": json_mode,
+                        }
+                        if system:
+                            debug_payload["system"] = system
+                    else:
+                        debug_payload = {
+                            "model": model,
+                            "messages": all_messages,
+                            "temperature": temperature,
+                        }
+                        if active_provider:
+                            debug_payload["provider"] = {
+                                "order": [active_provider],
+                                "allow_fallbacks": False,
+                            }
+                        if response_format:
+                            debug_payload["response_format"] = response_format
+                    f.write(json.dumps(debug_payload, indent=2))
+                    f.write("\n--- RESPONSE ---\n")
+                    f.write(json.dumps(data, indent=2))
+                    f.write("\n------------------------\n")
 
-                elapsed = time.monotonic() - t0
-                print(f"[llm] {model} completed in {elapsed:.1f}s", file=sys.stderr)
-                break
+            elapsed = time.monotonic() - t0
+            provider_label = (
+                "namazing-server-proxy" if proxy_url else (active_provider or "openrouter-auto")
+            )
+            print(
+                f"[llm] {model} via {provider_label} completed in {elapsed:.1f}s", file=sys.stderr
+            )
+            break
         except (httpx.HTTPError, httpx.TimeoutException) as e:
             if attempt < max_retries - 1:
                 print(
@@ -115,6 +187,9 @@ async def call_llm(
             raise e
     else:
         raise Exception(f"Failed after {max_retries} attempts")
+
+    if proxy_url:
+        return data.get("content", "")
 
     choices = data.get("choices", [])
     if not choices:

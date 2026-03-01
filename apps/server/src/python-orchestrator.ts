@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
 import { createRun, saveRun, saveRunResult, updateRunStatus } from "./storage.js";
 import { supabase } from "./supabase.js";
+import { getInternalLlmToken } from "./internal-llm.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,8 @@ export class PythonOrchestrator {
   private runs = new Map<string, RunContext>();
   private pythonPath: string;
   private cwd: string;
+  private internalLlmUrl: string;
+  private internalLlmToken: string;
 
   constructor() {
     let rootDir = process.cwd();
@@ -33,6 +36,9 @@ export class PythonOrchestrator {
 
     this.cwd = path.resolve(rootDir, "namazing-py");
     this.pythonPath = path.resolve(this.cwd, ".venv/bin/python");
+    const port = process.env.PORT ? Number(process.env.PORT) : 4000;
+    this.internalLlmUrl = `http://127.0.0.1:${port}/api/internal/llm/chat`;
+    this.internalLlmToken = getInternalLlmToken();
   }
 
   async startRun(brief: string, mode: "serial" | "parallel", userId?: string): Promise<RunContext> {
@@ -63,7 +69,9 @@ export class PythonOrchestrator {
         cwd: this.cwd,
         env: {
             ...process.env,
-            PYTHONPATH: path.resolve(this.cwd, "src")
+            PYTHONPATH: path.resolve(this.cwd, "src"),
+            NAMAZING_LLM_PROXY_URL: this.internalLlmUrl,
+            NAMAZING_LLM_PROXY_TOKEN: this.internalLlmToken,
         }
       }
     );

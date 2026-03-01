@@ -158,11 +158,6 @@ describe('ComponentName', () => {
 
 ## Namazing-Specific Components
 
-### Intake Wizard (`components/intake/`)
-- Test step navigation
-- Test form validation per step
-- Test data persistence between steps
-
 ### Processing Components (`components/processing/`)
 - Test SSE event handling
 - Test progress updates

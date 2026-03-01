@@ -2,8 +2,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   type ChatMessage,
   type ChatProfile,
+  type ConversationState,
   mergeProfile,
   createOpeningAssistantMessage,
+  createOpeningConversationState,
+  normalizeProfile,
+  normalizeConversationState,
 } from "@/lib/chat-utils";
 
 const STORAGE_KEY = "namazing-chat";
@@ -11,52 +15,54 @@ const STORAGE_KEY = "namazing-chat";
 interface ChatState {
   messages: ChatMessage[];
   profile: ChatProfile;
-  summary: string | null;
+  conversation: ConversationState;
 }
 
 const createInitialState = (): ChatState => ({
   messages: [createOpeningAssistantMessage()],
-  profile: {},
-  summary: null,
+  profile: normalizeProfile({}),
+  conversation: createOpeningConversationState(),
 });
 
 function loadState(): ChatState {
   if (typeof window === "undefined") {
     return createInitialState();
   }
+
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      let messages: ChatMessage[] = parsed.messages || [];
+    if (!saved) return createInitialState();
 
-      // Strip orphaned user message from a previous session that never
-      // received an assistant reply — roll back to last clean state.
-      if (messages.length > 0 && messages[messages.length - 1].role === "user") {
-        messages = messages.slice(0, -1);
-        // Persist the cleanup so it doesn't reappear on next load
-        const cleaned = { ...parsed, messages };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-      }
+    const parsed = JSON.parse(saved);
+    let messages: ChatMessage[] = parsed.messages || [];
 
-      return {
-        messages: messages.length > 0 ? messages : [createOpeningAssistantMessage()],
-        profile: parsed.profile || {},
-        summary: parsed.summary || null,
-      };
+    if (messages.length > 0 && messages[messages.length - 1].role === "user") {
+      messages = messages.slice(0, -1);
+      const cleaned = { ...parsed, messages };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
     }
-  } catch (e) {
-    console.error("[chat] Failed to load saved state:", e);
+
+    const normalizedMessages = messages.length > 0 ? messages : [createOpeningAssistantMessage()];
+    const profile = normalizeProfile(parsed.profile || {});
+    const conversation = normalizeConversationState(parsed.conversation || null);
+
+    return {
+      messages: normalizedMessages,
+      profile,
+      conversation,
+    };
+  } catch (error) {
+    console.error("[chat] Failed to load saved state:", error);
+    return createInitialState();
   }
-  return createInitialState();
 }
 
 function saveState(state: ChatState) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.error("[chat] Failed to save state:", e);
+  } catch (error) {
+    console.error("[chat] Failed to save state:", error);
   }
 }
 
@@ -67,32 +73,33 @@ function generateId(): string {
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [profile, setProfile] = useState<ChatProfile>({});
-  const [summary, setSummary] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ChatProfile>(normalizeProfile({}));
+  const [conversation, setConversation] = useState<ConversationState>(createOpeningConversationState());
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const state = loadState();
     setMessages(state.messages);
     setProfile(state.profile);
-    setSummary(state.summary);
+    setConversation(state.conversation);
     setIsLoaded(true);
   }, []);
 
-  // Persist to localStorage on changes
   useEffect(() => {
     if (isLoaded) {
-      saveState({ messages, profile, summary });
+      saveState({ messages, profile, conversation });
     }
-  }, [messages, profile, summary, isLoaded]);
+  }, [messages, profile, conversation, isLoaded]);
 
-  // Core API call — fetches a response for the given messages + profile
   const fetchReply = useCallback(
-    async (allMessages: ChatMessage[], currentProfile: ChatProfile) => {
+    async (
+      allMessages: ChatMessage[],
+      currentProfile: ChatProfile,
+      currentConversation: ConversationState
+    ) => {
       setIsStreaming(true);
       setError(null);
 
@@ -104,25 +111,27 @@ export function useChat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: allMessages.map((m) => ({
-              role: m.role,
-              content: m.content,
+            messages: allMessages.map((message) => ({
+              role: message.role,
+              content: message.content,
             })),
             profile: currentProfile,
+            conversation: currentConversation,
           }),
           signal: controller.signal,
         });
 
         if (!res.ok) {
           const errBody = await res.json().catch(() => null);
-          throw new Error(
-            errBody?.error || `Request failed: ${res.status}`
-          );
+          throw new Error(errBody?.error || `Request failed: ${res.status}`);
         }
 
-        // Parse SSE events from response body
         const body = await res.text();
         const lines = body.split("\n");
+
+        let assistantText = "";
+        let profileUpdate: Partial<ChatProfile> | null = null;
+        let conversationUpdate: ConversationState | null = null;
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
@@ -131,36 +140,44 @@ export function useChat() {
 
           try {
             const event = JSON.parse(jsonStr);
-
             switch (event.type) {
               case "content":
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: generateId(),
-                    role: "assistant",
-                    content: event.text,
-                  },
-                ]);
+                assistantText = typeof event.text === "string" ? event.text : assistantText;
                 break;
-
               case "profile_update":
                 if (event.data) {
-                  setProfile((prev) => mergeProfile(prev, event.data));
+                  profileUpdate = event.data;
                 }
                 break;
-
-              case "summary":
-                setSummary(event.text);
+              case "conversation_state":
+                if (event.data) {
+                  conversationUpdate = normalizeConversationState(event.data);
+                }
                 break;
-
-              case "done":
+              default:
                 break;
             }
           } catch {
-            // Skip malformed lines
+            // Ignore malformed lines.
           }
         }
+
+        const nextProfile = profileUpdate ? mergeProfile(currentProfile, profileUpdate) : currentProfile;
+        const nextMessages = assistantText
+          ? [
+              ...allMessages,
+              {
+                id: generateId(),
+                role: "assistant" as const,
+                content: assistantText,
+              },
+            ]
+          : allMessages;
+        const nextConversation = conversationUpdate ?? currentConversation;
+
+        setMessages(nextMessages);
+        setProfile(nextProfile);
+        setConversation(nextConversation);
       } catch (err: any) {
         if (err.name === "AbortError") return;
         console.error("[chat] Error sending message:", err);
@@ -177,9 +194,6 @@ export function useChat() {
     async (content: string) => {
       if (!content.trim() || isStreaming) return;
 
-      // Clear summary so user can continue chatting
-      setSummary(null);
-
       const userMessage: ChatMessage = {
         id: generateId(),
         role: "user",
@@ -187,25 +201,40 @@ export function useChat() {
       };
 
       const updatedMessages = [...messages, userMessage];
-      setMessages(updatedMessages);
-      fetchReply(updatedMessages, profile);
-    },
-    [messages, profile, isStreaming, fetchReply]
-  );
+      const nextConversation: ConversationState =
+        conversation.phase === "ready"
+          ? {
+              ...conversation,
+              phase: "synthesis_check" as const,
+              userAct: "answer" as const,
+              assistantAct: "reflect_and_confirm" as const,
+              pendingTopic: "summary" as const,
+              lastTopic: conversation.pendingTopic,
+              misunderstandingsInRow: 0,
+              portraitSummary: null,
+              briefSummary: null,
+            }
+          : conversation;
 
-  const setLocalSummary = useCallback((text: string | null) => {
-    setSummary(text);
-  }, []);
+      setMessages(updatedMessages);
+      setConversation(nextConversation);
+      await fetchReply(updatedMessages, profile, nextConversation);
+    },
+    [messages, profile, conversation, isStreaming, fetchReply]
+  );
 
   const resetChat = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
     }
-    setMessages([createOpeningAssistantMessage()]);
-    setProfile({});
-    setSummary(null);
+
+    const initialState = createInitialState();
+    setMessages(initialState.messages);
+    setProfile(initialState.profile);
+    setConversation(initialState.conversation);
     setError(null);
     setIsStreaming(false);
+
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -214,12 +243,11 @@ export function useChat() {
   return {
     messages,
     profile,
-    summary,
+    conversation,
     isStreaming,
     isLoaded,
     error,
     sendMessage,
-    setLocalSummary,
     resetChat,
   };
 }

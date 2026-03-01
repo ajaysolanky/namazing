@@ -1,5 +1,5 @@
-import ChatIntakeClient from "./ChatIntakeClient";
 import { Header } from "@/components/layout/Header";
+import ChatIntakeClient from "./ChatIntakeClient";
 
 export const metadata = {
   title: "Start Your Consultation | Namazing",
