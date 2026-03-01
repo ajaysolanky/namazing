@@ -97,9 +97,7 @@ export function SampleReportPreview() {
 
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="text-sm font-medium text-studio-muted">
-              Scroll through sample reports
-            </p>
+            <div />
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -126,10 +124,11 @@ export function SampleReportPreview() {
             </div>
           </div>
 
-          <div
-            ref={trackRef}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          >
+          <div className="-mx-6 overflow-hidden px-6">
+            <div
+              ref={trackRef}
+              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scroll-px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
             {sampleEntries.map((entry) => {
               const sample = SAMPLE_REPORTS[entry.slug];
               const featured = sample.report.finalists[0];
@@ -137,7 +136,7 @@ export function SampleReportPreview() {
               return (
                 <article
                   key={entry.slug}
-                  className="min-w-[85%] snap-start rounded-[1.9rem] border border-studio-border bg-white p-5 shadow-card-green sm:min-w-[27rem]"
+                  className="w-full min-w-full snap-start rounded-[1.9rem] border border-studio-border bg-white p-4 shadow-card-green sm:w-[calc(50%-0.5rem)] sm:min-w-[calc(50%-0.5rem)] sm:p-5"
                 >
                   <div className="flex flex-wrap items-center gap-3 text-sm text-studio-muted">
                     <span className="rounded-full bg-studio-sand px-3 py-1 font-medium text-studio-ink">
@@ -146,7 +145,7 @@ export function SampleReportPreview() {
                     <span>{entry.briefLabel}</span>
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-studio-peach/40 bg-studio-sand p-4">
+                  <div className="mt-4 rounded-2xl border border-studio-peach/40 bg-studio-sand p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-studio-muted/70">
                       Top match
                     </p>
@@ -154,29 +153,20 @@ export function SampleReportPreview() {
                       {featured.name}
                     </p>
                     <p className="mt-3 text-sm leading-relaxed text-studio-muted">
-                      {truncate(featured.why, 120)}
+                      {truncate(featured.why, 96)}
                     </p>
                   </div>
 
-                  <div className="mt-5 border-l-2 border-studio-peach pl-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-studio-muted/70">
-                      Report summary
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-studio-muted">
-                      {truncate(sample.report.summary, 140)}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl bg-studio-cream/60 p-4">
+                  <div className="mt-4 rounded-2xl bg-studio-cream/60 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-studio-muted/70">
                       From this family
                     </p>
                     <blockquote className="mt-3 text-sm leading-relaxed text-studio-ink">
-                      &ldquo;{truncate(entry.testimonial, 120)}&rdquo;
+                      &ldquo;{truncate(entry.testimonial, 92)}&rdquo;
                     </blockquote>
                   </div>
 
-                  <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="mt-4 flex flex-wrap gap-3">
                     <Link href={`/sample/${entry.slug}`}>
                       <Button variant="forest" size="md">
                         Open sample report
@@ -186,6 +176,7 @@ export function SampleReportPreview() {
                 </article>
               );
             })}
+            </div>
           </div>
 
           <div className="mt-5 flex items-center justify-center gap-2">
