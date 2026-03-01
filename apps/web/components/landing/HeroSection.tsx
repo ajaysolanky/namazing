@@ -90,7 +90,7 @@ export function HeroSection() {
               <span className="hidden md:inline">Find the perfect<br />name, beautifully<br />curated for you.</span>
             </h1>
             <p className={`${landingDesign.bodyLarge} max-w-[28ch] sm:max-w-md mt-6 sm:mt-8`}>
-              Answer a short intake, then get a personalized naming report with researched finalists, meanings, sibling fit, and cultural context.
+              Answer a short baby-name intake, then get a personalized naming report with researched finalists, meanings, sibling fit, and cultural context.
             </p>
             <div className="mt-7 sm:mt-8 md:mt-10">
               <Link href="/intake">
@@ -100,7 +100,7 @@ export function HeroSection() {
             <div className="mt-5 flex flex-wrap gap-2.5 text-sm font-medium text-studio-muted">
               <span className="rounded-full bg-white/80 px-3 py-1 shadow-soft">5-minute intake</span>
               <span className="rounded-full bg-white/80 px-3 py-1 shadow-soft">No credit card</span>
-              <span className="rounded-full bg-white/80 px-3 py-1 shadow-soft">Real family briefs</span>
+              <span className="rounded-full bg-white/80 px-3 py-1 shadow-soft">Baby name guide</span>
             </div>
             <MobileTeaserCard />
           </div>
