@@ -17,11 +17,14 @@ export function Footer() {
     <footer className="border-t border-studio-border bg-studio-sand mt-auto" id="footer">
       <Container size="xl" className="px-6">
         <div className="py-16 sm:py-20 md:py-32 text-center">
+          <span className="inline-block rounded-full bg-studio-forest/10 px-3 py-1 text-sm font-medium text-studio-forest mb-5">
+            Early access is free
+          </span>
           <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-studio-ink mb-6 sm:mb-8">
-            Ready to meet your baby&apos;s name?
+            Ready to start your naming consultation?
           </h2>
           <p className="text-lg sm:text-xl text-studio-muted max-w-xl mx-auto mb-10 sm:mb-12">
-            Start your conversational intake now. No commitment required to begin exploring.
+            Begin with a short conversational intake and get your naming report without a credit card.
           </p>
           <Link href="/intake">
             <button className="bg-studio-forest text-white px-7 py-3.5 sm:px-9 sm:py-4 rounded-xl text-sm sm:text-base font-medium hover:bg-studio-forest-dark transition-colors inline-flex items-center gap-2">
@@ -39,7 +42,7 @@ export function Footer() {
           <div className="flex items-center gap-6 sm:gap-10">
             <Link href="/privacy" className="hover:text-studio-forest transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-studio-forest transition-colors">Terms</Link>
-            <Link href="/sign-in" className="hover:text-studio-forest transition-colors">Contact</Link>
+            <a href="mailto:hello@namazing.co" className="hover:text-studio-forest transition-colors">Contact</a>
           </div>
 
           <p className="text-sm">&copy; <span suppressHydrationWarning>{currentYear}</span> Namazing. All rights reserved.</p>

@@ -30,12 +30,24 @@ export function ValueProposition() {
       <Container size="xl" className="px-6">
         <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16 lg:gap-24">
           <div className="w-full md:w-1/2">
-            <h2 className={`${landingDesign.headingDisplay} mb-8`}>Beyond simple lists.</h2>
+            <h2 className={`${landingDesign.headingDisplay} mb-8`}>Beyond baby-name lists.</h2>
             <p className={`${landingDesign.bodyLarge} max-w-lg mb-8`}>
-              Generic baby name websites offer overwhelming databases. Namazing acts as your personal consultant, doing the heavy lifting to find true compatibility with your family.
+              Most naming sites give you thousands of options and leave you to sort through them. Namazing acts more like a naming consultant: learning your taste, screening the field, and narrowing things down to names that actually suit your family.
             </p>
+            <div className="mb-8 space-y-3">
+              {[
+                "Not just popularity charts and generic meanings",
+                "Not just endless scrolling through databases",
+                "Not just names in isolation from your family story",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3 text-sm text-studio-ink/80 sm:text-base">
+                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-studio-peach shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
             <Link href="/#how-it-works">
-              <Button variant="forest" className="h-auto px-8 py-3.5 text-base font-medium">Learn More</Button>
+              <Button variant="forest" className="h-auto px-8 py-3.5 text-base font-medium">See how it works</Button>
             </Link>
           </div>
 

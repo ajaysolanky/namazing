@@ -17,42 +17,34 @@ export function Pricing() {
   return (
     <section id="pricing" className={landingDesign.section}>
       <Container size="md" className="px-6">
-        <div className="text-center mb-10 sm:mb-16">
-          <h2 className="font-display text-4xl sm:text-5xl text-studio-ink mb-4">Simple pricing</h2>
-          <p className="text-studio-muted max-w-lg mx-auto">Get started for free. No credit card required.</p>
-        </div>
-
-        <div className="max-w-sm mx-auto">
-          <div className="bg-white rounded-3xl p-8 shadow-soft border border-studio-border text-center">
-            <div className="mb-6">
-              <span className="inline-block px-3 py-1 bg-studio-forest/10 rounded-full text-sm text-studio-forest font-medium mb-4">
-                Early Access
+        <div className="rounded-[2rem] border border-studio-border bg-white px-6 py-8 text-center shadow-soft sm:px-8">
+          <span className="inline-block rounded-full bg-studio-forest/10 px-3 py-1 text-sm font-medium text-studio-forest">
+            Early access
+          </span>
+          <h2 className="mt-4 font-display text-3xl sm:text-4xl text-studio-ink">
+            Start free while we&apos;re in early access.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-studio-muted sm:text-lg">
+            Full consultation pipeline, researched finalists, and your personalized naming report. No credit card required.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-studio-ink/70">
+            {features.slice(0, 4).map((feature) => (
+              <span key={feature} className="inline-flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 text-studio-forest"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {feature}
               </span>
-              <div className="flex items-baseline justify-center gap-3 mb-1">
-                <span className="font-display text-2xl text-studio-ink/30 line-through">$49</span>
-                <span className="font-display text-5xl text-studio-ink">$0</span>
-              </div>
-              <p className="text-sm text-studio-muted">Free during early access, normally $49.</p>
-            </div>
-
-            <ul className="space-y-3 mb-8 text-left">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-start gap-3 text-sm text-studio-ink/70">
-                  <svg
-                    className="w-5 h-5 text-studio-forest flex-shrink-0 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
+            ))}
+          </div>
+          <div className="mt-8">
             <Link href="/intake">
-              <Button variant="forest" size="lg" className="w-full">Start Consultation</Button>
+              <Button variant="forest" size="lg">Start Consultation</Button>
             </Link>
           </div>
         </div>

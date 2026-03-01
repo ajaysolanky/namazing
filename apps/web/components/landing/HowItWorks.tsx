@@ -3,9 +3,9 @@ import { landingDesign } from "@/design-system/landing";
 
 const items = [
   {
-    title: "The Intake Chat",
+    title: "Tell us your taste",
     description:
-      "Have a natural conversation with our AI. Share your vibes, family traditions, and what you want to avoid.",
+      "Share your surname, style, family context, and what you want to avoid in a quick conversational intake.",
     icon: (
       <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -13,9 +13,9 @@ const items = [
     ),
   },
   {
-    title: "Intelligent Curation",
+    title: "We research the shortlist",
     description:
-      "Our system analyzes thousands of options, cross-referencing meanings, cultural origins, and phonetic flow.",
+      "Namazing screens each candidate for meaning, cultural resonance, pronunciation, sibling fit, and phonetic flow.",
     icon: (
       <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <rect x="4" y="4" width="16" height="16" rx="2" />
@@ -25,20 +25,9 @@ const items = [
     ),
   },
   {
-    title: "Vetted & Checked",
+    title: "Get a naming report",
     description:
-      "We act as your personal consultant, vetting names for negative connotations and perfect sibling flow.",
-    icon: (
-      <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
-      </svg>
-    ),
-  },
-  {
-    title: "Your Dossier",
-    description:
-      "Unlock a beautifully formatted, comprehensive report detailing your personalized recommendations.",
+      "Receive a polished report with finalists, why each one fits, pairings, tradeoffs, and a clear recommendation set.",
     icon: (
       <svg className="w-8 h-8 text-studio-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -50,23 +39,31 @@ const items = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className={landingDesign.section}>
+    <section id="how-it-works" className="py-10 sm:py-20 md:py-32 border-t border-studio-border">
       <Container size="xl" className="px-6">
-        <div className="flex flex-col md:flex-row gap-12 md:gap-16 lg:gap-32">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-16 lg:gap-32">
           <div className="w-full md:w-1/3 shrink-0">
             <h2 className={`${landingDesign.headingDisplay} md:sticky md:top-32`}>
-              <span className="md:hidden">What We Do</span>
+              <span className="md:hidden">How It Works</span>
               <span className="hidden md:inline">What<br />We Do</span>
             </h2>
+            <p className={`${landingDesign.body} mt-5 max-w-xs`}>
+              A short editorial-style intake on the front end, then deep research and curation on the back end.
+            </p>
           </div>
 
-          <div className="w-full md:w-2/3 grid sm:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-16">
-            {items.map((item) => (
+          <div className="w-full md:w-2/3 grid gap-y-4 sm:gap-y-5">
+            {items.map((item, index) => (
               <div key={item.title}>
-                <div className="flex gap-5">
-                  <div className="shrink-0">{item.icon}</div>
-                  <div>
-                    <h3 className="text-xl font-medium tracking-tight text-studio-ink mb-3">{item.title}</h3>
+                <div className="flex gap-4 rounded-[1.6rem] border border-studio-border/80 bg-white/70 p-4 shadow-soft sm:p-5">
+                  <div className="shrink-0">
+                    <div className="mb-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-studio-sand px-2 text-xs font-semibold text-studio-forest">
+                      {index + 1}
+                    </div>
+                    <div className="scale-[0.9] origin-top-left">{item.icon}</div>
+                  </div>
+                  <div className="pt-0.5">
+                    <h3 className="text-lg sm:text-xl font-medium tracking-tight text-studio-ink mb-2">{item.title}</h3>
                     <p className={landingDesign.body}>{item.description}</p>
                   </div>
                 </div>
