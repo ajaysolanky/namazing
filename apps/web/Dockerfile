@@ -44,7 +44,7 @@ ENV PORT=3000
 
 # Copy Next.js standalone output from the configured production dist dir.
 COPY --from=build /app/apps/web/.next-build/standalone ./
-COPY --from=build /app/apps/web/.next-build/static ./apps/web/.next/static
+COPY --from=build /app/apps/web/.next-build/static ./apps/web/.next-build/static
 COPY --from=build /app/apps/web/public ./apps/web/public
 
 EXPOSE 3000
