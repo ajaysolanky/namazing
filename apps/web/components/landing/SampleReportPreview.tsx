@@ -45,12 +45,14 @@ export function SampleReportPreview() {
       const track = trackRef.current;
       if (!track) return;
       const cards = Array.from(track.children) as HTMLElement[];
-      const trackLeft = track.getBoundingClientRect().left;
+      const trackCenter = track.getBoundingClientRect().left + track.clientWidth / 2;
       let closestIndex = 0;
       let closestDistance = Number.POSITIVE_INFINITY;
 
       cards.forEach((card, index) => {
-        const distance = Math.abs(card.getBoundingClientRect().left - trackLeft);
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(cardCenter - trackCenter);
         if (distance < closestDistance) {
           closestDistance = distance;
           closestIndex = index;
@@ -73,7 +75,7 @@ export function SampleReportPreview() {
     if (!track) return;
     const card = track.children[index] as HTMLElement | undefined;
     if (!card) return;
-    card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     setActiveIndex(index);
   }
 
@@ -96,7 +98,7 @@ export function SampleReportPreview() {
         </div>
 
         <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="mb-4 flex items-center justify-between gap-4 lg:hidden">
             <div />
             <div className="flex items-center gap-2">
               <button
@@ -124,11 +126,62 @@ export function SampleReportPreview() {
             </div>
           </div>
 
-          <div className="-mx-6 overflow-hidden px-6">
+          <div className="-mx-6 overflow-hidden px-6 lg:hidden">
             <div
               ref={trackRef}
-              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scroll-px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2 scroll-px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             >
+              {sampleEntries.map((entry) => {
+                const sample = SAMPLE_REPORTS[entry.slug];
+                const featured = sample.report.finalists[0];
+
+                return (
+                  <article
+                    key={entry.slug}
+                    className="w-[calc(100%-0.75rem)] min-w-[calc(100%-0.75rem)] shrink-0 snap-center rounded-[1.9rem] border border-studio-border bg-white p-4 shadow-card-green sm:w-[calc(50%-0.5rem)] sm:min-w-[calc(50%-0.5rem)] sm:snap-start sm:p-5"
+                  >
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-studio-muted">
+                      <span className="rounded-full bg-studio-sand px-3 py-1 font-medium text-studio-ink">
+                        {entry.familyLabel}
+                      </span>
+                      <span>{entry.briefLabel}</span>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-studio-peach/40 bg-studio-sand p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-studio-muted/70">
+                        Top match
+                      </p>
+                      <p className="mt-3 font-display text-4xl text-studio-ink">
+                        {featured.name}
+                      </p>
+                      <p className="mt-3 text-sm leading-relaxed text-studio-muted">
+                        {truncate(featured.why, 96)}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl bg-studio-cream/60 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-studio-muted/70">
+                        From this family
+                      </p>
+                      <blockquote className="mt-3 text-sm leading-relaxed text-studio-ink">
+                        &ldquo;{truncate(entry.testimonial, 92)}&rdquo;
+                      </blockquote>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link href={`/sample/${entry.slug}`}>
+                        <Button variant="forest" size="md">
+                          Open sample report
+                        </Button>
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
             {sampleEntries.map((entry) => {
               const sample = SAMPLE_REPORTS[entry.slug];
               const featured = sample.report.finalists[0];
@@ -136,7 +189,7 @@ export function SampleReportPreview() {
               return (
                 <article
                   key={entry.slug}
-                  className="w-full min-w-full snap-start rounded-[1.9rem] border border-studio-border bg-white p-4 shadow-card-green sm:w-[calc(50%-0.5rem)] sm:min-w-[calc(50%-0.5rem)] sm:p-5"
+                  className="rounded-[1.9rem] border border-studio-border bg-white p-5 shadow-card-green"
                 >
                   <div className="flex flex-wrap items-center gap-3 text-sm text-studio-muted">
                     <span className="rounded-full bg-studio-sand px-3 py-1 font-medium text-studio-ink">
@@ -153,7 +206,7 @@ export function SampleReportPreview() {
                       {featured.name}
                     </p>
                     <p className="mt-3 text-sm leading-relaxed text-studio-muted">
-                      {truncate(featured.why, 96)}
+                      {truncate(featured.why, 120)}
                     </p>
                   </div>
 
@@ -162,7 +215,7 @@ export function SampleReportPreview() {
                       From this family
                     </p>
                     <blockquote className="mt-3 text-sm leading-relaxed text-studio-ink">
-                      &ldquo;{truncate(entry.testimonial, 92)}&rdquo;
+                      &ldquo;{truncate(entry.testimonial, 110)}&rdquo;
                     </blockquote>
                   </div>
 
@@ -176,10 +229,9 @@ export function SampleReportPreview() {
                 </article>
               );
             })}
-            </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-2">
+          <div className="mt-5 flex items-center justify-center gap-2 lg:hidden">
             {sampleEntries.map((entry, index) => (
               <button
                 key={entry.slug}
