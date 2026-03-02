@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { notifyRegistrationIfNeeded } from "@/lib/auth/registration-notifier";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -58,6 +59,27 @@ export async function GET(request: Request) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user?.email) {
+        try {
+          await notifyRegistrationIfNeeded({
+            userId: user.id,
+            email: user.email,
+            displayName:
+              user.user_metadata?.display_name ??
+              user.user_metadata?.full_name ??
+              user.user_metadata?.name ??
+              null,
+            provider: user.app_metadata?.provider ?? null,
+          });
+        } catch (notifyError) {
+          console.error("[auth/callback] registration notification failed", notifyError);
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

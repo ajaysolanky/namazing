@@ -36,7 +36,7 @@ function SignUpForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -51,6 +51,18 @@ function SignUpForm() {
     }
 
     posthog.capture("signup_completed", { method: "email" });
+
+    if (data.session) {
+      try {
+        await fetch("/api/auth/notify-registration", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (notifyError) {
+        console.error("[sign-up] registration notification failed", notifyError);
+      }
+    }
+
     router.push(next as any);
     router.refresh();
   }

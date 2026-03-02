@@ -21,6 +21,6 @@ export const faqs = [
   },
   {
     q: "Is my data private?",
-    a: "Your briefs and results are stored securely and only visible to you. We do not share your personal data with third parties.",
+    a: "Your briefs and results are stored securely and tied to your account. We share data only with the providers needed to run Namazing, including hosting, authentication, analytics, and AI processing services. For details, see our privacy policy.",
   },
 ];

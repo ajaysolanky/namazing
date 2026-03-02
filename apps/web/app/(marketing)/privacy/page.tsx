@@ -24,9 +24,11 @@ export default function PrivacyPage() {
             <section>
               <h2 className="font-display text-xl text-studio-ink">1. Information we collect</h2>
               <p>
-                <strong>Account information.</strong> When you sign in with Google, we receive your
-                name, email address, and profile picture from Google. We do not receive or store your
-                Google password.
+                <strong>Account information.</strong> When you create an account, we collect the
+                information needed to authenticate you and keep your account working. This may include
+                your name, email address, profile image, and the authentication method you use, such
+                as Google sign-in or email and password. We do not receive or store your Google
+                password.
               </p>
               <p>
                 <strong>Naming preferences.</strong> When you use our service, we collect the
@@ -34,9 +36,9 @@ export default function PrivacyPage() {
                 background, style preferences, family surname).
               </p>
               <p>
-                <strong>Usage data.</strong> We collect anonymous analytics about how you use the app
-                (pages visited, features used) to improve the service. We do not use cookies for
-                tracking.
+                <strong>Usage data.</strong> We collect usage and analytics data about how people use
+                the app, including pages viewed, features used, and account-linked product activity.
+                We currently use Google Analytics and PostHog for analytics and product measurement.
               </p>
             </section>
 
@@ -55,9 +57,10 @@ export default function PrivacyPage() {
               <h2 className="font-display text-xl text-studio-ink">3. AI processing</h2>
               <p>
                 Your naming preferences are processed by AI language models to generate personalized
-                name recommendations. Your data may be sent to third-party AI providers for
-                processing. These providers are contractually bound to keep your data confidential and
-                not use it for their own purposes.
+                name recommendations. To run this service, we send prompts and model responses to
+                third-party AI providers through OpenRouter. Provider data practices may vary by
+                model and provider. We limit sharing to what is needed to generate your consultation
+                and report.
               </p>
             </section>
 
@@ -73,12 +76,14 @@ export default function PrivacyPage() {
             <section>
               <h2 className="font-display text-xl text-studio-ink">5. Data sharing</h2>
               <p>
-                We do not sell your personal information. We share data only with:
+                We do not sell your personal information. We share data only with the service
+                providers needed to operate Namazing, including:
               </p>
               <ul className="list-disc pl-5 space-y-1">
-                <li>AI processing providers (to generate name recommendations)</li>
-                <li>Infrastructure providers (hosting, database, authentication)</li>
-                <li>Analytics providers (anonymous usage data only)</li>
+                <li>AI processing providers (to generate name recommendations and reports)</li>
+                <li>Infrastructure providers (hosting, database, and authentication)</li>
+                <li>Analytics providers, including Google Analytics and PostHog</li>
+                <li>Email providers used for operational notifications about account activity</li>
               </ul>
             </section>
 
@@ -89,7 +94,7 @@ export default function PrivacyPage() {
                 <li>Access the personal data we hold about you</li>
                 <li>Request correction of inaccurate data</li>
                 <li>Request deletion of your data</li>
-                <li>Export your data in a portable format</li>
+                <li>Request an export of your data in a portable format</li>
               </ul>
             </section>
 
