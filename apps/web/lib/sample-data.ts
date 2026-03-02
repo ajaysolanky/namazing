@@ -711,6 +711,94 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           },
         ],
       },
+      {
+        name: "Wren",
+        theme: "Nature & Earth",
+        ipa: "/ɹɛn/",
+        syllables: 1,
+        meaning: "A small songbird; associated with music, brightness, and lightness",
+        origins: ["English"],
+        variants: [],
+        nicknames: {
+          intended: [],
+          likely: [],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 184,
+          trend_notes:
+            "Rising quickly, especially for girls, but still fresh enough to feel distinctive. Its nature meaning is instantly legible.",
+        },
+        notable_bearers: {
+          positive: ["Wren Blair, actress and writer"],
+          fictional: [],
+        },
+        cultural_notes: [
+          "Bird names tend to feel airy and modern, and Wren is one of the cleanest examples",
+          "Pairs especially well with another nature name when the family wants a subtle theme rather than something overt",
+        ],
+        surname_fit: {
+          surname: "Anderson",
+          notes:
+            "Wren Anderson is brisk and stylish. The single-syllable first name gives the surname room to breathe.",
+        },
+        sibset_fit: {
+          siblings: ["Sage"],
+          notes:
+            "Sage and Wren feel artistic and outdoorsy together. The pairing is light and modern without sounding precious.",
+        },
+        combo_suggestions: [
+          {
+            first: "Wren",
+            middle: "Elliot",
+            why: "Wren Elliot Anderson keeps the name grounded and flexible across genders.",
+          },
+        ],
+      },
+      {
+        name: "Sylvan",
+        theme: "Nature & Earth",
+        ipa: "/ˈsɪl.vən/",
+        syllables: 2,
+        meaning: "Of the forest; woodland",
+        origins: ["Latin", "French"],
+        variants: ["Silvan", "Sylvain"],
+        nicknames: {
+          intended: ["Syl"],
+          likely: [],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 0,
+          trend_notes:
+            "Very rare in the U.S. but increasingly appealing to families looking for a cultivated nature name with real history.",
+        },
+        notable_bearers: {
+          positive: ["Saint Sylvanus (historical variant)"],
+          fictional: [],
+        },
+        cultural_notes: [
+          "More literary and old-world than many modern nature names",
+          "Feels quietly masculine in some contexts, but remains flexible enough for families open to a softly gender-neutral sound",
+        ],
+        surname_fit: {
+          surname: "Anderson",
+          notes:
+            "Sylvan Anderson sounds polished and woodsy. It has more grandeur than the other options without losing warmth.",
+        },
+        sibset_fit: {
+          siblings: ["Sage"],
+          notes:
+            "Sage and Sylvan are deeply botanical without being obvious. Together they feel thoughtful and quietly intellectual.",
+        },
+        combo_suggestions: [
+          {
+            first: "Sylvan",
+            middle: "Reed",
+            why: "Sylvan Reed Anderson doubles down on the natural world in a way that still feels wearable.",
+          },
+        ],
+      },
     ],
     selection: {
       finalists: [
@@ -718,6 +806,8 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
         { name: "Linden", why: "The most unique choice -- under the radar but instantly recognizable." },
         { name: "Juniper", why: "Joyful and energetic with great nickname potential (Juno, June)." },
         { name: "Hazel", why: "A warm classic, though it leans more feminine than the family may want." },
+        { name: "Wren", why: "The sleekest and most modern option -- small, bright, and genuinely unisex in feel." },
+        { name: "Sylvan", why: "The most literary forest name on the list, with a cultivated, quietly adventurous tone." },
       ],
       near_misses: [
         { name: "Briar", reason: "Lovely but the 'Br' start felt slightly harsh with 'Anderson.'" },
@@ -747,6 +837,16 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           name: "Hazel",
           why: "The most popular option, beloved for good reason. Best if you're less concerned about strict gender neutrality.",
           combo: { first: "Hazel", middle: "Quinn", why: "Hazel Quinn Anderson is crisp and modern." },
+        },
+        {
+          name: "Wren",
+          why: "The cleanest, lightest option. Wren gives you nature imagery in a compact, modern package that still works beautifully beside Sage.",
+          combo: { first: "Wren", middle: "Elliot", why: "Wren Elliot Anderson keeps the sound spare, calm, and beautifully flexible." },
+        },
+        {
+          name: "Sylvan",
+          why: "The most quietly literary choice. Sylvan feels like a walk in the woods translated into a name -- rare, rooted, and thoughtful.",
+          combo: { first: "Sylvan", middle: "Reed", why: "Sylvan Reed Anderson leans fully into the woodland brief without sounding costume-like." },
         },
       ],
       tradeoffs: [
@@ -986,6 +1086,94 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           },
         ],
       },
+      {
+        name: "Kaito",
+        theme: "Japanese Heritage",
+        ipa: "/ˈkaɪ.toʊ/",
+        syllables: 2,
+        meaning: "Ocean, sea, or soar -- depending on kanji choices such as 海翔 or 海斗",
+        origins: ["Japanese"],
+        variants: ["Kaito (海翔)", "Kaito (海斗)"],
+        nicknames: {
+          intended: [],
+          likely: ["Kai"],
+          avoid: ["Kai"],
+        },
+        popularity: {
+          latest_rank: 0,
+          trend_notes:
+            "Popular in Japan and increasingly familiar abroad because the sound is easy for English speakers to handle.",
+        },
+        notable_bearers: {
+          positive: [],
+          fictional: ["Kaito Kuroba from Detective Conan / Magic Kaito"],
+        },
+        cultural_notes: [
+          "Feels unmistakably Japanese while still sounding natural to English speakers",
+          "The ocean and soaring imagery give the name a forward-looking, expansive feel",
+        ],
+        surname_fit: {
+          surname: "Tanaka",
+          notes:
+            "Kaito Tanaka is crisp and energetic. The clean vowels make it easy to say in both English and Japanese.",
+        },
+        sibset_fit: {
+          siblings: ["Hana"],
+          notes:
+            "Hana and Kaito feel balanced and contemporary -- one floral, one sky-and-sea oriented.",
+        },
+        combo_suggestions: [
+          {
+            first: "Kaito",
+            middle: "Ren",
+            why: "Kaito Ren Tanaka keeps the name fully Japanese while adding a calm, elegant middle.",
+          },
+        ],
+      },
+      {
+        name: "Daichi",
+        theme: "Japanese Heritage",
+        ipa: "/ˈdaɪ.tʃi/",
+        syllables: 2,
+        meaning: "Great earth; great wisdom or great land depending on kanji",
+        origins: ["Japanese"],
+        variants: ["Daichi (大地)"],
+        nicknames: {
+          intended: [],
+          likely: ["Dai"],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 0,
+          trend_notes:
+            "Well established in Japan but still uncommon in the U.S., making it distinctive without feeling invented.",
+        },
+        notable_bearers: {
+          positive: ["Daichi Miura, Japanese singer-songwriter"],
+          fictional: [],
+        },
+        cultural_notes: [
+          "The kanji 大地 evokes solid ground and steadiness -- a strong symbolic fit for parents who want gravitas",
+          "Carries more weight and traditional masculinity than Ren or Sora",
+        ],
+        surname_fit: {
+          surname: "Tanaka",
+          notes:
+            "Daichi Tanaka sounds substantial and steady. The rhythm is confident without becoming heavy.",
+        },
+        sibset_fit: {
+          siblings: ["Hana"],
+          notes:
+            "Hana and Daichi feel deeply Japanese and complementary -- flower and earth in quiet conversation.",
+        },
+        combo_suggestions: [
+          {
+            first: "Daichi",
+            middle: "Ken",
+            why: "Daichi Ken Tanaka subtly nods to grandfather without using Kenji directly as the first name.",
+          },
+        ],
+      },
     ],
     selection: {
       finalists: [
@@ -993,6 +1181,8 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
         { name: "Ren", why: "Japan's most popular boys' name with profound Buddhist symbolism. Minimalist and modern." },
         { name: "Haruki", why: "Literary gravitas via Murakami. The nickname Haru is warm and accessible." },
         { name: "Sora", why: "Poetic and gender-fluid. Sky and flower (with Hana) make a stunning sibset." },
+        { name: "Kaito", why: "A more expansive, energetic choice that still feels natural in both Tokyo and New York." },
+        { name: "Daichi", why: "Grounded and substantial, with a powerful kanji meaning that wears beautifully into adulthood." },
       ],
       near_misses: [
         { name: "Akira", reason: "Iconic but the strong film association may overshadow the child's own identity." },
@@ -1022,6 +1212,16 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           name: "Sora",
           why: "The most poetic option. Hana and Sora -- flower and sky -- is the kind of sibset that takes your breath away.",
           combo: { first: "Sora", middle: "Kenji", why: "Sora Kenji Tanaka could still honor grandfather while choosing the more ethereal first name." },
+        },
+        {
+          name: "Kaito",
+          why: "The most energetic option. Kaito feels adventurous and bright while remaining unmistakably Japanese and easy to pronounce.",
+          combo: { first: "Kaito", middle: "Ren", why: "Kaito Ren Tanaka combines motion and calm in a pairing that feels contemporary and balanced." },
+        },
+        {
+          name: "Daichi",
+          why: "The strongest, most grounded option. Daichi carries the solidity of 'great earth' and feels like a name a child can grow into with confidence.",
+          combo: { first: "Daichi", middle: "Ken", why: "Daichi Ken Tanaka offers a lighter honor to grandfather while keeping the first name distinct." },
         },
       ],
       tradeoffs: [
@@ -1263,6 +1463,94 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           },
         ],
       },
+      {
+        name: "Soraya",
+        theme: "Modern & Global",
+        ipa: "/səˈraɪ.ə/",
+        syllables: 3,
+        meaning: "The Pleiades constellation; a name associated with brilliance and starlight",
+        origins: ["Persian", "Arabic"],
+        variants: ["Suraya", "Thurayya"],
+        nicknames: {
+          intended: [],
+          likely: ["Sora", "Raya"],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 614,
+          trend_notes:
+            "Recognizable but uncommon in the U.S. Feels worldly and elegant without being hard to pronounce.",
+        },
+        notable_bearers: {
+          positive: ["Soraya Esfandiary-Bakhtiary, former Queen of Iran"],
+          fictional: [],
+        },
+        cultural_notes: [
+          "A deeply established name across Persian and Arabic traditions",
+          "Feels cosmopolitan and luminous, with a stronger sense of grandeur than Zara or Leena",
+        ],
+        surname_fit: {
+          surname: "Hassan",
+          notes:
+            "Soraya Hassan sounds graceful and expansive. The longer first name gives the full name a more lyrical rhythm.",
+        },
+        sibset_fit: {
+          siblings: ["Omar"],
+          notes:
+            "Omar and Soraya feel rooted in the same world while offering different textures -- one compact, one more celestial.",
+        },
+        combo_suggestions: [
+          {
+            first: "Soraya",
+            middle: "Fatima",
+            why: "Soraya Fatima Hassan layers celestial imagery with grandmother's name in a way that feels regal and heartfelt.",
+          },
+        ],
+      },
+      {
+        name: "Mina",
+        theme: "Modern & Global",
+        ipa: "/ˈmiː.nə/",
+        syllables: 2,
+        meaning: "Love, trustworthy, or blue gemstone depending on language tradition",
+        origins: ["Arabic", "Persian", "German", "Japanese"],
+        variants: ["Mena", "Meena"],
+        nicknames: {
+          intended: [],
+          likely: [],
+          avoid: [],
+        },
+        popularity: {
+          latest_rank: 662,
+          trend_notes:
+            "Simple and underused in the U.S. while already familiar globally across several traditions.",
+        },
+        notable_bearers: {
+          positive: ["Mina Loy, poet and modernist writer"],
+          fictional: [],
+        },
+        cultural_notes: [
+          "One of the cleanest genuinely cross-cultural names -- easy in Arabic and English, but also legible across Europe and Asia",
+          "Short, modern, and gently luminous without feeling trendy",
+        ],
+        surname_fit: {
+          surname: "Hassan",
+          notes:
+            "Mina Hassan is compact, bright, and easy to carry. The name feels modern without losing softness.",
+        },
+        sibset_fit: {
+          siblings: ["Omar"],
+          notes:
+            "Omar and Mina are balanced, simple, and globally fluent. They feel like names that travel well together.",
+        },
+        combo_suggestions: [
+          {
+            first: "Mina",
+            middle: "Fatima",
+            why: "Mina Fatima Hassan combines a sleek modern first name with a deeply rooted family middle.",
+          },
+        ],
+      },
     ],
     selection: {
       finalists: [
@@ -1270,6 +1558,8 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
         { name: "Layla", why: "The most romantic choice, steeped in Arabic literary tradition." },
         { name: "Nadia", why: "Cosmopolitan and elegant, with cross-cultural meaning (caller + hope)." },
         { name: "Leena", why: "Gentle and Quranic, with a universal softness." },
+        { name: "Soraya", why: "The most celestial and regal option, with deep Persian and Arabic roots." },
+        { name: "Mina", why: "The sleekest and most internationally flexible choice on the list." },
       ],
       near_misses: [
         { name: "Aisha", reason: "Beautiful and deeply meaningful but very common in Arabic-speaking communities." },
@@ -1299,6 +1589,16 @@ export const SAMPLE_REPORTS: Record<string, RunResult> = {
           name: "Leena",
           why: "The gentlest option. A Quranic name meaning tender, with the softness of a palm tree bending in the breeze.",
           combo: { first: "Leena", middle: "Fatima", why: "Leena Fatima Hassan is delicate, spiritual, and quietly powerful." },
+        },
+        {
+          name: "Soraya",
+          why: "The most regal option. Soraya carries the glow of starlight and a more elevated, cosmopolitan feel than the rest of the list.",
+          combo: { first: "Soraya", middle: "Fatima", why: "Soraya Fatima Hassan feels celestial, graceful, and deeply rooted in family." },
+        },
+        {
+          name: "Mina",
+          why: "The cleanest modern option. Mina is short, global, and quietly stylish -- a name that works beautifully in almost any setting.",
+          combo: { first: "Mina", middle: "Fatima", why: "Mina Fatima Hassan balances sleek simplicity with family depth." },
         },
       ],
       tradeoffs: [
