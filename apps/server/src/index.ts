@@ -1,15 +1,14 @@
-import cors from "cors";
 import express, { type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 import { pythonOrchestrator } from "./python-orchestrator.js";
 import { saveRun, getRun, deleteRun } from "./storage.js";
 import { handleChat } from "./chat.js";
 import { handleInternalLlmChat } from "./internal-llm.js";
+import { requireTrustedBackendRequest } from "./backend-auth.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
 const app = express();
-app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
 app.use((req, res, next) => {
@@ -64,9 +63,9 @@ app.get("/healthz", (_req: Request, res: Response) => {
 });
 
 app.post("/api/internal/llm/chat", handleInternalLlmChat);
-app.post("/api/chat", chatRateLimiter, handleChat);
+app.post("/api/chat", requireTrustedBackendRequest, chatRateLimiter, handleChat);
 
-app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {
+app.post("/api/run", requireTrustedBackendRequest, runRateLimiter, async (req: Request, res: Response) => {
   const { brief, mode, userId } = req.body || {};
   if (!brief || typeof brief !== "string") {
     return res.status(400).json({ error: "brief is required" });
@@ -93,7 +92,7 @@ app.post("/api/run", runRateLimiter, async (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/events/:runId", readRateLimiter, async (req: Request, res: Response) => {
+app.get("/api/events/:runId", requireTrustedBackendRequest, readRateLimiter, async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first (has live events), fall back to disk
   const memoryRun = pythonOrchestrator.getRun(runId);
@@ -141,7 +140,7 @@ app.get("/api/events/:runId", readRateLimiter, async (req: Request, res: Respons
   }
 });
 
-app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Response) => {
+app.get("/api/result/:runId", requireTrustedBackendRequest, readRateLimiter, async (req: Request, res: Response) => {
   const { runId } = req.params;
   // Try in-memory first, fall back to disk
   const memoryRun = pythonOrchestrator.getRun(runId);
@@ -167,7 +166,7 @@ app.get("/api/result/:runId", readRateLimiter, async (req: Request, res: Respons
   res.json(run.result);
 });
 
-app.delete("/api/run/:runId", async (req: Request, res: Response) => {
+app.delete("/api/run/:runId", requireTrustedBackendRequest, async (req: Request, res: Response) => {
   const { runId } = req.params;
   try {
     console.log(`[API] Deleting run: runId=${runId}`);

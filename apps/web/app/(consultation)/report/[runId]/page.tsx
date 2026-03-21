@@ -2,7 +2,7 @@ import { ReportLayout } from "@/components/report";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { createClient } from "@/lib/supabase/server";
-import { fetchResult } from "@/lib/api";
+import { getOwnedRunResult } from "@/lib/run-access";
 import { notFound } from "next/navigation";
 
 export const metadata = {
@@ -22,27 +22,7 @@ async function getResult(runId: string) {
 
   if (!user) return null;
 
-  // Try fetching from Supabase first (completed runs)
-  const { data: run } = await supabase
-    .from("runs")
-    .select("user_id, run_results(result)")
-    .eq("id", runId)
-    .single();
-
-  if (run) {
-    // Ownership check
-    if (run.user_id !== user.id) return null;
-
-    const results = Array.isArray(run.run_results) ? run.run_results[0] : run.run_results;
-    if (results?.result) return results.result;
-  }
-
-  // Fallback: fetch from Express (in-progress or legacy runs)
-  try {
-    return await fetchResult(runId);
-  } catch {
-    return null;
-  }
+  return await getOwnedRunResult(runId, user.id);
 }
 
 export default async function ReportPage({ params }: ReportPageProps) {

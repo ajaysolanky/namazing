@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getBackendAuthHeaders } from "@/lib/backend-auth";
 import { createClient } from "@/lib/supabase/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getBackendAuthHeaders(),
       },
       body: JSON.stringify({ ...body, userId: user.id }),
     });

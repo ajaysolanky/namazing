@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportDocument } from "@/lib/pdf/ReportDocument";
-import { fetchResult } from "@/lib/api";
 import { SAMPLE_REPORTS } from "@/lib/sample-data";
+import { createClient } from "@/lib/supabase/server";
+import { getOwnedRunResult } from "@/lib/run-access";
 
 const PDF_TIMEOUT_MS = 30_000; // 30 seconds
 
@@ -21,7 +22,16 @@ export async function GET(
       const sampleName = runId.replace("sample-", "");
       result = SAMPLE_REPORTS[sampleName];
     } else {
-      result = await fetchResult(runId);
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      result = await getOwnedRunResult(runId, user.id);
     }
 
     if (!result) {

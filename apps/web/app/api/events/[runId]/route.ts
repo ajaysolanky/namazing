@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
+import { getBackendAuthHeaders } from "@/lib/backend-auth";
 import { createClient } from "@/lib/supabase/server";
+import { userOwnsRun } from "@/lib/run-access";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
@@ -15,12 +17,18 @@ export async function GET(
       return new Response("Unauthorized", { status: 401 });
     }
 
+    const ownsRun = await userOwnsRun(params.runId, user.id);
+    if (!ownsRun) {
+      return new Response("Not found", { status: 404 });
+    }
+
     console.log(`[api/events] SSE proxy: userId=${user.id} runId=${params.runId}`);
 
     const response = await fetch(`${BACKEND_URL}/api/events/${params.runId}`, {
       headers: {
         Accept: "text/event-stream",
         "Cache-Control": "no-cache",
+        ...getBackendAuthHeaders(),
       },
     });
 

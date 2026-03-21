@@ -1,12 +1,7 @@
 import type { RunMode } from "./types";
 
-// Determine base URL at runtime
 function getApiBaseUrl() {
-  // Server-side: go directly to backend
-  if (typeof window === "undefined") {
-    return process.env.BACKEND_URL || "http://localhost:4000";
-  }
-  // Client-side: use same-origin proxy
+  // Always use the Next.js API layer so auth and ownership checks are enforced consistently.
   return process.env.NEXT_PUBLIC_API_BASE_URL || "";
 }
 

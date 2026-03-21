@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getBackendAuthHeaders } from "@/lib/backend-auth";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
@@ -8,7 +9,10 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...getBackendAuthHeaders(),
+      },
       body: JSON.stringify(body),
     });
 
